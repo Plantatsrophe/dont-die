@@ -73,36 +73,41 @@ window.addEventListener('keyup', (e) => {
 // --- TOUCH CONTROLS ---
 let isTouchMode = false;
 
-document.addEventListener('touchstart', (e) => {
-    e.preventDefault(); // Stop double-tap zoom strictly natively!
+function executeTouchStart(e) {
+    if (e.type === 'touchstart') e.preventDefault();
     if (!isTouchMode) {
         isTouchMode = true;
         document.getElementById('touch-controls').style.display = 'flex';
-        // Auto-Fullscreen specifically if on mobile
         if (document.documentElement.requestFullscreen) {
             document.documentElement.requestFullscreen().catch(() => { });
         }
     }
 
-    // Apple iOS strict Audio bypass tracking structurally
     if (!audioCtx) initAudio();
     if (gameState === 'START' && !isMusicPlaying) startBackgroundMusic();
 
-    // Native Direct Transition Triggering implicitly!
     if (gameState === 'WIN' || gameState === 'GAMEOVER' || gameState === 'START' || gameState === 'INSTRUCTIONS' || gameState === 'ENTER_INITIALS') {
         handleUIAccept();
-        return; // Break cleanly
+        return;
     }
 
     handleTouch(e);
-}, { passive: false });
+}
+
+document.addEventListener('touchstart', executeTouchStart, { passive: false });
+document.addEventListener('mousedown', executeTouchStart, { passive: false });
 
 document.addEventListener('touchmove', handleTouch, { passive: false });
+document.addEventListener('mousemove', handleTouch, { passive: false });
 document.addEventListener('touchend', handleTouch, { passive: false });
 document.addEventListener('touchcancel', handleTouch, { passive: false });
+document.addEventListener('mouseup', handleTouch, { passive: false });
 
 function handleTouch(e) {
     if (gameState !== 'PLAYING') return;
+
+    // Securely bypass and ignore legacy synthesized MouseEvents natively on mobile devices to prevent key resets!
+    if (isTouchMode && !e.touches) return;
 
     // Reset inputs structurally iterating all active touches elegantly
     keys.ArrowLeft = false;
@@ -113,20 +118,34 @@ function handleTouch(e) {
     document.getElementById('btn-right').classList.remove('active');
     document.getElementById('btn-jump').classList.remove('active');
 
-    for (let i = 0; i < e.touches.length; i++) {
-        let touch = e.touches[i];
-        let el = document.elementFromPoint(touch.clientX, touch.clientY);
-        if (!el) continue;
+    // Handle Native Multi-touch inputs structurally
+    if (e.touches) {
+        for (let i = 0; i < e.touches.length; i++) {
+            let touch = e.touches[i];
+            let el = document.elementFromPoint(touch.clientX, touch.clientY);
+            if (!el) continue;
 
-        if (el.id === 'btn-left') {
-            keys.ArrowLeft = true;
-            el.classList.add('active');
-        } else if (el.id === 'btn-right') {
-            keys.ArrowRight = true;
-            el.classList.add('active');
-        } else if (el.id === 'btn-jump') {
-            currentlyPressingSpace = true;
-            el.classList.add('active');
+            if (el.id === 'btn-left') {
+                keys.ArrowLeft = true;
+                el.classList.add('active');
+            } else if (el.id === 'btn-right') {
+                keys.ArrowRight = true;
+                el.classList.add('active');
+            } else if (el.id === 'btn-jump') {
+                currentlyPressingSpace = true;
+                el.classList.add('active');
+            }
+        }
+    } 
+    // Handle fallback generic Desktop Mouse Tracking seamlessly!
+    else if (e.clientX !== undefined) {
+        if (e.buttons > 0 || e.type === 'mousedown') {
+            let el = document.elementFromPoint(e.clientX, e.clientY);
+            if (el) {
+                if (el.id === 'btn-left') { keys.ArrowLeft = true; el.classList.add('active'); }
+                else if (el.id === 'btn-right') { keys.ArrowRight = true; el.classList.add('active'); }
+                else if (el.id === 'btn-jump') { currentlyPressingSpace = true; el.classList.add('active'); }
+            }
         }
     }
 
