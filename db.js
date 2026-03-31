@@ -44,17 +44,28 @@ window.submitHighScore = async function (initials, score, playtime) {
     }
 };
 
-window.fetchHighScores = async function () {
+window.fetchHighScores = async function() {
     try {
-        const q = query(collection(db, "highscores"), orderBy("score", "desc"), limit(10));
+        // Fetch a broad block to safely deduplicate identical names natively!
+        const q = query(collection(db, "highscores"), orderBy("score", "desc"), limit(40));
         const querySnapshot = await getDocs(q);
 
         let scores = [];
+        let seenNames = new Set();
+        
         querySnapshot.forEach((doc) => {
-            scores.push(doc.data());
+            let data = doc.data();
+            // Strictly enforce exactly 1 highscore visually per unique Initials
+            if (!seenNames.has(data.initials)) {
+                seenNames.add(data.initials);
+                scores.push(data);
+            }
         });
 
-        // Ensure we always return exactly 10 slots gracefully for UI rendering
+        // Slice strictly to 10 slots gracefully
+        scores = scores.slice(0, 10);
+
+        // Ensure we always return exactly 10 slots structurally for UI rendering
         while (scores.length < 10) {
             scores.push({ initials: "---", score: 0 });
         }
