@@ -39,6 +39,11 @@ function playerDeath() {
     gameState = 'DYING';
     player.dyingTimer = 0;
 
+    // Flush active hazard beams seamlessly logically intuitively explicitly securely!
+    for (let l of laserPool) {
+        l.active = false;
+    }
+
     // 4 Quadrant Fragmentation Matrix! dynamically allocated via strict pooling seamlessly!
     for (let i = 0; i < 4; i++) {
         let qx = (i % 2 === 0) ? 0 : 0.5;

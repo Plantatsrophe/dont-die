@@ -28,7 +28,7 @@ def generate_slums(i, tier):
                 level[13][c+dx] = "3"
             c += w
         elif choice < 0.8:
-            level[12][c] = "L" if random.random() < 0.3 else "8"
+            level[12][c] = "L" if (i >= 9 and random.random() < 0.3) else "8"
     return level
 
 def generate_acid(i, tier):
