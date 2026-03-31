@@ -29,6 +29,17 @@ function drawKey(ctx, x, y, w, h, label) {
     else { ctx.fillText(label, x + w/2, y + h/2 + 4); }
 }
 
+function drawGlow(ctx, x, y, radius, colorStr) {
+    let grad = ctx.createRadialGradient(x, y, 0, x, y, radius);
+    grad.addColorStop(0, colorStr);
+    grad.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.fillStyle = grad;
+    ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
+    ctx.restore();
+}
+
 function render() {
     // Parallax Layer 0: Sky (Radioactive Red/Orange)
     let skyGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
@@ -304,8 +315,22 @@ function render() {
                 let pHeight = TILE_SIZE * undulate;
                 let pDx = tx + (TILE_SIZE - pWidth) / 2;
                 let pDy = ty + (TILE_SIZE - pHeight) / 2;
+                drawGlow(ctx, pDx + pWidth/2, pDy + pHeight/2, 40, 'rgba(0, 255, 255, 0.5)');
                 drawSprite(ctx, sprPortal, pDx, pDy, pWidth, pHeight, false);
             }
+        }
+    }
+
+    // Draw Moving Platforms
+    for (let plat of platforms) {
+        drawGlow(ctx, plat.x + plat.width/2, plat.y + 8, 30, 'rgba(255, 100, 0, 0.4)');
+        drawSprite(ctx, sprRocketPad, plat.x, plat.y, plat.width, plat.height, false);
+        
+        // Render Rocket Thrusters intrinsically organically!
+        if (Math.random() > 0.2) {
+            ctx.fillStyle = Math.random() > 0.5 ? '#ff2222' : '#f1c40f';
+            ctx.fillRect(plat.x + 8 + Math.random() * 4, plat.y + plat.height, 2 + Math.random() * 2, 2 + Math.random() * 4);
+            ctx.fillRect(plat.x + plat.width - 12 + Math.random() * 4, plat.y + plat.height, 2 + Math.random() * 2, 2 + Math.random() * 4);
         }
     }
 
@@ -332,14 +357,29 @@ function render() {
     
     // Draw Lasers
     for (let l of lasers) {
+        drawGlow(ctx, l.x + 8, l.y + 2, 30, 'rgba(255, 0, 0, 0.6)');
         drawSprite(ctx, sprLaser, l.x - 4, l.y - 10, 24, 24, l.vx < 0);
     }
 
     // Draw Particles
     for (let p of particles) {
         let alpha = Math.max(0, p.life / p.maxLife);
-        ctx.fillStyle = `rgba(180, 180, 180, ${alpha})`;
-        ctx.fillRect(p.x - p.size/2, p.y - p.size/2, p.size, p.size);
+        
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        
+        if (p.type === 'gear') {
+            // Draw a tiny rotating 8-bit gear authentically strictly natively!
+            ctx.translate(p.x, p.y);
+            ctx.rotate(Date.now() / 150 + p.vx); // Spin dynamically explicitly natively!
+            drawSprite(ctx, sprGear, -8, -8, 16, 16, false);
+        } else {
+            // Standard square shrapnel explicitly safely cleanly securely!
+            ctx.fillStyle = p.color || `rgb(180, 180, 180)`;
+            ctx.fillRect(p.x - p.size/2, p.y - p.size/2, p.size, p.size);
+        }
+        
+        ctx.restore();
     }
 
     // Draw Player
@@ -353,6 +393,10 @@ function render() {
 
     let pSpr = (gameState === 'DYING') ? sprHeroDead : sprHero;
     let wY = (player.isOnGround && player.vx !== 0 && Math.floor(timerAcc*10)%2===0) ? 2 : 0; // walk bob
+
+    if (gameState !== 'DYING') {
+        drawGlow(ctx, player.x + 12, player.y + 16, 40, 'rgba(255, 150, 0, 0.25)'); // Organic warm player glow
+    }
 
     drawSprite(ctx, pSpr, player.x, player.y + wY, player.width, player.height, playerFlip);
     
@@ -415,6 +459,16 @@ function render() {
         ctx.font = '15px "Press Start 2P"';
         ctx.fillStyle = '#fff';
         ctx.fillText('USE ARROWS. PRESS ENTER TO SAVE', canvas.width/2, 350);
+    }
+    
+    // Draw Global Share UX Button
+    if (gameState === 'GAMEOVER' || gameState === 'WIN' || gameState === 'ENTER_INITIALS') {
+        ctx.fillStyle = '#1da1f2';
+        ctx.fillRect(canvas.width / 2 - 120, canvas.height - 80, 240, 40);
+        ctx.fillStyle = 'white';
+        ctx.font = '12px "Press Start 2P"';
+        ctx.textAlign = 'center';
+        ctx.fillText('[ SHARE TWITTER/X ]', canvas.width / 2, canvas.height - 55);
     }
 }
 

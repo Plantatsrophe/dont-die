@@ -7,6 +7,8 @@
     <title>Don't Die</title>
     <link rel="stylesheet" href="style.css?v=8">
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="icon.svg" type="image/svg+xml">
 </head>
 
 <body>
@@ -38,7 +40,12 @@
     <script src="audio.js?v=12"></script>
     <script src="physics.js?v=12"></script>
     <script src="render.js?v=12"></script>
-    <script src="game.js?v=12"></script>
+    <script src="game.js?v=13"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').then(() => console.log('PWA Ready'));
+        }
+    </script>
 </body>
 
 </html>

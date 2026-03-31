@@ -14,6 +14,7 @@ let items = [];
 let enemies = [];
 let lasers = [];
 let particles = [];
+let platforms = [];
 let camera = { x: 0, y: 0 };
 
 let gameState = 'START'; // START, INTRO, INSTRUCTIONS, PLAYING, DYING, LEVEL_CLEAR, GAMEOVER, WIN, ENTER_INITIALS

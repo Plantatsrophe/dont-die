@@ -89,6 +89,21 @@ function executeTouchStart(e) {
     if (!audioCtx) initAudio();
     if (gameState === 'START' && !isMusicPlaying) startBackgroundMusic();
 
+    if (gameState === 'WIN' || gameState === 'GAMEOVER' || gameState === 'ENTER_INITIALS') {
+        let cX = e.touches ? e.touches[0].clientX : e.clientX;
+        let cY = e.touches ? e.touches[0].clientY : e.clientY;
+        let canvas = document.getElementById('gameCanvas');
+        let rect = canvas.getBoundingClientRect();
+        let cx = (cX - rect.left) * (canvas.width / rect.width);
+        let cy = (cY - rect.top) * (canvas.height / rect.height);
+        
+        if (cx >= canvas.width / 2 - 120 && cx <= canvas.width / 2 + 120 && cy >= canvas.height - 80 && cy <= canvas.height - 40) {
+            let encodedStr = encodeURIComponent(`I just scored ${player.score} in Don't Die! Can you out-survive me?`);
+            window.open('https://twitter.com/intent/tweet?text=' + encodedStr, '_blank');
+            return; // Explicitly halt state transition organically
+        }
+    }
+
     if (gameState === 'WIN' || gameState === 'GAMEOVER' || gameState === 'START' || gameState === 'INTRO' || gameState === 'INSTRUCTIONS' || gameState === 'ENTER_INITIALS') {
         handleUIAccept();
         return;
@@ -190,6 +205,7 @@ function parseMap(resetEntities = true) {
         items = [];
         enemies = [];
         lasers = [];
+        platforms = [];
     }
     particles = [];
 
@@ -208,6 +224,19 @@ function parseMap(resetEntities = true) {
             } else if (tile === 11) {
                 if (resetEntities) {
                     items.push({ x: col * TILE_SIZE + 8, y: row * TILE_SIZE + 8, width: 24, height: 24, collected: false, type: 'hotdog' });
+                }
+                rowData.push(0);
+            } else if (tile === 12) {
+                if (resetEntities) {
+                    platforms.push({
+                        x: col * TILE_SIZE,
+                        y: row * TILE_SIZE + 8,
+                        width: TILE_SIZE * 1.5,
+                        height: 16,
+                        vx: 60,
+                        minX: (col - 3) * TILE_SIZE,
+                        maxX: (col + 3) * TILE_SIZE
+                    });
                 }
                 rowData.push(0);
                 // Spawn logically defaults locally in strings!
@@ -365,16 +394,19 @@ function updateGame(dt) {
                 player.doubleJump = true;
                 player.score += 200;
 
-                // Smoke Particles
-                for (let pCounter = 0; pCounter < 15; pCounter++) {
+                // Scrap Gear Particles!
+                for (let pCounter = 0; pCounter < 20; pCounter++) {
+                    let rad = Math.random() * Math.PI * 2;
+                    let spd = 50 + Math.random() * 150;
                     particles.push({
+                        type: 'gear',
                         x: e.x + e.width / 2,
                         y: e.y + e.height / 2,
-                        vx: (Math.random() - 0.5) * 150,
-                        vy: (Math.random() - 0.5) * 150 - 50,
-                        size: Math.random() * 8 + 4,
-                        life: 0.3 + Math.random() * 0.3,
-                        maxLife: 0.6
+                        vx: Math.cos(rad) * spd,
+                        vy: Math.sin(rad) * spd - 50, // Bias slightly upward
+                        size: 16,
+                        life: 0.8 + Math.random() * 0.4,
+                        maxLife: 1.2
                     });
                 }
 
@@ -413,6 +445,18 @@ function updateGame(dt) {
         if (enemyWalkTimer > 0.12) { // Quick scratching speed
             playSound('enemyMove');
             enemyWalkTimer = 0;
+        }
+    }
+
+    // Platform structural oscillations naturally mapped seamlessly
+    for (let plat of platforms) {
+        plat.x += plat.vx * dt;
+        if (plat.x >= plat.maxX) {
+            plat.x = plat.maxX;
+            plat.vx *= -1;
+        } else if (plat.x <= plat.minX) {
+            plat.x = plat.minX;
+            plat.vx *= -1;
         }
     }
 

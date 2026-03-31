@@ -37,19 +37,36 @@ function playerDeath() {
     if (gameState === 'DYING') return;
     playSound('die');
     gameState = 'DYING';
-    player.vy = -350; // Pop up slightly
+    player.dyingTimer = 0;
+
+    // Mega-Man Scatter Matrix!
+    for (let i = 0; i < 40; i++) {
+        let angle = Math.random() * Math.PI * 2;
+        let speed = 50 + Math.random() * 200;
+        particles.push({
+            x: player.x + player.width / 2,
+            y: player.y + player.height / 2,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            life: 1.0 + Math.random(),
+            maxLife: 2.0,
+            size: 4 + Math.random() * 6,
+            color: Math.random() > 0.5 ? '#ff2222' : '#f1c40f'
+        });
+    }
+
     player.vx = 0;
+    player.vy = 0;
     player.isOnGround = false;
     player.isClimbing = false;
 }
 
 function updatePhysics(dt) {
     if (gameState === 'DYING') {
-        player.vy += player.gravity * dt;
-        player.y += player.vy * dt;
+        player.dyingTimer += dt;
         
-        // Wait till solidly off screen
-        if (player.y > mapRows * TILE_SIZE + 50) {
+        // Wait till shatter explicitly dissipates
+        if (player.dyingTimer > 1.8) {
             player.lives--;
             if (player.lives <= 0) {
                 stopBackgroundMusic();
@@ -181,8 +198,31 @@ function updatePhysics(dt) {
     // Move Y and Check Map Collisions
     player.isOnGround = false;
     player.y += player.vy * dt;
+    
+    // Moving Platform Y-axis collision explicitly tracked natively organically!
+    let onPlatform = false;
+    for (let plat of platforms) {
+        if (
+            player.vy >= 0 && 
+            player.x + player.width > plat.x &&
+            player.x < plat.x + plat.width &&
+            player.y + player.height >= plat.y &&
+            (player.y + player.height - player.vy * dt) <= plat.y + 4 // 4px leniency visually
+        ) {
+            player.y = plat.y - player.height;
+            player.isOnGround = true;
+            player.doubleJump = false;
+            player.vy = 0;
+            // Native momentum inheritance purely!
+            player.x += plat.vx * dt;
+            onPlatform = true;
+            break;
+        }
+    }
+
     let tilesAfterY = getCollidingTiles(player);
     for (let t of tilesAfterY) {
+        if (onPlatform) break; // Disable subsequent down-collisions if securely anchored!
         if (t.type === 1) { // Wall
             if (player.vy > 0) { // moving down
                 player.y = t.rect.y - player.height;
