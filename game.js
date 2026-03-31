@@ -52,7 +52,7 @@ function handleUIAccept() {
     } else if (gameState === 'GAMEOVER') {
         gameState = 'ENTER_INITIALS';
     } else if (gameState === 'START') {
-        introY = document.getElementById('gameCanvas').height + 50;
+        introY = document.getElementById('gameCanvas').height * 0.66;
         gameState = 'INTRO';
     } else if (gameState === 'INTRO') {
         gameState = 'INSTRUCTIONS';
