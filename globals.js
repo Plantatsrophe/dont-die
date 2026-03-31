@@ -16,8 +16,17 @@ let lasers = [];
 let particles = [];
 let camera = { x: 0, y: 0 };
 
-let gameState = 'START'; // START, PLAYING, DYING, LEVEL_CLEAR, GAMEOVER, WIN, ENTER_INITIALS
-let timer = 60; 
+let gameState = 'START'; // START, INTRO, INSTRUCTIONS, PLAYING, DYING, LEVEL_CLEAR, GAMEOVER, WIN, ENTER_INITIALS
+let introY = 0;
+const introText = `A Great Computer War rages across the planet.
+
+The battle has gone on for so long that no one remembers who started it. So many generations have passed, knowing only war and violence, that the idea of peace is an unknown concept. Man and bot are at each other's throats and circuit boards over the future of the planet. Neither side knows what they will do if they win, only that they must come out victorious.
+
+In the midst of the chaos, a bold operation is being planned. An operation so important, almost no one knows of its existence. If successful, this mission could turn the tide of the war and bring an end to the violence. It’s a prospect so potent, and yet so fragile, that it can be trusted with only the very best operatives. An extensive search has been ongoing, scouring the entire planet itself for such a candidate.
+
+This most important operation was given a code name, such that hearing it would never lead one to suspect its magnitude and importance. A code name that was chosen for its common familiarity, continued use, and recognition. Fate, it would seem, is not without a sense of irony, as Hot Dog Henley races to complete Operation Hot Dog and save the universe as we know it`;
+
+let timer = 60;
 let timerAcc = 0;
 let winTimer = 0;
 let enemyWalkTimer = 0;

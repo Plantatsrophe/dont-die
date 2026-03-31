@@ -108,6 +108,51 @@ function render() {
         drawSprite(ctx, sprCash, canvas.width/2 + 167, sbY + 70, 24, 24, sprFlip);
         
         return;
+    } else if (gameState === 'INTRO') {
+        ctx.fillStyle = 'black';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        ctx.font = '14px "Press Start 2P"';
+        ctx.fillStyle = '#f1c40f'; // Cinematic Golden Retro Yellow
+        ctx.textAlign = 'center';
+        
+        let paragraphs = introText.split('\n');
+        let yCursor = introY;
+        let lineHeight = 28;
+        let maxWidth = canvas.width - 120; // Healthy padding visually
+        
+        for (let j = 0; j < paragraphs.length; j++) {
+            let paragraph = paragraphs[j];
+            if (paragraph.trim() === '') {
+                // Instead of empty logic, we just bump cursor
+                yCursor += lineHeight;
+                continue;
+            }
+            
+            let words = paragraph.split(' ');
+            let line = '';
+            for(let n = 0; n < words.length; n++) {
+                let testLine = line + words[n] + ' ';
+                let metrics = ctx.measureText(testLine);
+                if (metrics.width > maxWidth && n > 0) {
+                    ctx.fillText(line, canvas.width / 2, yCursor);
+                    line = words[n] + ' ';
+                    yCursor += lineHeight;
+                } else {
+                    line = testLine;
+                }
+            }
+            ctx.fillText(line, canvas.width / 2, yCursor);
+            yCursor += lineHeight * 2; // Extra gap between paragraphs!
+        }
+        
+        // Skip prompt natively securely tracked matching 'Star Wars' aesthetics!
+        if (Math.floor(Date.now() / 500) % 2 === 0) {
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '10px "Press Start 2P"';
+            ctx.fillText('PRESS ENTER OR TOUCH TO SKIP', canvas.width / 2, canvas.height - 30);
+        }
+        return;
     } else if (gameState === 'INSTRUCTIONS') {
         ctx.fillStyle = 'black';
         ctx.fillRect(0, 0, canvas.width, canvas.height);

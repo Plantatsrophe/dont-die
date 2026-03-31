@@ -32,7 +32,7 @@ window.addEventListener('keydown', (e) => {
             initials[initialIndex] = String.fromCharCode(code);
         }
         if (e.code === 'Enter') handleUIAccept();
-    } else if (gameState === 'START' || gameState === 'GAMEOVER' || gameState === 'WIN' || gameState === 'INSTRUCTIONS') {
+    } else if (gameState === 'START' || gameState === 'INTRO' || gameState === 'GAMEOVER' || gameState === 'WIN' || gameState === 'INSTRUCTIONS') {
         if (e.code === 'Enter') handleUIAccept();
     }
 });
@@ -52,6 +52,9 @@ function handleUIAccept() {
     } else if (gameState === 'GAMEOVER') {
         gameState = 'ENTER_INITIALS';
     } else if (gameState === 'START') {
+        introY = document.getElementById('gameCanvas').height + 50;
+        gameState = 'INTRO';
+    } else if (gameState === 'INTRO') {
         gameState = 'INSTRUCTIONS';
     } else if (gameState === 'INSTRUCTIONS') {
         currentLevel = 0;
@@ -86,7 +89,7 @@ function executeTouchStart(e) {
     if (!audioCtx) initAudio();
     if (gameState === 'START' && !isMusicPlaying) startBackgroundMusic();
 
-    if (gameState === 'WIN' || gameState === 'GAMEOVER' || gameState === 'START' || gameState === 'INSTRUCTIONS' || gameState === 'ENTER_INITIALS') {
+    if (gameState === 'WIN' || gameState === 'GAMEOVER' || gameState === 'START' || gameState === 'INTRO' || gameState === 'INSTRUCTIONS' || gameState === 'ENTER_INITIALS') {
         handleUIAccept();
         return;
     }
@@ -437,6 +440,11 @@ function gameLoop(timestamp) {
             updateGame(step);
             dt -= step;
             if (gameState === 'GAMEOVER' || gameState === 'WIN') break;
+        }
+    } else if (gameState === 'INTRO') {
+        introY -= 30 * dt; // Cinematic Scroll velocity
+        if (introY < -600) {
+            handleUIAccept(); // Auto-advance logically securely naturally
         }
     }
 
