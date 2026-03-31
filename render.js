@@ -388,48 +388,50 @@ function render() {
         return;
     }
 
-    // Parallax Layer 1: Distant City at 0.2x speed
-    let bgOffset1 = -(camera.x * 0.2) % 200;
-    for (let i = -1; i < canvas.width / 200 + 2; i++) {
-        let x = bgOffset1 + i * 200;
-        ctx.fillStyle = '#1c0d14';
-        ctx.fillRect(x + 20, 100, 60, canvas.height);
-        ctx.fillRect(x + 80, 150, 40, canvas.height);
-        ctx.fillRect(x + 150, 80, 50, canvas.height);
+    if (bId === 0) {
+        // Parallax Layer 1: Distant City at 0.2x speed
+        let bgOffset1 = -(camera.x * 0.2) % 200;
+        for (let i = -1; i < canvas.width / 200 + 2; i++) {
+            let x = bgOffset1 + i * 200;
+            ctx.fillStyle = '#1c0d14';
+            ctx.fillRect(x + 20, 100, 60, canvas.height);
+            ctx.fillRect(x + 80, 150, 40, canvas.height);
+            ctx.fillRect(x + 150, 80, 50, canvas.height);
+            
+            // Random Flickering structural fires!
+            let flicker = Math.sin(Date.now() / 150 + i * 42);
+            if (flicker > 0) {
+                ctx.fillStyle = '#ff5500';
+                ctx.fillRect(x + 35, 115, 3, 4 + flicker*4);
+                ctx.fillStyle = '#ffaa00';
+                ctx.fillRect(x + 36, 116, 1, 2 + flicker*2);
+            }
+            let f2 = Math.cos(Date.now() / 120 + i * 17);
+            if (f2 > -0.2) {
+                ctx.fillStyle = '#ff4400';
+                ctx.fillRect(x + 165, 95, 4, 3 + f2*5);
+            }
+        }
         
-        // Random Flickering structural fires!
-        let flicker = Math.sin(Date.now() / 150 + i * 42);
-        if (flicker > 0) {
-            ctx.fillStyle = '#ff5500';
-            ctx.fillRect(x + 35, 115, 3, 4 + flicker*4);
-            ctx.fillStyle = '#ffaa00';
-            ctx.fillRect(x + 36, 116, 1, 2 + flicker*2);
+        // Blowing Dust Parallax
+        ctx.fillStyle = 'rgba(200, 100, 50, 0.4)';
+        for(let d=0; d<30; d++) {
+            let dx = (canvas.width - ((Date.now()/10 + d*40) % canvas.width) + (camera.x*0.4)) % canvas.width;
+            let dy = (d * 53) % canvas.height;
+            ctx.fillRect(dx, dy + Math.sin(Date.now()/300 + d)*10, 2, 2);
         }
-        let f2 = Math.cos(Date.now() / 120 + i * 17);
-        if (f2 > -0.2) {
-            ctx.fillStyle = '#ff4400';
-            ctx.fillRect(x + 165, 95, 4, 3 + f2*5);
-        }
-    }
-    
-    // Blowing Dust Parallax
-    ctx.fillStyle = 'rgba(200, 100, 50, 0.4)';
-    for(let d=0; d<30; d++) {
-        let dx = (canvas.width - ((Date.now()/10 + d*40) % canvas.width) + (camera.x*0.4)) % canvas.width;
-        let dy = (d * 53) % canvas.height;
-        ctx.fillRect(dx, dy + Math.sin(Date.now()/300 + d)*10, 2, 2);
-    }
 
-    // Parallax Layer 2: Midground Scrap Piles at 0.5x speed
-    let bgOffset2 = -(camera.x * 0.5) % 150;
-    ctx.fillStyle = '#1c0707';
-    for (let i = -1; i < canvas.width / 150 + 2; i++) {
-        let x = bgOffset2 + i * 150;
-        ctx.beginPath();
-        ctx.moveTo(x, canvas.height);
-        ctx.lineTo(x + 75, canvas.height - 150);
-        ctx.lineTo(x + 150, canvas.height);
-        ctx.fill();
+        // Parallax Layer 2: Midground Scrap Piles at 0.5x speed
+        let bgOffset2 = -(camera.x * 0.5) % 150;
+        ctx.fillStyle = '#1c0707';
+        for (let i = -1; i < canvas.width / 150 + 2; i++) {
+            let x = bgOffset2 + i * 150;
+            ctx.beginPath();
+            ctx.moveTo(x, canvas.height);
+            ctx.lineTo(x + 75, canvas.height - 150);
+            ctx.lineTo(x + 150, canvas.height);
+            ctx.fill();
+        }
     }
 
     // -- Start World Space --
