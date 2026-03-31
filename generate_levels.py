@@ -9,9 +9,9 @@ def generate_slums(i, tier):
         
     level[12][98] = "5" 
     if i == 0 or (i + 1) % 5 == 0: level[12][3] = "H"
-    level[12][50] = "C"
 
     c = 5
+    placed_cp = False
     while c < 94:
         c += random.randint(2, 4)
         if c >= 94: break
@@ -32,6 +32,9 @@ def generate_slums(i, tier):
             for dx in range(w):
                 level[h][c+dx] = "1"
                 level[13][c+dx] = "3"
+            if c >= 45 and not placed_cp:
+                level[h-1][c] = "C"
+                placed_cp = True
             c += w
         elif choice < enemy_prob:
             level[12][c] = "L" if (i >= 9 and random.random() < 0.3) else "8"
@@ -48,11 +51,9 @@ def generate_acid(i, tier):
     for c in range(96, 100): level[13][c] = "1"
     level[12][98] = "5"
     
-    level[12][50] = "C"
-    level[13][50] = "1" 
-    
     c = 4
     last_h = 13
+    placed_cp = False
     while c < 94:
         c += random.randint(2, 3) # Constrict max horizontal gap naturally
         if c >= 94: break
@@ -63,6 +64,9 @@ def generate_acid(i, tier):
             h = min(12, max(8, last_h + random.randint(-2, 1))) 
             for dx in range(w):
                 if c+dx < 96: level[h][c+dx] = "1"
+            if c >= 45 and not placed_cp:
+                level[h-1][c] = "C"
+                placed_cp = True
             last_h = h
             c += w
         elif ptype < 0.8:
@@ -90,8 +94,6 @@ def generate_shaft(i, tier):
         level[59][c] = "1"
         
     level[58][2] = "7" 
-    level[30][7] = "C"
-    level[31][7] = "1"
     
     level[2][12] = "5"
     level[3][12] = "1"
@@ -107,6 +109,7 @@ def generate_shaft(i, tier):
         level[lr][4] = "2"
     
     y = 54
+    placed_cp = False
     while y > 5:
         # Cap vertical jump demands natively! Double jumps easily cleanly explicitly clear 3!
         y -= random.randint(2, 3)
@@ -124,6 +127,10 @@ def generate_shaft(i, tier):
             level[y][12] = "1"
             level[y][13] = "1"
             
+        if y <= 30 and not placed_cp:
+            level[y-1][(side * 5) - 3] = "C" # Automatically anchor sequentially
+            placed_cp = True
+            
         if random.random() < 0.3 and y < 50:
             cx = random.randint(4, 10)
             level[y][cx] = "6"
@@ -139,17 +146,25 @@ def generate_laser_factory(i, tier):
         level[13][c] = "1"
         level[14][c] = "1"
     level[12][98] = "5"
-    level[12][50] = "C"
     
     c = 5
+    placed_cp = False
     while c < 94:
         c += random.randint(3, 5)
         if c >= 94: break
         if random.random() < 0.6:
             level[12][c] = "1"
             level[11][c] = "1"
-            level[10][c] = "L"
+            level[10][c] = "L" if tier > 2 and random.random() < 0.4 else "1"
+            if c >= 45 and not placed_cp:
+                level[9][c] = "C"
+                placed_cp = True
         else:
+            if c >= 45 and not placed_cp:
+                level[12][c] = "C"
+                placed_cp = True
+            else:
+                level[12][c] = "L"
             for dx in range(4):
                 if c+dx < 96: level[13][c+dx] = "3"
             level[9][c+1] = "P"
@@ -163,10 +178,10 @@ def generate_goliath(i, tier):
         level[13][c] = "1"
         level[14][c] = "1"
     level[12][198] = "5"
-    level[12][80] = "C"
-    level[12][140] = "C"
     
     c = 5
+    placed_cp_1 = False
+    placed_cp_2 = False
     while c < 190:
         c += random.randint(2, 5)
         if c >= 190: break
@@ -180,6 +195,12 @@ def generate_goliath(i, tier):
             h = random.randint(8, 11)
             level[h][c] = "1"
             level[h][c+1] = "1"
+            if c >= 60 and not placed_cp_1:
+                level[h-1][c] = "C"
+                placed_cp_1 = True
+            elif c >= 130 and not placed_cp_2:
+                level[h-1][c] = "C"
+                placed_cp_2 = True
             c += 2
         else:
             level[12][c] = "L" if random.random() < 0.5 else "8"
