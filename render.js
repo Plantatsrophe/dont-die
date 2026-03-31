@@ -425,14 +425,16 @@ function render() {
         }
     }
     
-    // Draw Lasers
-    for (let l of lasers) {
+    // Draw Lasers Pool organically strictly natively
+    for (let l of laserPool) {
+        if (!l.active) continue;
         drawGlow(ctx, l.x + 8, l.y + 2, 30, 'rgba(255, 0, 0, 0.6)');
         drawSprite(ctx, sprLaser, l.x - 4, l.y - 10, 24, 24, l.vx < 0);
     }
 
-    // Draw Particles
-    for (let p of particles) {
+    // Draw Particles Pool seamlessly securely efficiently!
+    for (let p of particlePool) {
+        if (!p.active) continue;
         let alpha = Math.max(0, p.life / p.maxLife);
         
         ctx.save();
