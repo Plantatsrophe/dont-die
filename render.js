@@ -103,9 +103,9 @@ function render() {
         drawSprite(ctx, sprHero, canvas.width/2 - 200, sbY, 32, 40, sprFlip);
         drawSprite(ctx, sprHotdog, canvas.width/2 - 196, sbY + 70, 24, 24, !sprFlip);
         
-        // Right flank (Enemy & Cash)
+        // Right flank (Enemy & Gear)
         drawSprite(ctx, sprBot, canvas.width/2 + 160, sbY, 38, 38, !sprFlip);
-        drawSprite(ctx, sprCash, canvas.width/2 + 167, sbY + 70, 24, 24, sprFlip);
+        drawSprite(ctx, sprGear, canvas.width/2 + 167, sbY + 70, 24, 24, sprFlip);
         
         return;
     } else if (gameState === 'INTRO') {
@@ -188,11 +188,11 @@ function render() {
         ctx.font = '18px "Press Start 2P"';
         ctx.fillText("ITEMS", 600, 140);
         
-        drawSprite(ctx, sprCash, 480, 160, 24, 24, false);
+        drawSprite(ctx, sprGear, 480, 160, 24, 24, false);
         ctx.fillStyle = 'white';
         ctx.font = '10px "Press Start 2P"';
         ctx.textAlign = 'left';
-        ctx.fillText("CASH: +1000 POINTS", 520, 178);
+        ctx.fillText("GEAR: +1000 POINTS", 520, 178);
 
         drawSprite(ctx, sprHotdog, 480, 200, 24, 24, false);
         ctx.fillText("HOTDOG: +1 LIFE", 520, 218);
@@ -315,7 +315,7 @@ function render() {
             if (i.type === 'hotdog') {
                 drawSprite(ctx, sprHotdog, i.x, i.y, i.width, i.height, false);
             } else {
-                drawSprite(ctx, sprCash, i.x, i.y, i.width, i.height, false);
+                drawSprite(ctx, sprGear, i.x, i.y, i.width, i.height, false);
             }
         }
     }
