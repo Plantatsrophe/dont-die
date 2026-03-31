@@ -218,6 +218,8 @@ function parseMap(resetEntities = true) {
             let char = currentMapData[row][col];
             let tile = parseInt(char, 10);
             if (char === 'H') tile = 11;
+            else if (char === 'C') tile = 14;
+            else if (char === 'A') tile = 15;
 
             if (tile === 4) {
                 if (resetEntities) {
@@ -227,6 +229,11 @@ function parseMap(resetEntities = true) {
             } else if (tile === 11) {
                 if (resetEntities) {
                     items.push({ x: col * TILE_SIZE + 8, y: row * TILE_SIZE + 8, width: 24, height: 24, collected: false, type: 'hotdog' });
+                }
+                rowData.push(0);
+            } else if (tile === 14) {
+                if (resetEntities) {
+                    items.push({ x: col * TILE_SIZE, y: row * TILE_SIZE, width: 32, height: 32, collected: false, type: 'checkpoint' });
                 }
                 rowData.push(0);
             } else if (char === 'P') {
@@ -339,6 +346,28 @@ function updateGame(dt) {
             if (i.type === 'hotdog') {
                 player.lives++;
                 playSound('powerup');
+            } else if (i.type === 'checkpoint') {
+                if (player.startX !== i.x + 8 || player.startY !== i.y + 8) {
+                    player.startX = i.x + 8;
+                    player.startY = i.y + 8;
+                    playSound('powerup');
+                    
+                    // Blast 20 particles explicitly visually denoting Checkpoint Grab
+                    for (let pCounter = 0; pCounter < 20; pCounter++) {
+                        let p = particlePool.find(pp => !pp.active);
+                        if (p) {
+                            p.active = true;
+                            p.type = 'checkpoint';
+                            p.x = i.x + 16;
+                            p.y = i.y + 16;
+                            p.vx = (Math.random() - 0.5) * 100;
+                            p.vy = -50 - Math.random() * 100;
+                            p.size = 6;
+                            p.life = 0.5 + Math.random() * 0.5;
+                            p.maxLife = 1.0;
+                        }
+                    }
+                }
             } else {
                 player.score += 1000;
                 playSound('collect');

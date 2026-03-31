@@ -149,6 +149,9 @@ function updatePhysics(dt) {
             if (checkRectCollision(player, spikeHitbox)) {
                 hitSpike = true;
             }
+        } else if (t.type === 15) {
+            // Acid bounding rigidly kills explicitly 
+            hitSpike = true;
         }
         if (t.type === 5) hitGoal = true;
     }

@@ -41,10 +41,20 @@ function drawGlow(ctx, x, y, radius, colorStr) {
 }
 
 function render() {
-    // Parallax Layer 0: Sky (Midnight to Dusky Orange)
+    let bId = Math.floor(currentLevel / 10) % 5;
+
+    // Parallax Layer 0: Sky dynamically maps bounds implicitly to active Biome gracefully!
     let skyGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-    skyGradient.addColorStop(0, '#0a0a1a'); 
-    skyGradient.addColorStop(1, '#a34110');
+    if (bId === 1) { // Acid Plant
+        skyGradient.addColorStop(0, '#0a1a0f'); 
+        skyGradient.addColorStop(1, '#1b5c21');
+    } else if (bId === 3) { // Factory 
+        skyGradient.addColorStop(0, '#050f14'); 
+        skyGradient.addColorStop(1, '#1a4159');
+    } else {
+        skyGradient.addColorStop(0, '#0a0a1a'); 
+        skyGradient.addColorStop(1, '#a34110');
+    }
     ctx.fillStyle = skyGradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -365,6 +375,23 @@ function render() {
                     offscreenMapCtx.fill();
 
                     drawGlow(offscreenMapCtx, tx + TILE_SIZE/2, ty + TILE_SIZE/2 + 4, 30, 'rgba(255, 30, 0, 0.3)');
+                } else if (tile === 15) {
+                    // Toxic Acid Pool rendering statically explicitly natively
+                    offscreenMapCtx.fillStyle = '#0a210f';
+                    offscreenMapCtx.fillRect(tx, ty + 12, TILE_SIZE, TILE_SIZE - 12);
+                    
+                    offscreenMapCtx.fillStyle = '#1b5c21';
+                    offscreenMapCtx.fillRect(tx, ty + 12, TILE_SIZE, 4);
+
+                    for(let b=0; b<3; b++) {
+                        if (Math.random() > 0.2) {
+                            offscreenMapCtx.fillStyle = '#3ee855';
+                            offscreenMapCtx.beginPath();
+                            offscreenMapCtx.arc(tx + 4 + Math.random() * 30, ty + 18 + Math.random() * 14, 1 + Math.random()*3, 0, Math.PI*2);
+                            offscreenMapCtx.fill();
+                        }
+                    }
+                    drawGlow(offscreenMapCtx, tx + TILE_SIZE/2, ty + 16, 20, 'rgba(62, 232, 85, 0.4)');
                 }
             }
         }
@@ -414,7 +441,16 @@ function render() {
 
     // Draw Items
     for (let i of items) {
-        if (!i.collected) {
+        if (i.type === 'checkpoint') {
+            let isActive = player.startX === i.x + 8 && player.startY === i.y + 8;
+            let flip = isActive || (Math.floor(Date.now() / 400) % 2 === 0);
+            drawSprite(ctx, sprRef, i.x, i.y, i.width, i.height, flip);
+            if (isActive) {
+                drawGlow(ctx, i.x + 16, i.y + 16, 40, 'rgba(10, 255, 100, 0.6)');
+            } else {
+                drawGlow(ctx, i.x + 16, i.y + 16, 20, 'rgba(255, 255, 255, 0.3)');
+            }
+        } else if (!i.collected) {
             if (i.type === 'hotdog') {
                 drawSprite(ctx, sprHotdog, i.x, i.y, i.width, i.height, false);
             } else {
