@@ -119,7 +119,7 @@ function render() {
         
         ctx.save();
         ctx.translate(canvas.width/2 + 167 + 12, sbY + 70 + 12);
-        ctx.rotate(Date.now() / 250); // Smooth mechanical radial spin
+        ctx.scale(Math.cos(Date.now() / 150), 1); // 3D Retro Coin-style axle spin
         drawSprite(ctx, sprGear, -12, -12, 24, 24, false);
         ctx.restore();
         
@@ -473,7 +473,7 @@ function render() {
         ctx.fillStyle = 'white';
         ctx.font = '12px "Press Start 2P"';
         ctx.textAlign = 'center';
-        ctx.fillText('[ SHARE TWITTER/X ]', canvas.width / 2, canvas.height - 55);
+        ctx.fillText('[ SHARE HIGHSCORE! ]', canvas.width / 2, canvas.height - 55);
     }
 }
 
