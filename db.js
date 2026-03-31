@@ -79,7 +79,7 @@ if (window.refreshLeaderboard) {
 // ==========================================
 window.migrateLegacyScoresToFirebase = async function() {
     // Only fire this structural migration strictly once permanently natively!
-    if (localStorage.getItem('legacy_scores_migrated_v2')) {
+    if (localStorage.getItem('legacy_scores_migrated_v3')) {
         return;
     }
 
@@ -89,11 +89,11 @@ window.migrateLegacyScoresToFirebase = async function() {
     // If the browser cache is completely empty, strictly inject the original classical default targets!
     if (legacyScores.length === 0) {
         legacyScores = [
-            { name: 'Hotdog', score: 9999999 },
-            { name: 'Fudge', score: 919919 },
-            { name: 'Barry', score: 80085 },
-            { name: 'Jill9000', score: 9000 },
-            { name: 'Darby', score: 1337 }
+            { name: 'HOT', score: 9999999 },
+            { name: 'FDG', score: 919919 },
+            { name: 'BRY', score: 80085 },
+            { name: 'JIL', score: 9000 },
+            { name: 'DRB', score: 1337 }
         ];
     }
 
@@ -101,13 +101,17 @@ window.migrateLegacyScoresToFirebase = async function() {
     for (let i = 0; i < legacyScores.length; i++) {
         let sc = legacyScores[i];
         if (sc.name && sc.score >= 0 && sc.name !== '---') {
+            // CRITICAL FIX: The Firebase Security Rules strictly demand exactly 3 characters!
+            // Legacy names like 'Hotdog' or 'Fudge' were being physically rejected gracefully.
+            let shortName = sc.name.substring(0, 3).toUpperCase().padEnd(3, 'A');
+            
             // Notice we inject '10000' strictly for PlaytimeMs securely passing our exact Cloud Firestore Security Constraints dynamically!
-            await window.submitHighScore(sc.name, sc.score, 10000); 
+            await window.submitHighScore(shortName, sc.score, 10000); 
         }
     }
     
     // Lock the migration sequentially permanently resolving flawlessly avoiding infinite looping loops!
-    localStorage.setItem('legacy_scores_migrated_v2', 'true');
+    localStorage.setItem('legacy_scores_migrated_v3', 'true');
     console.log("Legacy Backup Migration natively resolved! Restoring Leaderboards...");
     
     if (window.refreshLeaderboard) {
