@@ -86,20 +86,49 @@ function render() {
         let d1 = (Date.now() / 40) % (canvas.width + 200) - 100;
         ctx.fillRect(canvas.width - d1, 60 + Math.sin(Date.now()/700)*15, 6, 2);
     } else if (bId === 1) {
-        // Biome 1: Acid - Deep Sewer Tunnels
+        // Biome 1: Acid - Deep Sewer Tunnels (Rusted Dripping Pipes)
         let px = camera.x * 0.3;
-        ctx.lineWidth = 20;
-        for(let i = 0; i < 5; i++) {
-            let x = ((i * 250) - px) % (canvas.width + 200);
+        
+        // Massive Horizontal Overhead Pipe
+        ctx.fillStyle = '#2a140b';
+        ctx.fillRect(0, 0, canvas.width, 40);
+        ctx.fillStyle = '#170a05';
+        ctx.fillRect(0, 30, canvas.width, 10);
+        
+        // Animated Acid Drips from the overhead pipe
+        for(let j = 0; j < 8; j++) {
+            let hX = ((j * 150) - px * 1.5) % (canvas.width + 100);
+            if (hX < -100) hX += canvas.width + 200;
+            
+            let hDripY = 40 + ((Date.now() / (12 + (j%3)*4)) % (canvas.height - 80));
+            ctx.fillStyle = '#3ee855'; // Glowy Acid Green
+            ctx.fillRect(hX, hDripY, 3, 15 + (j%2)*5);
+            ctx.fillStyle = '#1b5c21'; // Dark trail
+            ctx.fillRect(hX, hDripY - 8, 3, 4);
+        }
+
+        // Background Vertical Rusty Pipes
+        for(let i = 0; i < 6; i++) {
+            let x = ((i * 200) - px) % (canvas.width + 200);
             if(x < -200) x += canvas.width + 400;
-            ctx.beginPath();
-            ctx.strokeStyle = '#051208'; // Dark outer arch
-            ctx.arc(x, canvas.height + 20, 180, Math.PI, 0);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.strokeStyle = '#0a210f'; // Inner arch lip
-            ctx.arc(x, canvas.height + 20, 160, Math.PI, 0);
-            ctx.stroke();
+            
+            // Vertical Pipe Cylinder
+            ctx.fillStyle = '#3a1f11'; // Rusty brown body
+            ctx.fillRect(x, 0, 40, canvas.height);
+            ctx.fillStyle = '#1c0e07'; // Shadow
+            ctx.fillRect(x + 25, 0, 15, canvas.height);
+            
+            // Rusty Joints / Collars
+            ctx.fillStyle = '#4a2817';
+            ctx.fillRect(x - 5, 100 + (i%3)*50, 50, 20);
+            ctx.fillStyle = '#261209';
+            ctx.fillRect(x - 5, 115 + (i%3)*50, 50, 5);
+            
+            // Drip slipping off the joint
+            let dripY = 120 + (i%3)*50 + ((Date.now() / (10 + (i%2)*5)) % (canvas.height - 150));
+            ctx.fillStyle = '#3ee855'; 
+            ctx.fillRect(x + 10, dripY, 3, 10 + (i%4)*5); // Stretched leading edge
+            ctx.fillRect(x + 10, dripY - 5, 3, 3); // Trailing dot
         }
         // Horizontal Base Sludge River
         ctx.fillStyle = '#07170a';

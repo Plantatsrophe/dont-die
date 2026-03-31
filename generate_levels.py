@@ -52,26 +52,31 @@ def generate_acid(i, tier):
     level[13][50] = "1" 
     
     c = 4
+    last_h = 13
     while c < 94:
-        c += random.randint(2, 4)
+        c += random.randint(2, 3) # Constrict max horizontal gap naturally
         if c >= 94: break
         ptype = random.random()
         if ptype < 0.4:
             w = random.randint(2, 3)
-            h = random.randint(9, 12)
+            # Bound height tightly to previous platform safely mapping organically
+            h = min(12, max(8, last_h + random.randint(-2, 1))) 
             for dx in range(w):
                 if c+dx < 96: level[h][c+dx] = "1"
+            last_h = h
             c += w
         elif ptype < 0.8:
-            h = random.randint(9, 11)
+            h = min(12, max(8, last_h + random.randint(-2, 1)))
             level[h][c+1] = "P"
+            last_h = h
             c += 4
         else:
             h = random.randint(5, 8)
             level[h][c+1] = "6"
             level[h][c+2] = "1"
             for r in range(h+1, 13): level[r][c+1] = "2"
-            level[13][c+1] = "1"
+            level[13][c+1] = "1" # Solid landing block perfectly implicitly mapped
+            last_h = h
             c += 3
     return level
 
@@ -103,7 +108,8 @@ def generate_shaft(i, tier):
     
     y = 54
     while y > 5:
-        y -= random.randint(3, 4)
+        # Cap vertical jump demands natively! Double jumps easily cleanly explicitly clear 3!
+        y -= random.randint(2, 3)
         side = random.choice([1, 2, 3])
         if side == 1:
             level[y][1] = "1"
