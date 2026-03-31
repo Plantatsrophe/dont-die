@@ -1,13 +1,12 @@
 window.addEventListener('keydown', (e) => {
-    if (e.isTrusted) {
-        document.getElementById('touch-controls').style.display = 'none'; // Auto-hide on genuine Desktop keys
-    }
+    document.getElementById('touch-controls').style.display = 'none'; // Auto-hide on Desktop
+
     if (!audioCtx) initAudio();
-    
+
     if (gameState === 'START' && !isMusicPlaying) {
         startBackgroundMusic();
     }
-    
+
     if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.ArrowLeft = true;
     if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.ArrowRight = true;
     if (e.code === 'ArrowUp' || e.code === 'KeyW') keys.ArrowUp = true;
@@ -18,50 +17,50 @@ window.addEventListener('keydown', (e) => {
             spacePressed = true;
         }
     }
-    
+
     if (gameState === 'ENTER_INITIALS') {
         if (e.code === 'ArrowLeft') initialIndex = Math.max(0, initialIndex - 1);
         if (e.code === 'ArrowRight') initialIndex = Math.min(2, initialIndex + 1);
         if (e.code === 'ArrowUp') {
             let code = initials[initialIndex].charCodeAt(0);
-            code++; if(code>90) code=65;
+            code++; if (code > 90) code = 65;
             initials[initialIndex] = String.fromCharCode(code);
         }
         if (e.code === 'ArrowDown') {
             let code = initials[initialIndex].charCodeAt(0);
-            code--; if(code<65) code=90;
+            code--; if (code < 65) code = 90;
             initials[initialIndex] = String.fromCharCode(code);
         }
-        if (e.code === 'Enter') {
-            saveScore();
-            resetFullGame();
-            gameState = 'START';
-        }
+        if (e.code === 'Enter') handleUIAccept();
     } else if (gameState === 'START' || gameState === 'GAMEOVER' || gameState === 'WIN' || gameState === 'INSTRUCTIONS') {
-        if (e.code === 'Enter') {
-            if (gameState === 'WIN') {
-                currentLevel++;
-                if (currentLevel >= staticLevels.length) {
-                    currentLevel = 0; // Loop successfully explicitly!
-                }
-                timer = 60;
-                parseMap();
-                resetPlayerPosition();
-                gameState = 'PLAYING';
-            } else if (gameState === 'GAMEOVER') {
-                gameState = 'ENTER_INITIALS';
-            } else if (gameState === 'START') {
-                gameState = 'INSTRUCTIONS';
-            } else if (gameState === 'INSTRUCTIONS') {
-                currentLevel = 0;
-                resetFullGame();
-                initAudio();
-                startBackgroundMusic();
-                gameState = 'PLAYING';
-            }
-        }
+        if (e.code === 'Enter') handleUIAccept();
     }
 });
+
+function handleUIAccept() {
+    if (gameState === 'ENTER_INITIALS') {
+        saveScore();
+        resetFullGame();
+        gameState = 'START';
+    } else if (gameState === 'WIN') {
+        currentLevel++;
+        if (currentLevel >= staticLevels.length) currentLevel = 0;
+        timer = 60;
+        parseMap();
+        resetPlayerPosition();
+        gameState = 'PLAYING';
+    } else if (gameState === 'GAMEOVER') {
+        gameState = 'ENTER_INITIALS';
+    } else if (gameState === 'START') {
+        gameState = 'INSTRUCTIONS';
+    } else if (gameState === 'INSTRUCTIONS') {
+        currentLevel = 0;
+        resetFullGame();
+        initAudio();
+        startBackgroundMusic();
+        gameState = 'PLAYING';
+    }
+}
 
 window.addEventListener('keyup', (e) => {
     if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.ArrowLeft = false;
@@ -80,18 +79,18 @@ document.addEventListener('touchstart', (e) => {
         isTouchMode = true;
         document.getElementById('touch-controls').style.display = 'flex';
         // Auto-Fullscreen specifically if on mobile
-        if(document.documentElement.requestFullscreen) {
-            document.documentElement.requestFullscreen().catch(()=>{});
+        if (document.documentElement.requestFullscreen) {
+            document.documentElement.requestFullscreen().catch(() => { });
         }
     }
-    
+
     // Apple iOS strict Audio bypass tracking structurally
     if (!audioCtx) initAudio();
     if (gameState === 'START' && !isMusicPlaying) startBackgroundMusic();
-    
-    // Simulate Enter if on UI screens!
+
+    // Native Direct Transition Triggering implicitly!
     if (gameState === 'WIN' || gameState === 'GAMEOVER' || gameState === 'START' || gameState === 'INSTRUCTIONS' || gameState === 'ENTER_INITIALS') {
-        window.dispatchEvent(new KeyboardEvent('keydown', {'code': 'Enter'}));
+        handleUIAccept();
         return; // Break cleanly
     }
 
@@ -103,34 +102,34 @@ document.addEventListener('touchend', handleTouch, { passive: false });
 document.addEventListener('touchcancel', handleTouch, { passive: false });
 
 function handleTouch(e) {
-    if(gameState !== 'PLAYING') return;
-    
+    if (gameState !== 'PLAYING') return;
+
     // Reset inputs structurally iterating all active touches elegantly
     keys.ArrowLeft = false;
     keys.ArrowRight = false;
     let currentlyPressingSpace = false;
-    
+
     document.getElementById('btn-left').classList.remove('active');
     document.getElementById('btn-right').classList.remove('active');
     document.getElementById('btn-jump').classList.remove('active');
 
-    for(let i = 0; i < e.touches.length; i++) {
+    for (let i = 0; i < e.touches.length; i++) {
         let touch = e.touches[i];
         let el = document.elementFromPoint(touch.clientX, touch.clientY);
-        if(!el) continue;
-        
-        if(el.id === 'btn-left') {
+        if (!el) continue;
+
+        if (el.id === 'btn-left') {
             keys.ArrowLeft = true;
             el.classList.add('active');
-        } else if(el.id === 'btn-right') {
+        } else if (el.id === 'btn-right') {
             keys.ArrowRight = true;
             el.classList.add('active');
-        } else if(el.id === 'btn-jump') {
+        } else if (el.id === 'btn-jump') {
             currentlyPressingSpace = true;
             el.classList.add('active');
         }
     }
-    
+
     if (currentlyPressingSpace) {
         if (!spacePressed) {
             handleJump();
@@ -144,7 +143,7 @@ function handleTouch(e) {
 
 function handleJump() {
     if (gameState !== 'PLAYING') return;
-    
+
     if (player.isOnGround || player.isClimbing) {
         player.vy = player.jumpPower;
         player.isOnGround = false;
@@ -170,7 +169,7 @@ function parseMap(resetEntities = true) {
         lasers = [];
     }
     particles = [];
-    
+
     for (let row = 0; row < mapRows; row++) {
         let rowData = [];
         for (let col = 0; col < mapCols; col++) {
@@ -182,13 +181,13 @@ function parseMap(resetEntities = true) {
                 if (resetEntities) {
                     items.push({ x: col * TILE_SIZE + 8, y: row * TILE_SIZE + 8, width: 24, height: 24, collected: false, type: 'cash' });
                 }
-                rowData.push(0); 
+                rowData.push(0);
             } else if (tile === 11) {
                 if (resetEntities) {
                     items.push({ x: col * TILE_SIZE + 8, y: row * TILE_SIZE + 8, width: 24, height: 24, collected: false, type: 'hotdog' });
                 }
-                rowData.push(0); 
-            // Spawn logically defaults locally in strings!
+                rowData.push(0);
+                // Spawn logically defaults locally in strings!
             } else if (char === '7' || (row === 12 && col === 1)) {
                 player.startX = col * TILE_SIZE + 6;
                 player.startY = (row + 1) * TILE_SIZE - player.height;
@@ -211,7 +210,7 @@ function parseMap(resetEntities = true) {
                         x: col * TILE_SIZE + 8,
                         y: (row + 1) * TILE_SIZE - 24,
                         width: 24, height: 24,
-                        vx: 0, dir: -1, cooldown: 1.0 
+                        vx: 0, dir: -1, cooldown: 1.0
                     });
                 }
                 rowData.push(0);
@@ -259,7 +258,7 @@ function updateGame(dt) {
     if (camera.x < 0) camera.x = 0;
     let maxCamX = mapCols * TILE_SIZE - canvas.width;
     if (camera.x > maxCamX) camera.x = maxCamX;
-    
+
     camera.y = player.y - canvas.height / 2 + player.height / 2;
     if (camera.y < 0) camera.y = 0;
     let maxCamY = mapRows * TILE_SIZE - canvas.height;
@@ -283,22 +282,22 @@ function updateGame(dt) {
     let anyEnemyVisible = false;
     for (let i = enemies.length - 1; i >= 0; i--) {
         let e = enemies[i];
-        
+
         // Track for audio
         if (e.x > camera.x && e.x < camera.x + canvas.width) {
             anyEnemyVisible = true;
         }
-        
+
         if (e.type === 'bot') {
             let ogX = e.x;
             e.x += e.vx * e.dir * dt;
-            
+
             let hitWall = false;
             let eTiles = getCollidingTiles(e);
             for (let t of eTiles) {
                 if (t.type === 1) hitWall = true;
             }
-            
+
             // Pit check natively
             let pitCheck = { x: e.x + (e.dir === 1 ? e.width : -1), y: e.y + e.height + 1, width: 1, height: 1 };
             let pitTiles = getCollidingTiles(pitCheck);
@@ -313,7 +312,7 @@ function updateGame(dt) {
             }
         } else if (e.type === 'laserBot') {
             e.dir = player.x < e.x ? -1 : 1; // Always identically geometric facing!
-            
+
             // Line of Sight engagement tracking securely natively
             if (Math.abs(player.y - e.y) < 150 && Math.abs(player.x - e.x) < 500) {
                 e.cooldown -= dt;
@@ -329,19 +328,19 @@ function updateGame(dt) {
                 }
             }
         }
-        
+
         if (checkRectCollision(player, e)) {
             // Check Stomp
             let playerBottom = player.y + player.height;
             let playerPrevBottom = playerBottom - player.vy * dt;
-            
+
             if (player.vy > 0 && playerPrevBottom <= e.y + 15) {
                 // Stomped!
                 playSound('stomp');
                 player.vy = keys.Space ? player.jumpPower * 0.9 : player.jumpPower * 0.6;
                 player.doubleJump = true;
                 player.score += 200;
-                
+
                 // Smoke Particles
                 for (let pCounter = 0; pCounter < 15; pCounter++) {
                     particles.push({
@@ -354,7 +353,7 @@ function updateGame(dt) {
                         maxLife: 0.6
                     });
                 }
-                
+
                 enemies.splice(i, 1);
             } else {
                 playerDeath();
@@ -362,23 +361,23 @@ function updateGame(dt) {
             }
         }
     }
-    
+
     // Laser Physics Engine natively decoupled 
     for (let i = lasers.length - 1; i >= 0; i--) {
         let l = lasers[i];
         l.x += l.vx * dt;
-        
+
         let lTiles = getCollidingTiles(l);
         let hitWall = false;
         for (let t of lTiles) {
             if (t.type === 1) hitWall = true;
         }
-        
+
         if (hitWall || l.x < 0 || l.x > mapCols * TILE_SIZE) {
             lasers.splice(i, 1);
             continue;
         }
-        
+
         if (checkRectCollision(player, l)) {
             playerDeath();
             return;
