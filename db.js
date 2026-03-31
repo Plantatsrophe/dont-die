@@ -6,12 +6,12 @@ import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit } from
 // Replace this object with your exact Firebase config snippet from your Firebase Console!
 // ==========================================
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY_HERE",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
+    apiKey: "AIzaSyA2d_Sp94HwlAyRlZ4q611AxJYUo9ecOcg",
+    authDomain: "bitplatformer-2b284.firebaseapp.com",
+    projectId: "bitplatformer-2b284",
+    storageBucket: "bitplatformer-2b284.firebasestorage.app",
+    messagingSenderId: "872741019987",
+    appId: "1:872741019987:web:76cb7846d82dc1888101a6"
 };
 
 // Initialize Firebase securely
@@ -27,7 +27,7 @@ function obfuscatePayload(initials, score, playtime) {
 }
 
 // Attach universally accessible bindings to the global engine seamlessly
-window.submitHighScore = async function(initials, score, playtime) {
+window.submitHighScore = async function (initials, score, playtime) {
     try {
         const payloadHash = obfuscatePayload(initials, score, playtime);
 
@@ -44,11 +44,11 @@ window.submitHighScore = async function(initials, score, playtime) {
     }
 };
 
-window.fetchHighScores = async function() {
+window.fetchHighScores = async function () {
     try {
         const q = query(collection(db, "highscores"), orderBy("score", "desc"), limit(10));
         const querySnapshot = await getDocs(q);
-        
+
         let scores = [];
         querySnapshot.forEach((doc) => {
             scores.push(doc.data());
@@ -58,7 +58,7 @@ window.fetchHighScores = async function() {
         while (scores.length < 10) {
             scores.push({ initials: "---", score: 0 });
         }
-        
+
         return scores;
     } catch (e) {
         console.error("Error natively catching FireStore scores: ", e);
