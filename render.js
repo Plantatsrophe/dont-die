@@ -45,25 +45,102 @@ function render() {
 
     // Parallax Layer 0: Sky dynamically maps bounds implicitly to active Biome gracefully!
     let skyGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-    if (bId === 1) { // Acid Plant
-        skyGradient.addColorStop(0, '#0a1a0f'); 
-        skyGradient.addColorStop(1, '#1b5c21');
-    } else if (bId === 3) { // Factory 
-        skyGradient.addColorStop(0, '#050f14'); 
-        skyGradient.addColorStop(1, '#1a4159');
-    } else {
-        skyGradient.addColorStop(0, '#0a0a1a'); 
-        skyGradient.addColorStop(1, '#a34110');
+    if (bId === 1) { // Acid
+        skyGradient.addColorStop(0, '#0a1a0f'); skyGradient.addColorStop(1, '#1b5c21');
+    } else if (bId === 2) { // Shaft
+        skyGradient.addColorStop(0, '#030014'); skyGradient.addColorStop(1, '#2c0c4a');
+    } else if (bId === 3) { // Factory
+        skyGradient.addColorStop(0, '#050f14'); skyGradient.addColorStop(1, '#1a4159');
+    } else if (bId === 4) { // Goliath
+        skyGradient.addColorStop(0, '#2b0202'); skyGradient.addColorStop(1, '#7a0505');
+    } else { // Slums
+        skyGradient.addColorStop(0, '#0a0a1a'); skyGradient.addColorStop(1, '#a34110');
     }
     ctx.fillStyle = skyGradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Sub-Parallax: Drifting Dystopian Drones
-    ctx.fillStyle = '#05050f';
-    let d1 = (Date.now() / 40) % (canvas.width + 200) - 100;
-    ctx.fillRect(canvas.width - d1, 60 + Math.sin(Date.now()/700)*15, 6, 2);
-    let d2 = (Date.now() / 25) % (canvas.width + 400) - 200;
-    ctx.fillRect(canvas.width - d2, 110 + Math.cos(Date.now()/500)*20, 8, 3);
+    // Contextual Sub-Parallax Execution!
+    if (bId === 0) {
+        // Biome 0: Slums - City Skyline
+        ctx.fillStyle = '#05050f';
+        let px = camera.x * 0.2; // 20% parallax speed
+        for (let i = 0; i < 30; i++) {
+            let h = 80 + (Math.sin(i * 999) * 40);
+            let w = 40 + (Math.cos(i * 777) * 20);
+            let x = ((i * 60) - px) % (canvas.width + 100);
+            if (x < -100) x += canvas.width + 200;
+            ctx.fillRect(x, canvas.height - h, w, h);
+        }
+        // Drones
+        let d1 = (Date.now() / 40) % (canvas.width + 200) - 100;
+        ctx.fillRect(canvas.width - d1, 60 + Math.sin(Date.now()/700)*15, 6, 2);
+    } else if (bId === 1) {
+        // Biome 1: Acid - Falling Toxic Rain and Silhouette Pipes
+        ctx.fillStyle = '#0a210f';
+        let px = camera.x * 0.3;
+        for(let i = 0; i < 5; i++) {
+            let x = ((i * 150) - px) % (canvas.width + 100);
+            if(x < -100) x += canvas.width + 200;
+            ctx.fillRect(x, 0, 30, canvas.height);
+        }
+        ctx.fillStyle = 'rgba(62, 232, 85, 0.4)';
+        for(let i = 0; i < 40; i++) {
+            let dropX = ((i * 200) - camera.x * 0.5) % canvas.width;
+            if (dropX < 0) dropX += canvas.width;
+            let dropY = (Date.now() / 15 * (1 + (i%3)*0.5) + i * 50) % canvas.height;
+            ctx.fillRect(dropX, dropY, 2, 8);
+        }
+    } else if (bId === 2) {
+        // Biome 2: Shaft - Vertical Steel Beams
+        ctx.fillStyle = '#170c24';
+        let py = camera.y * 0.4; // Vertical Parallax!
+        for(let i = 0; i < 8; i++) {
+            let x = i * 100 + 40;
+            let y = (-py + i * 200) % (canvas.height + 200);
+            if (y < -100) y += canvas.height + 200;
+            ctx.fillRect(x, y, 40, canvas.height + 100);
+            ctx.fillStyle = '#221333';
+            ctx.fillRect(x-5, y+50, 50, 20); // crossbeams
+            ctx.fillStyle = '#170c24';
+        }
+    } else if (bId === 3) {
+        // Biome 3: Laser Factory - Cyberpunk Network
+        ctx.strokeStyle = 'rgba(0, 255, 255, 0.1)';
+        ctx.lineWidth = 1;
+        let px = camera.x * 0.1;
+        let offsetX = -px % 40;
+        ctx.beginPath();
+        for (let x = offsetX; x < canvas.width; x += 40) {
+            ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height);
+        }
+        for (let y = 0; y < canvas.height; y += 40) {
+            ctx.moveTo(0, y); ctx.lineTo(canvas.width, y);
+        }
+        ctx.stroke();
+        // Pulsing Nodes
+        for(let i = 0; i < 15; i++) {
+            let nx = ((i * 123) - px) % canvas.width;
+            if (nx < 0) nx += canvas.width;
+            let ny = (i * 87) % canvas.height;
+            let glow = 0.2 + Math.abs(Math.sin(Date.now() / 300 + i)) * 0.5;
+            ctx.fillStyle = `rgba(0, 255, 255, ${glow})`;
+            ctx.fillRect(nx, ny, 4, 4);
+        }
+    } else if (bId === 4) {
+        // Biome 4: Goliath - Thunder and Apocalypse
+        if (Math.random() > 0.95) {
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+        ctx.fillStyle = '#210202';
+        let px = camera.x * 0.5;
+        for (let i = 0; i < 20; i++) {
+            let x = ((i * 110) - px) % (canvas.width + 100);
+            if (x < -100) x += canvas.width + 200;
+            let y = canvas.height - 100 - (i % 3) * 50;
+            ctx.fillRect(x, y, 30 + (i%2)*20, 200);
+        }
+    }
 
     if (gameState === 'START') {
         ctx.fillStyle = 'black';
