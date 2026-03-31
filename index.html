@@ -5,17 +5,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>8-Bit Platformer Alpha</title>
-    <link rel="stylesheet" href="style.css?v=3">
+    <link rel="stylesheet" href="style.css?v=4">
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 </head>
 
 <body>
-    <div id="game-container">
-        <!-- Internal resolution of 800x600 -->
-        <canvas id="gameCanvas" width="800" height="600"></canvas>
-        <img id="logoImg" src="images/Grfc%20white.png" style="display:none;">
+    <div id="app-wrapper">
+        <div id="game-container">
+            <!-- Internal resolution of 800x600 -->
+            <canvas id="gameCanvas" width="800" height="600"></canvas>
+            <img id="logoImg" src="images/Grfc%20white.png" style="display:none;">
+        </div>
         
-        <!-- Virtual Touch Joypad natively overlaid -->
+        <!-- Ergonomic Virtual Touch Joypad decoupled dynamically -->
         <div id="touch-controls">
             <div id="btn-left" class="touch-btn">&lt;</div>
             <div id="btn-right" class="touch-btn">&gt;</div>
