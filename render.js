@@ -72,7 +72,7 @@ function render() {
         ctx.fillStyle = '#f1c40f'; // Golden visual theme
         ctx.textAlign = 'center';
         ctx.font = '25px "Press Start 2P"';
-        ctx.fillText("DON'T BLOW YOUR HOLE", canvas.width / 2, canvas.height / 2 - 140);
+        ctx.fillText("DON'T DIE", canvas.width / 2, canvas.height / 2 - 140);
         
         ctx.font = '15px "Press Start 2P"';
         ctx.fillStyle = '#f1c40f'; 

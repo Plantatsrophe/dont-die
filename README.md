@@ -1,4 +1,4 @@
-# Don't Blow Your Hole - A GRFC™ Game
+# Don't Die - A GRFC™ Game
 
 A completely native, zero-dependency, intense 8-bit web browser platformer scaling across an incredible 100 hand-crafted static maps, featuring dynamically generated Synthwave audio, tracking Laser Bots, and a classic arcade High-Score structure natively persisting to your browser's local storage.
 
