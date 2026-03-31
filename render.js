@@ -41,12 +41,19 @@ function drawGlow(ctx, x, y, radius, colorStr) {
 }
 
 function render() {
-    // Parallax Layer 0: Sky (Radioactive Red/Orange)
+    // Parallax Layer 0: Sky (Midnight to Dusky Orange)
     let skyGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-    skyGradient.addColorStop(0, '#5A1F1F'); 
-    skyGradient.addColorStop(1, '#8C3123');
+    skyGradient.addColorStop(0, '#0a0a1a'); 
+    skyGradient.addColorStop(1, '#a34110');
     ctx.fillStyle = skyGradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Sub-Parallax: Drifting Dystopian Drones
+    ctx.fillStyle = '#05050f';
+    let d1 = (Date.now() / 40) % (canvas.width + 200) - 100;
+    ctx.fillRect(canvas.width - d1, 60 + Math.sin(Date.now()/700)*15, 6, 2);
+    let d2 = (Date.now() / 25) % (canvas.width + 400) - 200;
+    ctx.fillRect(canvas.width - d2, 110 + Math.cos(Date.now()/500)*20, 8, 3);
 
     if (gameState === 'START') {
         ctx.fillStyle = 'black';
@@ -242,12 +249,34 @@ function render() {
 
     // Parallax Layer 1: Distant City at 0.2x speed
     let bgOffset1 = -(camera.x * 0.2) % 200;
-    ctx.fillStyle = '#2b0a0a';
     for (let i = -1; i < canvas.width / 200 + 2; i++) {
         let x = bgOffset1 + i * 200;
+        ctx.fillStyle = '#1c0d14';
         ctx.fillRect(x + 20, 100, 60, canvas.height);
         ctx.fillRect(x + 80, 150, 40, canvas.height);
         ctx.fillRect(x + 150, 80, 50, canvas.height);
+        
+        // Random Flickering structural fires!
+        let flicker = Math.sin(Date.now() / 150 + i * 42);
+        if (flicker > 0) {
+            ctx.fillStyle = '#ff5500';
+            ctx.fillRect(x + 35, 115, 3, 4 + flicker*4);
+            ctx.fillStyle = '#ffaa00';
+            ctx.fillRect(x + 36, 116, 1, 2 + flicker*2);
+        }
+        let f2 = Math.cos(Date.now() / 120 + i * 17);
+        if (f2 > -0.2) {
+            ctx.fillStyle = '#ff4400';
+            ctx.fillRect(x + 165, 95, 4, 3 + f2*5);
+        }
+    }
+    
+    // Blowing Dust Parallax
+    ctx.fillStyle = 'rgba(200, 100, 50, 0.4)';
+    for(let d=0; d<30; d++) {
+        let dx = (canvas.width - ((Date.now()/10 + d*40) % canvas.width) + (camera.x*0.4)) % canvas.width;
+        let dy = (d * 53) % canvas.height;
+        ctx.fillRect(dx, dy + Math.sin(Date.now()/300 + d)*10, 2, 2);
     }
 
     // Parallax Layer 2: Midground Scrap Piles at 0.5x speed
@@ -279,13 +308,28 @@ function render() {
             let ty = row * TILE_SIZE;
 
             if (tile === 1 || tile === 6) {
-                // Post-Apoc scrap metal blocks
-                ctx.fillStyle = '#3a3a3a'; 
+                // Gritty War-Torn scrap metal blocks
+                ctx.fillStyle = '#2f2c2b'; 
                 ctx.fillRect(tx, ty, TILE_SIZE, TILE_SIZE);
-                ctx.strokeStyle = '#222';
+                
+                // Industrial Grating
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+                for(let g=4; g<TILE_SIZE-4; g+=4) {
+                    ctx.fillRect(tx + 4, ty + g, TILE_SIZE - 8, 2);
+                }
+                
+                // Heavy Brown Rust detailing pseudo-randomly
+                if ((row * 13 + col * 7) % 5 === 0) {
+                    ctx.fillStyle = 'rgba(139, 69, 19, 0.3)';
+                    ctx.fillRect(tx + 2, ty + 2, TILE_SIZE/2, TILE_SIZE/2);
+                    ctx.fillRect(tx + TILE_SIZE/2, ty + TILE_SIZE/2, TILE_SIZE/2 - 2, TILE_SIZE/2 - 2);
+                }
+
+                ctx.strokeStyle = '#1a1818';
                 ctx.lineWidth = 2;
                 ctx.strokeRect(tx + 2, ty + 2, TILE_SIZE - 4, TILE_SIZE - 4);
-                ctx.fillStyle = '#111'; // Rivets
+                
+                ctx.fillStyle = '#0a0a0a'; // Rivets
                 ctx.fillRect(tx+4, ty+4, 2, 2);
                 ctx.fillRect(tx+TILE_SIZE-6, ty+4, 2, 2);
                 ctx.fillRect(tx+4, ty+TILE_SIZE-6, 2, 2);
@@ -305,13 +349,24 @@ function render() {
                     ctx.fillRect(tx + 12, ty + i * 10 + 5, 16, 1);
                 }
             } else if (tile === 3) {
-                // Spike
-                ctx.fillStyle = '#ff0000';
+                // Multi-Serrated Rusted Spikes
+                let spikeGrad = ctx.createLinearGradient(0, ty + TILE_SIZE, 0, ty);
+                spikeGrad.addColorStop(0, '#332a22'); // Rusted base
+                spikeGrad.addColorStop(1, '#ff3300'); // Glowing orange/red tip
+                ctx.fillStyle = spikeGrad;
+                
                 ctx.beginPath();
-                ctx.moveTo(tx + TILE_SIZE / 2, ty);
-                ctx.lineTo(tx + TILE_SIZE, ty + TILE_SIZE);
-                ctx.lineTo(tx, ty + TILE_SIZE);
+                let spikesCount = 4;
+                let w = TILE_SIZE / spikesCount;
+                for (let s = 0; s < spikesCount; s++) {
+                    ctx.moveTo(tx + s * w + w/2, ty + TILE_SIZE/2);
+                    ctx.lineTo(tx + (s+1) * w, ty + TILE_SIZE);
+                    ctx.lineTo(tx + s * w, ty + TILE_SIZE);
+                }
                 ctx.fill();
+
+                // Soft ominous localized glow across the serrations
+                drawGlow(ctx, tx + TILE_SIZE/2, ty + TILE_SIZE/2 + 4, 30, 'rgba(255, 30, 0, 0.3)');
             } else if (tile === 5) {
                 // Time Portal (Pulsing and Undulating)
                 let pulse = 1 + Math.sin(Date.now() / 150) * 0.1;

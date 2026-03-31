@@ -74,9 +74,6 @@ canvas {
     }
 }
 
-#btn-space {
-    flex-grow: 1;
-}
 
 .dpad {
     display: flex;
