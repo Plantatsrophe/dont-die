@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dont-die-v43';
+const CACHE_NAME = 'platformer-cache-v44';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',

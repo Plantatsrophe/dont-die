@@ -12,9 +12,10 @@ let audioCtx = null;
 let map = [];
 let items = [];
 let enemies = [];
-let lasers = []; // Legacy mapping organically gracefully superseded contextually
+let lasers = []; 
 let particles = [];
 let platforms = [];
+let boss = { active: false };
 let camera = { x: 0, y: 0 };
 
 // Hardware-Accelerated Cache Pipeline natively efficiently mapping strictly gracefully

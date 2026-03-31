@@ -1,6 +1,21 @@
 import random
 
 def generate_slums(i, tier):
+    if (i + 1) % 10 == 0:
+        level = [["0"] * 100 for _ in range(15)]
+        for c in range(100):
+            level[0][c] = "1"
+            level[13][c] = "1"
+            level[14][c] = "1"
+        level[12][3] = "C"
+        level[12][98] = "5"
+        level[12][80] = "B" # Junk Dozer
+        for px in [30, 50, 70]:
+            for y in range(8, 13):
+                level[y][px] = "1"
+                level[y][px+1] = "1"
+        return level
+
     level = [["0"] * 100 for _ in range(15)]
     for c in range(100):
         level[0][c] = "1"
@@ -43,6 +58,22 @@ def generate_slums(i, tier):
     return level
 
 def generate_acid(i, tier):
+    if (i + 1) % 10 == 0:
+        level = [["0"] * 100 for _ in range(15)]
+        for c in range(100):
+            level[0][c] = "1"
+            level[13][c] = "A" 
+            level[14][c] = "1"
+        for c in range(0, 15): level[13][c] = "1"
+        for c in range(85, 100): level[13][c] = "1"
+        level[12][3] = "C"
+        level[12][98] = "5"
+        level[12][50] = "B" # Sludge Queen
+        for c in range(40, 60): level[10][c] = "1"
+        level[8][25] = "V"
+        level[8][75] = "V"
+        return level
+
     level = [["0"] * 100 for _ in range(15)]
     for c in range(100):
         level[0][c] = "1"
@@ -97,6 +128,33 @@ def generate_acid(i, tier):
     return level
 
 def generate_shaft(i, tier):
+    if (i + 1) % 10 == 0:
+        level = [["0"] * 15 for _ in range(60)]
+        for r in range(60):
+            level[r][0] = "1"
+            level[r][14] = "1"
+        for c in range(15):
+            level[0][c] = "1"
+            level[59][c] = "1"
+        level[58][7] = "C"
+        level[58][6] = "B" # Warden Drone
+        level[2][12] = "5"
+        y = 54
+        side = 1
+        while y > 5:
+            if side == 1:
+                level[y][1] = "1"; level[y][2] = "1"; level[y][3] = "1"
+                side = 2
+            elif side == 2:
+                level[y][6] = "1"; level[y][7] = "1"; level[y][8] = "1"
+                side = 3
+            else:
+                level[y][11] = "1"; level[y][12] = "1"; level[y][13] = "1"
+                side = 1
+            y -= 4
+        level[4][7] = "V"
+        return level
+
     level = [["0"] * 15 for _ in range(60)]
     for r in range(60):
         level[r][0] = "1"
@@ -162,6 +220,24 @@ def generate_shaft(i, tier):
     return level
 
 def generate_laser_factory(i, tier):
+    if (i + 1) % 10 == 0:
+        level = [["0"] * 100 for _ in range(15)]
+        for c in range(100):
+            level[0][c] = "1"
+            level[13][c] = "1"
+            level[14][c] = "1"
+        level[12][3] = "C"
+        level[12][98] = "5"
+        level[6][50] = "B" # Core CPU
+        level[12][20] = "V"
+        level[12][80] = "V"
+        level[5][20] = "V"
+        level[5][80] = "V"
+        for dx in range(3):
+            level[8][18+dx] = "1"
+            level[8][78+dx] = "1"
+        return level
+
     level = [["0"] * 100 for _ in range(15)]
     for c in range(100):
         level[0][c] = "1"
@@ -198,6 +274,28 @@ def generate_laser_factory(i, tier):
     return level
 
 def generate_goliath(i, tier):
+    if (i + 1) % 10 == 0:
+        level = [["0"] * 200 for _ in range(15)]
+        for c in range(200):
+            level[0][c] = "1"
+            level[13][c] = "1"
+            level[14][c] = "1"
+        level[12][5] = "C"
+        level[12][3] = "B" # Goliath Prime
+        
+        if i >= 90:
+            level[12][198] = "D" # Detonator!
+        else:
+            level[12][198] = "5"
+            
+        c = 20
+        while c < 185:
+            level[13][c] = "3"
+            level[13][c+1] = "3"
+            level[13][c+2] = "3"
+            c += 15
+        return level
+
     level = [["0"] * 200 for _ in range(15)]
     for c in range(200):
         level[0][c] = "1"

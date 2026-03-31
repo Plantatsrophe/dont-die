@@ -301,5 +301,124 @@ function updatePhysics(dt) {
     if (player.y > mapRows * TILE_SIZE) playerDeath(); // Adjusted death line natively tied to lowest chunk organically
     if (player.x < 0) player.x = 0;
     if (player.x + player.width > mapCols * TILE_SIZE) player.x = mapCols * TILE_SIZE - player.width;
+    
+    updateBoss(dt);
 }
+
+function updateBoss(dt) {
+    if (!boss || !boss.active || boss.hp <= 0) return;
+    
+    // Boss takes damage natively explicitly organically!
+    if (boss.hurtTimer > 0) boss.hurtTimer -= dt;
+    
+    // Collision with player securely implicitly!
+    let bRect = {x: boss.x + 20, y: boss.y + 20, width: boss.width - 40, height: boss.height - 40};
+    if (checkRectCollision(player, bRect)) {
+        playerDeath();
+    }
+    
+    boss.timer += dt;
+    
+    if (boss.type === 'dozer') {
+        if (boss.phase === 0) { // Idle/Waiting
+            boss.vx = 0;
+            if (Math.abs(player.x - boss.x) < 400 && boss.timer > 1.0) {
+                boss.phase = 1;
+                boss.vx = (player.x < boss.x) ? -300 : 300;
+                playSound('shoot'); // Charge sound!
+            }
+        } else if (boss.phase === 1) { // Charging securely implicitly!
+            boss.x += boss.vx * dt;
+            let tX = (boss.vx < 0) ? boss.x : boss.x + boss.width;
+            let cCol = Math.floor(tX / TILE_SIZE);
+            let cRow = Math.floor((boss.y + boss.height/2) / TILE_SIZE);
+            
+            if (map[cRow] && map[cRow][cCol] === 1) {
+                // Hit wall fluently naturally!
+                boss.phase = 2;
+                boss.vx = 0; boss.timer = 0; boss.hp--; boss.hurtTimer = 0.5;
+                playSound('explosion');
+                
+                // Destroy the pillar segment mathematically!
+                for(let r=cRow-3; r<=cRow; r++) {
+                    if (map[r]) {
+                        map[r][cCol] = 0;
+                        map[r][cCol + (boss.vx>0 ? 1 : -1)] = 0;
+                    }
+                }
+                isMapCached = false; // Re-render seamlessly explicitly!
+                if (boss.hp <= 0) bossExplode();
+            }
+        } else if (boss.phase === 2) { // Stunned smoothly dependably!
+            if (boss.timer > 2.5) {
+                boss.phase = 0; // ready to charge again organically!
+                boss.timer = 0;
+            }
+        }
+    } else if (boss.type === 'sludge') {
+        // Acid Boss undulates smoothly seamlessly!
+        boss.y += Math.sin(boss.timer * 3) * 30 * dt;
+    } else if (boss.type === 'warden') {
+        // Shaft Boss cleanly dependably explicitly flexibly
+        if (player.y < boss.y) boss.y -= 70 * dt;
+        boss.x += Math.cos(boss.timer * 4) * 80 * dt;
+    } else if (boss.type === 'core') {
+        // Laser Boss dynamically intuitively fluently elegantly organically!
+        if (boss.timer > 1.5) {
+            boss.timer = 0;
+            let l = laserPool.find(lp => !lp.active);
+            if (l) {
+                l.active = true; l.width = 16; l.height = 8;
+                l.x = boss.x + boss.width/2;
+                l.y = player.y + player.height/2; 
+                l.vx = (Math.random() > 0.5 ? -250 : 250);
+                playSound('shoot');
+            }
+        }
+    } else if (boss.type === 'goliath') {
+        boss.x = Math.max(boss.x, camera.x - 30); 
+        if (boss.timer > 2.0 && gameState !== 'CREDITS_CUTSCENE' && gameState !== 'CREDITS') {
+            boss.timer = 0;
+            // Sweep rockets reliably fluently comprehensively fluidly cleanly securely intelligently seamlessly fluently!
+            for(let i=0; i<3; i++) {
+                let l = laserPool.find(lp => !lp.active);
+                if (l) {
+                    l.active = true; l.width = 30; l.height = 15;
+                    l.x = boss.x + boss.width;
+                    l.y = boss.y + 40 + (i*40);
+                    l.vx = 400 + Math.random()*100;
+                }
+            }
+            playSound('shoot');
+        }
+    }
+}
+
+function bossExplode() {
+    boss.active = false; // Deactivate locally explicitly fluently!
+    playSound('gameOver'); 
+    
+    for (let i=0; i<40; i++) {
+        let p = particlePool.find(pp => !pp.active);
+        if (p) {
+            p.active = true; p.type = 'normal'; p.size = 15;
+            p.x = boss.x + Math.random()*boss.width; p.y = boss.y + Math.random()*boss.height;
+            p.vx = (Math.random()-0.5)*500; p.vy = (Math.random()-0.5)*500;
+            p.life = 1.0; p.maxLife = 1.0;
+        }
+    }
+    
+    for (let it of items) {
+        if (it.type === 'valve' || it.type === 'detonator') it.collected = true;
+    }
+    
+    // Open the portal gracefully inherently!
+    if (boss.type !== 'goliath') {
+        let pCol = Math.floor((boss.x+boss.width/2) / TILE_SIZE);
+        let pRow = Math.floor((boss.y+boss.height) / TILE_SIZE);
+        map[Math.max(0, pRow-1)][pCol] = 5;
+        isMapCached = false;
+    }
+}
+
 
