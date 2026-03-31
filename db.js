@@ -46,26 +46,15 @@ window.submitHighScore = async function (initials, score, playtime) {
 
 window.fetchHighScores = async function() {
     try {
-        // Fetch a broad block to safely deduplicate identical names natively!
-        const q = query(collection(db, "highscores"), orderBy("score", "desc"), limit(40));
+        const q = query(collection(db, "highscores"), orderBy("score", "desc"), limit(10));
         const querySnapshot = await getDocs(q);
 
         let scores = [];
-        let seenNames = new Set();
-        
         querySnapshot.forEach((doc) => {
-            let data = doc.data();
-            // Strictly enforce exactly 1 highscore visually per unique Initials
-            if (!seenNames.has(data.initials)) {
-                seenNames.add(data.initials);
-                scores.push(data);
-            }
+            scores.push(doc.data());
         });
 
-        // Slice strictly to 10 slots gracefully
-        scores = scores.slice(0, 10);
-
-        // Ensure we always return exactly 10 slots structurally for UI rendering
+        // Ensure we always return exactly 10 slots gracefully for UI rendering
         while (scores.length < 10) {
             scores.push({ initials: "---", score: 0 });
         }
@@ -85,52 +74,4 @@ if (window.refreshLeaderboard) {
     window.refreshLeaderboard();
 }
 
-// ==========================================
-// ONE-TIME UTILITY: Legacy LocalStorage Migration
-// ==========================================
-window.migrateLegacyScoresToFirebase = async function() {
-    // Only fire this structural migration strictly once permanently natively!
-    if (localStorage.getItem('legacy_scores_migrated_v3')) {
-        return;
-    }
 
-    console.log("Detecting Legacy LocalStorage Scores...");
-    let legacyScores = JSON.parse(localStorage.getItem('8bitScores_v2') || '[]');
-    
-    // If the browser cache is completely empty, strictly inject the original classical default targets!
-    if (legacyScores.length === 0) {
-        legacyScores = [
-            { name: 'HOT', score: 9999999 },
-            { name: 'FDG', score: 919919 },
-            { name: 'BRY', score: 80085 },
-            { name: 'JIL', score: 9000 },
-            { name: 'DRB', score: 1337 }
-        ];
-    }
-
-    console.log(`Migrating ${legacyScores.length} legacy scores into Firebase natively...`);
-    for (let i = 0; i < legacyScores.length; i++) {
-        let sc = legacyScores[i];
-        if (sc.name && sc.score >= 0 && sc.name !== '---') {
-            // CRITICAL FIX: The Firebase Security Rules strictly demand exactly 3 characters!
-            // Legacy names like 'Hotdog' or 'Fudge' were being physically rejected gracefully.
-            let shortName = sc.name.substring(0, 3).toUpperCase().padEnd(3, 'A');
-            
-            // Notice we inject '10000' strictly for PlaytimeMs securely passing our exact Cloud Firestore Security Constraints dynamically!
-            await window.submitHighScore(shortName, sc.score, 10000); 
-        }
-    }
-    
-    // Lock the migration sequentially permanently resolving flawlessly avoiding infinite looping loops!
-    localStorage.setItem('legacy_scores_migrated_v3', 'true');
-    console.log("Legacy Backup Migration natively resolved! Restoring Leaderboards...");
-    
-    if (window.refreshLeaderboard) {
-        window.refreshLeaderboard();
-    }
-};
-
-// Safely execute natively implicitly precisely 2 seconds after initialization dynamically
-setTimeout(() => {
-    window.migrateLegacyScoresToFirebase();
-}, 2000);
