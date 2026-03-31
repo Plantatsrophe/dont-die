@@ -308,14 +308,15 @@ function updateGame(dt) {
 
     updatePhysics(dt);
     
-    // Global Particle update natively dynamically bypassing state bounds!
-    for (let i = particles.length - 1; i >= 0; i--) {
-        let p = particles[i];
+    // Global Particle update natively dynamically bounding to Object Pool natively!
+    for (let i = 0; i < particlePool.length; i++) {
+        let p = particlePool[i];
+        if (!p.active) continue;
         p.x += p.vx * dt;
         p.y += p.vy * dt;
         p.life -= dt;
         p.size *= 0.95; 
-        if (p.life <= 0) particles.splice(i, 1);
+        if (p.life <= 0) p.active = false;
     }
     
     if (gameState !== 'PLAYING') return;
@@ -385,12 +386,15 @@ function updateGame(dt) {
                 e.cooldown -= dt;
                 if (e.cooldown <= 0) {
                     e.cooldown = 1.6; // Fire rhythm elegantly explicitly
-                    lasers.push({
-                        x: e.dir === 1 ? e.x + e.width : e.x - 16,
-                        y: e.y + 4,
-                        width: 16, height: 4,
-                        vx: 350 * e.dir
-                    });
+                    let l = laserPool.find(lp => !lp.active);
+                    if (l) {
+                        l.active = true;
+                        l.x = e.dir === 1 ? e.x + e.width : e.x - 16;
+                        l.y = e.y + 4;
+                        l.width = 16; 
+                        l.height = 4;
+                        l.vx = 350 * e.dir;
+                    }
                     playSound('laser');
                 }
             }
@@ -408,20 +412,22 @@ function updateGame(dt) {
                 player.doubleJump = true;
                 player.score += 200;
 
-                // Scrap Gear Particles!
+                // Scrap Gear Particles! Pool instantiated cleanly
                 for (let pCounter = 0; pCounter < 20; pCounter++) {
                     let rad = Math.random() * Math.PI * 2;
                     let spd = 50 + Math.random() * 150;
-                    particles.push({
-                        type: 'gear',
-                        x: e.x + e.width / 2,
-                        y: e.y + e.height / 2,
-                        vx: Math.cos(rad) * spd,
-                        vy: Math.sin(rad) * spd - 50, // Bias slightly upward
-                        size: 16,
-                        life: 0.8 + Math.random() * 0.4,
-                        maxLife: 1.2
-                    });
+                    let p = particlePool.find(pp => !pp.active);
+                    if (p) {
+                        p.active = true;
+                        p.type = 'gear';
+                        p.x = e.x + e.width / 2;
+                        p.y = e.y + e.height / 2;
+                        p.vx = Math.cos(rad) * spd;
+                        p.vy = Math.sin(rad) * spd - 50;
+                        p.size = 16;
+                        p.life = 0.8 + Math.random() * 0.4;
+                        p.maxLife = 1.2;
+                    }
                 }
 
                 enemies.splice(i, 1);
@@ -432,9 +438,11 @@ function updateGame(dt) {
         }
     }
 
-    // Laser Physics Engine natively decoupled 
-    for (let i = lasers.length - 1; i >= 0; i--) {
-        let l = lasers[i];
+    // Laser Physics Engine decoupled actively mapping memory pool intelligently
+    for (let i = 0; i < laserPool.length; i++) {
+        let l = laserPool[i];
+        if (!l.active) continue;
+
         l.x += l.vx * dt;
 
         let lTiles = getCollidingTiles(l);
@@ -444,7 +452,7 @@ function updateGame(dt) {
         }
 
         if (hitWall || l.x < 0 || l.x > mapCols * TILE_SIZE) {
-            lasers.splice(i, 1);
+            l.active = false;
             continue;
         }
 

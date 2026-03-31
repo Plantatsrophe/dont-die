@@ -39,22 +39,25 @@ function playerDeath() {
     gameState = 'DYING';
     player.dyingTimer = 0;
 
-    // 4 Quadrant Fragmentation Matrix!
+    // 4 Quadrant Fragmentation Matrix! dynamically allocated via strict pooling seamlessly!
     for (let i = 0; i < 4; i++) {
         let qx = (i % 2 === 0) ? 0 : 0.5;
         let qy = (i < 2) ? 0 : 0.5;
-        particles.push({
-            type: 'playerQuad',
-            qx: qx,
-            qy: qy,
-            x: player.x + (qx * player.width) + (player.width / 4),
-            y: player.y + (qy * player.height) + (player.height / 4),
-            vx: (qx === 0 ? -1 : 1) * (150 + Math.random() * 50),
-            vy: (qy === 0 ? -1 : 1) * (150 + Math.random() * 50) - 100,
-            life: 1.5,
-            maxLife: 2.0,
-            flip: player.lastDir === -1
-        });
+        let p = particlePool.find(pp => !pp.active);
+        if (p) {
+            p.active = true;
+            p.type = 'playerQuad';
+            p.qx = qx;
+            p.qy = qy;
+            p.x = player.x + (qx * player.width) + (player.width / 4);
+            p.y = player.y + (qy * player.height) + (player.height / 4);
+            p.vx = (qx === 0 ? -1 : 1) * (150 + Math.random() * 50);
+            p.vy = (qy === 0 ? -1 : 1) * (150 + Math.random() * 50) - 100;
+            p.size = Math.max(player.width, player.height) / 2;
+            p.life = 1.5;
+            p.maxLife = 2.0;
+            p.flip = player.lastDir === -1;
+        }
     }
 
     player.vx = 0;

@@ -309,6 +309,14 @@ function render() {
                     offscreenMapCtx.fillStyle = '#2f2c2b'; 
                     offscreenMapCtx.fillRect(tx, ty, TILE_SIZE, TILE_SIZE);
                     
+                    // High-Contrast Bright Edge Trim implicitly defining walkable flooring intrinsically natively!
+                    offscreenMapCtx.fillStyle = '#6e3c15'; // Bright rusty orange top plate 
+                    offscreenMapCtx.fillRect(tx, ty, TILE_SIZE, 4);
+
+                    // Underglow trim strictly elegantly cleanly mapped
+                    offscreenMapCtx.fillStyle = '#110d0c';
+                    offscreenMapCtx.fillRect(tx, ty + 4, TILE_SIZE, 2);
+                    
                     offscreenMapCtx.fillStyle = 'rgba(0, 0, 0, 0.4)';
                     for(let g=4; g<TILE_SIZE-4; g+=4) {
                         offscreenMapCtx.fillRect(tx + 4, ty + g, TILE_SIZE - 8, 2);
