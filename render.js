@@ -520,15 +520,43 @@ function render() {
             // Random Flickering structural fires!
             let flicker = Math.sin(Date.now() / 150 + i * 42);
             if (flicker > 0) {
+                // Top fire
                 ctx.fillStyle = '#ff5500';
                 ctx.fillRect(x + 35, 115, 3, 4 + flicker*4);
                 ctx.fillStyle = '#ffaa00';
                 ctx.fillRect(x + 36, 116, 1, 2 + flicker*2);
+                
+                // Lower mid fire
+                ctx.fillStyle = '#ff3300';
+                ctx.fillRect(x + 50, 240, 4, 5 + flicker*3);
+                
+                // Bottom dwelling fire
+                ctx.fillStyle = '#ff5500';
+                ctx.fillRect(x + 100, 310, 3, 4 + flicker*3);
+                ctx.fillStyle = '#ffaa00';
+                ctx.fillRect(x + 101, 311, 1, 1 + flicker*2);
             }
             let f2 = Math.cos(Date.now() / 120 + i * 17);
             if (f2 > -0.2) {
+                // Top fire
                 ctx.fillStyle = '#ff4400';
                 ctx.fillRect(x + 165, 95, 4, 3 + f2*5);
+                
+                // Middle building lower fire
+                ctx.fillStyle = '#ff5500';
+                ctx.fillRect(x + 180, 220, 3, 3 + f2*5);
+                
+                // Ground fire
+                ctx.fillStyle = '#ff3300';
+                ctx.fillRect(x + 40, 400, 5, 4 + f2*4);
+            }
+            let f3 = Math.sin(Date.now() / 90 + i * 88);
+            if (f3 > 0.3) {
+                // Additional low structural fires
+                ctx.fillStyle = '#ffaa00';
+                ctx.fillRect(x + 175, 360, 2, 3 + f3*3);
+                ctx.fillStyle = '#ff4400';
+                ctx.fillRect(x + 95, 200, 3, 4 + f3*2);
             }
         }
         
