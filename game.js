@@ -221,6 +221,7 @@ function parseMap(resetEntities = true) {
         enemies = [];
         lasers = [];
         platforms = [];
+        bombs = [];
         boss = { active: false };
     }
     particles = [];
@@ -297,7 +298,7 @@ function parseMap(resetEntities = true) {
             } else if (char === 'B') {
                 if (resetEntities) {
                     let biome = Math.floor(currentLevel / 10) % 5;
-                    let bType = ['dozer', 'sludge', 'warden', 'core', 'goliath'][biome];
+                    let bType = ['masticator', 'sludge', 'warden', 'core', 'goliath'][biome];
                     boss = {
                         active: true, type: bType,
                         x: col * TILE_SIZE, y: row * TILE_SIZE,
@@ -315,6 +316,18 @@ function parseMap(resetEntities = true) {
             } else if (char === 'D') {
                 if (resetEntities) {
                     items.push({ x: col * TILE_SIZE, y: row * TILE_SIZE, width: 32, height: 32, collected: false, type: 'detonator' });
+                }
+                rowData.push(0);
+            } else if (char === 'M') {
+                if (resetEntities) {
+                    bombs.push({
+                        active: false,
+                        x: col * TILE_SIZE + 4,
+                        y: row * TILE_SIZE,
+                        width: 32, height: 32,
+                        vx: 0, vy: 0,
+                        col: col, row: row // Track native grid coordinates explicitly natively!
+                    });
                 }
                 rowData.push(0);
             } else {

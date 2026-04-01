@@ -7,13 +7,14 @@ def generate_slums(i, tier):
             level[0][c] = "1"
             level[13][c] = "1"
             level[14][c] = "1"
-        level[12][3] = "C"
         level[12][98] = "5"
-        level[12][80] = "B" # Junk Dozer
-        for px in [30, 50, 70]:
+        level[12][3] = "H"
+        level[12][50] = "B" # Masticator
+        for px in [25, 75]:
             for y in range(8, 13):
                 level[y][px] = "1"
                 level[y][px+1] = "1"
+            level[7][px] = "M" # Bomb
         return level
 
     level = [["0"] * 100 for _ in range(15)]
@@ -66,7 +67,7 @@ def generate_acid(i, tier):
             level[14][c] = "1"
         for c in range(0, 15): level[13][c] = "1"
         for c in range(85, 100): level[13][c] = "1"
-        level[12][3] = "C"
+        level[12][3] = "H"
         level[12][98] = "5"
         level[12][50] = "B" # Sludge Queen
         for c in range(40, 60): level[10][c] = "1"
@@ -136,7 +137,7 @@ def generate_shaft(i, tier):
         for c in range(15):
             level[0][c] = "1"
             level[59][c] = "1"
-        level[58][7] = "C"
+        level[58][7] = "H"
         level[58][6] = "B" # Warden Drone
         level[2][12] = "5"
         y = 54
@@ -226,7 +227,7 @@ def generate_laser_factory(i, tier):
             level[0][c] = "1"
             level[13][c] = "1"
             level[14][c] = "1"
-        level[12][3] = "C"
+        level[12][3] = "H"
         level[12][98] = "5"
         level[6][50] = "B" # Core CPU
         level[12][20] = "V"
@@ -280,7 +281,7 @@ def generate_goliath(i, tier):
             level[0][c] = "1"
             level[13][c] = "1"
             level[14][c] = "1"
-        level[12][5] = "C"
+        level[12][5] = "H"
         level[12][3] = "B" # Goliath Prime
         
         if i >= 90:

@@ -643,12 +643,51 @@ function render() {
 
     // Draw Boss
     if (boss && boss.active) {
-        if (boss.type === 'dozer') {
-            ctx.fillStyle = '#7a7a7a';
-            ctx.fillRect(boss.x, boss.y, boss.width, boss.height);
-            ctx.fillStyle = '#ff0000';
-            ctx.fillRect(boss.x + (boss.vx < 0 ? 10 : boss.width - 30), boss.y + 20, 20, 10);
-            if (boss.hurtTimer > 0) { ctx.fillStyle = 'white'; ctx.globalAlpha=0.5; ctx.fillRect(boss.x, boss.y, boss.width, boss.height); ctx.globalAlpha=1; }
+        if (boss.type === 'masticator') {
+            let cx = boss.x;
+            let cy = boss.y;
+            let bw = boss.width;
+            let bh = boss.height;
+
+            // Silver Chassis
+            ctx.fillStyle = '#C0C0C0';
+            ctx.fillRect(cx, cy, bw, bh);
+            ctx.fillStyle = '#A0A0A0';
+            ctx.fillRect(cx + bw - 20, cy, 20, bh); // shadow edge
+
+            // Glowing Red Eyes
+            let eyeY = cy + 15;
+            let eyeW = 18;
+            let eyeH = 10;
+            ctx.fillStyle = '#FF0000';
+            ctx.fillRect(cx + 15, eyeY, eyeW, eyeH);
+            ctx.fillRect(cx + bw - 15 - eyeW, eyeY, eyeW, eyeH);
+            drawGlow(ctx, cx + 15 + eyeW/2, eyeY + eyeH/2, 20, 'rgba(255, 0, 0, 0.6)');
+            drawGlow(ctx, cx + bw - 15 - eyeW/2, eyeY + eyeH/2, 20, 'rgba(255, 0, 0, 0.6)');
+
+            // Gaping Spiky Mouth
+            let mouthY = cy + 45;
+            let mouthH = (boss.phase === 2) ? 35 : 20; // Drops jaw when stunned!
+            ctx.fillStyle = '#111';
+            ctx.fillRect(cx + 10, mouthY, bw - 20, mouthH);
+            
+            // Spike Teeth
+            ctx.fillStyle = '#FFF';
+            for (let tx = 15; tx < bw - 20; tx += 15) {
+                // Top teeth
+                ctx.beginPath(); ctx.moveTo(cx + tx, mouthY); ctx.lineTo(cx + tx + 10, mouthY + 8); ctx.lineTo(cx + tx + 20, mouthY); ctx.fill();
+                // Bottom teeth
+                ctx.beginPath(); ctx.moveTo(cx + tx, mouthY + mouthH); ctx.lineTo(cx + tx + 10, mouthY + mouthH - 8); ctx.lineTo(cx + tx + 20, mouthY + mouthH); ctx.fill();
+            }
+
+            // Stunned Logic cleanly elegantly mapped
+            if (boss.phase === 2) {
+                if (Math.random() > 0.5) {
+                    ctx.fillStyle = '#FFFF00'; // Electric sparks
+                    ctx.fillRect(cx + Math.random()*bw, cy + Math.random()*bh, 4, 4);
+                }
+            }
+            if (boss.hurtTimer > 0) { ctx.fillStyle = 'white'; ctx.globalAlpha=0.5; ctx.fillRect(cx, cy, bw, bh); ctx.globalAlpha=1; }
         } else if (boss.type === 'sludge') {
             ctx.fillStyle = '#00ff00';
             ctx.beginPath(); ctx.arc(boss.x + boss.width/2, boss.y + boss.height/2, boss.width/2 + Math.sin(Date.now()/200)*10, 0, Math.PI*2); ctx.fill();
@@ -680,6 +719,35 @@ function render() {
         if (!l.active) continue;
         drawGlow(ctx, l.x + 8, l.y + 2, 30, 'rgba(255, 0, 0, 0.6)');
         drawSprite(ctx, sprLaser, l.x - 4, l.y - 10, 24, 24, l.vx < 0);
+    }
+
+    // Draw Bombs (TNT Bundles) seamlessly dependably elegantly
+    for (let b of bombs) {
+        let bx = b.x;
+        let by = b.y;
+        
+        // Wood/Rope bindings back
+        ctx.fillStyle = '#2b1a10';
+        ctx.fillRect(bx + 6, by + 10, 20, 4);
+        ctx.fillRect(bx + 6, by + 22, 20, 4);
+
+        // 3 Red sticks
+        ctx.fillStyle = '#D32F2F';
+        ctx.fillRect(bx + 6, by + 4, 6, 26);
+        ctx.fillRect(bx + 13, by + 4, 6, 26);
+        ctx.fillRect(bx + 20, by + 4, 6, 26);
+
+        // Lit Fuse logic natively
+        ctx.fillStyle = '#5D4037';
+        ctx.fillRect(bx + 15, by - 4, 2, 8); // Fuse cord
+        
+        if (b.active || (Math.floor(Date.now()/200)%2===0)) {
+            // Sputtering spark creatively natively functionally!
+            ctx.fillStyle = '#FFC107'; // yellow spark
+            ctx.beginPath(); ctx.arc(bx + 16 + (Math.random()-0.5)*4, by - 4 + (Math.random()-0.5)*4, 3, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = '#FF5722'; // orange core
+            ctx.beginPath(); ctx.arc(bx + 16, by - 4, 2, 0, Math.PI*2); ctx.fill();
+        }
     }
 
     // Draw Particles Pool seamlessly securely efficiently!

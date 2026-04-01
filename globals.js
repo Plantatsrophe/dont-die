@@ -15,6 +15,7 @@ let enemies = [];
 let lasers = []; 
 let particles = [];
 let platforms = [];
+let bombs = [];
 let boss = { active: false };
 let camera = { x: 0, y: 0 };
 

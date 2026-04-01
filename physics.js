@@ -303,6 +303,7 @@ function updatePhysics(dt) {
     if (player.x + player.width > mapCols * TILE_SIZE) player.x = mapCols * TILE_SIZE - player.width;
     
     updateBoss(dt);
+    updateBombs(dt);
 }
 
 function updateBoss(dt) {
@@ -319,12 +320,13 @@ function updateBoss(dt) {
     
     boss.timer += dt;
     
-    if (boss.type === 'dozer') {
+    if (boss.type === 'masticator') {
         if (boss.phase === 0) { // Idle/Waiting
             boss.vx = 0;
-            if (Math.abs(player.x - boss.x) < 400 && boss.timer > 1.0) {
+            // Activate when visible on screen
+            if (boss.x > camera.x && boss.x < camera.x + 800) {
                 boss.phase = 1;
-                boss.vx = (player.x < boss.x) ? -300 : 300;
+                boss.vx = (player.x < boss.x) ? -280 : 280;
                 playSound('shoot'); // Charge sound!
             }
         } else if (boss.phase === 1) { // Charging securely implicitly!
@@ -336,21 +338,29 @@ function updateBoss(dt) {
             if (map[cRow] && map[cRow][cCol] === 1) {
                 // Hit wall fluently naturally!
                 boss.phase = 2;
-                boss.vx = 0; boss.timer = 0; boss.hp--; boss.hurtTimer = 0.5;
+                boss.vx = 0; boss.timer = 0; 
                 playSound('explosion');
                 
                 // Destroy the pillar segment mathematically!
-                for(let r=cRow-3; r<=cRow; r++) {
-                    if (map[r]) {
+                for(let r=cRow-5; r<=cRow; r++) {
+                    if (map[r] && map[r][cCol] === 1) {
                         map[r][cCol] = 0;
-                        map[r][cCol + (boss.vx>0 ? 1 : -1)] = 0;
+                        if (map[r][cCol + 1] === 1) map[r][cCol + 1] = 0;
+                        if (map[r][cCol - 1] === 1) map[r][cCol - 1] = 0;
                     }
                 }
                 isMapCached = false; // Re-render seamlessly explicitly!
-                if (boss.hp <= 0) bossExplode();
+                
+                // Trigger bomb!
+                for (let b of bombs) {
+                    if (!b.active && Math.abs(b.col - cCol) <= 2) {
+                        b.active = true;
+                        b.vx = (boss.x + boss.width/2 > b.x) ? 50 : -50; // Drop towards boss
+                    }
+                }
             }
         } else if (boss.phase === 2) { // Stunned smoothly dependably!
-            if (boss.timer > 2.5) {
+            if (boss.timer > 3.0) {
                 boss.phase = 0; // ready to charge again organically!
                 boss.timer = 0;
             }
@@ -418,6 +428,59 @@ function bossExplode() {
         let pRow = Math.floor((boss.y+boss.height) / TILE_SIZE);
         map[Math.max(0, pRow-1)][pCol] = 5;
         isMapCached = false;
+    }
+}
+
+function updateBombs(dt) {
+    for (let b of bombs) {
+        if (!b.active) continue;
+
+        // Apply Gravity
+        b.vy += 800 * dt;
+        
+        // Track the boss horizontally securely 
+        if (boss && boss.active) {
+            let bossCenter = boss.x + boss.width / 2;
+            let bCenter = b.x + b.width / 2;
+            if (Math.abs(bossCenter - bCenter) > 5) {
+                b.vx = (bossCenter > bCenter) ? 100 : -100;
+            } else {
+                b.vx = 0;
+            }
+        }
+        
+        b.x += b.vx * dt;
+        b.y += b.vy * dt;
+        
+        // Collision with Stunned Boss seamlessly
+        if (boss && boss.active && checkRectCollision(b, boss)) {
+            b.active = false;
+            b.y = -9999; // Remove from play gracefully
+            playSound('explosion');
+            
+            // Blast Bomb Particles beautifully natively cleanly!
+            for (let i = 0; i < 20; i++) {
+                let p = particlePool.find(pp => !pp.active);
+                if (p) {
+                    p.active = true; p.type = 'explosion'; p.size = 12;
+                    p.x = b.x + 16; p.y = b.y + 16;
+                    p.vx = (Math.random()-0.5)*400; p.vy = (Math.random()-0.5)*400;
+                    p.life = 0.8; p.maxLife = 0.8;
+                }
+            }
+            
+            // Damage the boss
+            if (boss.phase === 2) {
+                boss.hp--;
+                boss.hurtTimer = 0.5;
+                if (boss.hp <= 0) bossExplode();
+            }
+        }
+
+        // Collision with Player implicitly
+        if (checkRectCollision(player, b)) {
+            playerDeath();
+        }
     }
 }
 
