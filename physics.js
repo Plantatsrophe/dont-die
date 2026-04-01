@@ -100,22 +100,15 @@ function updatePhysics(dt) {
     }
 
     if (gameState === 'LEVEL_CLEAR') {
-        player.vx = player.speed * 0.5; // Auto walk right
-        player.vy += player.gravity * dt;
-        player.x += player.vx * dt;
-        player.y += player.vy * dt;
-        
-        // Retain Floor Collisions to glide over goal reliably
-        let tilesAfterY = getCollidingTiles(player);
-        for (let t of tilesAfterY) {
-            if (t.type === 1 || t.type === 6) {
-                if (player.vy > 0) {
-                    player.y = t.rect.y - player.height;
-                    player.isOnGround = true;
-                    player.vy = 0;
-                }
-            }
+        // Fall into the portal dynamically securely gracefully instead of strictly walking!
+        if (player.portalX !== undefined) {
+            let targetX = player.portalX - player.width / 2;
+            let targetY = player.portalY - player.height / 2 + 16;
+            player.x += (targetX - player.x) * 4 * dt;
+            player.y += (targetY - player.y) * 4 * dt;
         }
+        player.vx = 0;
+        player.vy = 0;
 
         // Camera follow
         camera.x = player.x - canvas.width / 2 + player.width / 2;
@@ -165,7 +158,11 @@ function updatePhysics(dt) {
             // Acid bounding rigidly kills explicitly 
             hitSpike = true;
         }
-        if (t.type === 5) hitGoal = true;
+        if (t.type === 5) {
+            hitGoal = true;
+            player.portalX = t.rect.x + 16; // Center exactly horizontally implicitly elegantly
+            player.portalY = t.rect.y + 16; // Center strictly explicitly!
+        }
     }
     
     if (hitSpike) {

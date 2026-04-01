@@ -868,8 +868,21 @@ function render() {
     if (gameState !== 'DYING' && gameState !== 'CREDITS' && gameState !== 'CREDITS_CUTSCENE') {
         let pSpr = sprHero;
         let wY = (player.isOnGround && player.vx !== 0 && Math.floor(timerAcc*10)%2===0) ? 2 : 0; // walk bob
-        drawGlow(ctx, player.x + 12, player.y + 16, 40, 'rgba(255, 150, 0, 0.25)'); // Organic warm player glow
-        drawSprite(ctx, pSpr, player.x, player.y + wY, player.width, player.height, playerFlip);
+        
+        ctx.save();
+        if (gameState === 'LEVEL_CLEAR') {
+            let scale = Math.max(0, 1.0 - (winTimer / 2.0)); // shrinks over 2 seconds
+            let rot = winTimer * 15; // vortex spin mathematically natively!
+            ctx.translate(player.x + player.width/2, player.y + player.height/2 + wY);
+            ctx.rotate(rot);
+            ctx.scale(scale, scale);
+            drawGlow(ctx, 0, 0, 40, 'rgba(255, 150, 0, 0.25)'); 
+            drawSprite(ctx, pSpr, -player.width/2, -player.height/2, player.width, player.height, playerFlip);
+        } else {
+            drawGlow(ctx, player.x + 12, player.y + 16, 40, 'rgba(255, 150, 0, 0.25)'); // Organic warm player glow
+            drawSprite(ctx, pSpr, player.x, player.y + wY, player.width, player.height, playerFlip);
+        }
+        ctx.restore();
     }
     
     // Draw Cinematic Overlays cleanly natively explicitly!
