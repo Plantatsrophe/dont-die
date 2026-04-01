@@ -56,12 +56,14 @@ def generate_slums(i, difficulty):
             w = random.randint(2, 4)
             for dx in range(w):
                 level[h][c+dx] = "1"
-                level[13][c+dx] = "3"
+                if c+dx != 50 and c+dx != 98:
+                    level[13][c+dx] = "3"
             if random.random() < 0.3:
                 level[h-1][c+1] = "4" # Cash Item dynamically over the spike pit
             c += w
         elif choice < enemy_prob:
-            level[12][c] = "L" if (i >= 9 and random.random() < 0.3) else "8"
+            if c != 50 and c != 98:
+                level[12][c] = "L" if (i >= 9 and random.random() < 0.3) else "8"
     return level
 
 def generate_acid(i, difficulty):
