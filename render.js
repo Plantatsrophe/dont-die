@@ -42,52 +42,81 @@ function drawGlow(ctx, x, y, radius, colorStr) {
 
 function drawMasticator(ctx, boss) {
     let cx = boss.x;
-    let cy = boss.y;
+    let cy = boss.y - 15; // Set precisely 15 pixels lower than the original minus 20!
     let bw = boss.width;
     let bh = boss.height;
 
     let dir = boss.vx < 0 ? -1 : 1; 
+    let walkParam = (boss.vx !== 0) ? Date.now() / 100 : 0;
+    
+    let leg1 = (walkParam > 0) ? Math.sin(walkParam) * 12 : 0;
+    let leg2 = (walkParam > 0) ? Math.sin(walkParam + Math.PI) * 12 : 0;
 
     // Short Legs
     ctx.fillStyle = '#888';
-    ctx.fillRect(cx + 10, cy + bh, 15, 15);
-    ctx.fillRect(cx + bw - 25, cy + bh, 15, 15);
-    // Feet
+    let leg1X = cx + 10 + leg1;
+    let leg2X = cx + bw - 25 + leg2;
+    ctx.fillRect(leg1X, cy + bh, 15, 15);
+    ctx.fillRect(leg2X, cy + bh, 15, 15);
+    
+    // Feet pointing in direction
     ctx.fillStyle = '#555';
-    ctx.fillRect(cx + 5, cy + bh + 10, 20, 5);
-    ctx.fillRect(cx + bw - 30, cy + bh + 10, 20, 5);
+    let footStartOffset = (dir === 1) ? -5 : -15; // Point naturally smoothly
+    ctx.fillRect(leg1X + footStartOffset, cy + bh + 10, 25, 5);
+    ctx.fillRect(leg2X + footStartOffset, cy + bh + 10, 25, 5);
 
-    // Short Arms
+    // Walking arms conceptually pinned
+    let armAngle1 = (walkParam > 0) ? Math.sin(walkParam) * 0.3 : 0;
+    let armAngle2 = (walkParam > 0) ? Math.sin(walkParam + Math.PI) * 0.3 : 0;
+    let leftArmAngle = (dir === -1) ? armAngle1 : armAngle2;
+    let rightArmAngle = (dir === -1) ? armAngle2 : armAngle1;
+
+    let drawSword = (innerCtx) => {
+        innerCtx.save();
+        innerCtx.translate(0, 40); // hand offset relative to shoulder pivot (which is 0,0)
+        let swordAngle = (walkParam > 0) ? Math.sin(walkParam) * (Math.PI / 8) * dir : 0;
+        innerCtx.rotate(swordAngle);
+        
+        let sx = 0, sy = -10;
+        innerCtx.fillStyle = '#EaEaEa';
+        innerCtx.beginPath();
+        innerCtx.moveTo(sx - 10, sy);
+        innerCtx.lineTo(sx - 10, sy - 70);
+        innerCtx.lineTo(sx, sy - 90);       
+        innerCtx.lineTo(sx + 10, sy - 70);
+        innerCtx.lineTo(sx + 10, sy);
+        innerCtx.fill();
+        innerCtx.fillStyle = '#FFFFFF';
+        innerCtx.beginPath();
+        innerCtx.moveTo(sx, sy);
+        innerCtx.lineTo(sx, sy - 90);
+        innerCtx.lineTo(sx + 10, sy - 70);
+        innerCtx.lineTo(sx + 10, sy);
+        innerCtx.fill();
+        innerCtx.fillStyle = '#111';
+        innerCtx.fillRect(sx - 6, sy, 12, 24); 
+        innerCtx.fillStyle = '#ff0000';
+        innerCtx.fillRect(sx - 4, sy + 20, 8, 8); 
+        innerCtx.restore();
+    };
+
     ctx.fillStyle = '#888';
-    ctx.fillRect(cx - 15, cy + 30, 15, 30);
-    ctx.fillRect(cx + bw, cy + 30, 15, 30);
+    
+    // Draw Left Arm securely!
+    ctx.save();
+    ctx.translate(cx - 7.5, cy + 30);
+    ctx.rotate(leftArmAngle);
+    ctx.fillRect(-7.5, 0, 15, 30);
+    if (dir === -1) drawSword(ctx);
+    ctx.restore();
 
-    // Giant Metallic Sword (held in leading hand)
-    let sHx = (dir === -1) ? (cx - 30) : (cx + bw + 15);
-    let sHy = cy + 50; 
-
-    // Sword Blade
-    ctx.fillStyle = '#EaEaEa';
-    ctx.beginPath();
-    ctx.moveTo(sHx - 10, sHy);
-    ctx.lineTo(sHx - 10, sHy - 70);
-    ctx.lineTo(sHx, sHy - 90);       // Tip
-    ctx.lineTo(sHx + 10, sHy - 70);
-    ctx.lineTo(sHx + 10, sHy);
-    ctx.fill();
-    // Sword Edge Highlight
-    ctx.fillStyle = '#FFFFFF';
-    ctx.beginPath();
-    ctx.moveTo(sHx, sHy);
-    ctx.lineTo(sHx, sHy - 90);
-    ctx.lineTo(sHx + 10, sHy - 70);
-    ctx.lineTo(sHx + 10, sHy);
-    ctx.fill();
-    // Sword Handle
-    ctx.fillStyle = '#111';
-    ctx.fillRect(sHx - 6, sHy, 12, 24); // Solid black seamless handle
-    ctx.fillStyle = '#ff0000';
-    ctx.fillRect(sHx - 4, sHy + 20, 8, 8); // Pommel gem
+    // Draw Right Arm securely!
+    ctx.save();
+    ctx.translate(cx + bw + 7.5, cy + 30);
+    ctx.rotate(rightArmAngle);
+    ctx.fillRect(-7.5, 0, 15, 30);
+    if (dir === 1) drawSword(ctx);
+    ctx.restore();
 
     // Chassis
     ctx.fillStyle = '#C0C0C0';
@@ -961,7 +990,7 @@ function render() {
         ctx.fillStyle = '#00ff00';
         ctx.font = '30px "Press Start 2P"';
         ctx.textAlign = 'center';
-        ctx.fillText('STAGE CLEAR!', canvas.width / 2, canvas.height / 2);
+        ctx.fillText('LEVEL ' + (currentLevel + 1) + ' CLEARED!', canvas.width / 2, canvas.height / 2);
         ctx.fillStyle = 'white';
         ctx.font = '15px "Press Start 2P"';
         ctx.fillText('TIME BONUS: ' + (timer * 100), canvas.width / 2, canvas.height / 2 + 35);
@@ -1000,21 +1029,33 @@ function render() {
         ctx.textAlign = 'center';
         let cY = canvas.height - (player.cutsceneTimer - 4.0) * 50;
         
-        ctx.fillText("DON'T DIE", canvas.width/2, cY);
+        ctx.fillText("CREDITS", canvas.width/2, cY);
         
+        ctx.fillStyle = '#b75c32'; // Game brand rusty orange
+        ctx.font = '15px "Press Start 2P"';
+        ctx.fillText("CREATED BY:", canvas.width/2, cY + 100);
         ctx.fillStyle = 'white';
         ctx.font = '20px "Press Start 2P"';
-        ctx.fillText("A STORY OF SACRIFICE", canvas.width/2, cY + 80);
-        ctx.fillText("ART & CODE: THE CLOUD", canvas.width/2, cY + 160);
+        ctx.fillText("BARRY THE RING DADDY", canvas.width/2, cY + 140);
         
-        ctx.fillStyle = '#ff2222';
-        ctx.fillText("GOLIATH HAS FALLEN.", canvas.width/2, cY + 300);
-        
+        ctx.fillStyle = '#b75c32';
+        ctx.font = '15px "Press Start 2P"';
+        ctx.fillText("SCRIPT WRITTEN BY:", canvas.width/2, cY + 240);
         ctx.fillStyle = 'white';
-        ctx.font = '10px "Press Start 2P"';
-        ctx.fillText("AND SO HAS HEROIC HOTDOG HENLEY.", canvas.width/2, cY + 350);
-        ctx.fillText("THE UNIVERSE IS SAVED.", canvas.width/2, cY + 380);
-        ctx.fillText("THANK YOU FOR PLAYING.", canvas.width/2, cY + 500);
+        ctx.font = '20px "Press Start 2P"';
+        ctx.fillText("HOTDOG", canvas.width/2, cY + 280);
+        ctx.fillText("THE HISTORIAN", canvas.width/2, cY + 320);
+        
+        ctx.fillStyle = '#b75c32';
+        ctx.font = '15px "Press Start 2P"';
+        ctx.fillText("SPECIAL THANKS TO:", canvas.width/2, cY + 420);
+        ctx.fillStyle = 'white';
+        ctx.font = '20px "Press Start 2P"';
+        ctx.fillText("FUDGE", canvas.width/2, cY + 460);
+        ctx.fillText("THE ENTIRE GRFC TEAM", canvas.width/2, cY + 500);
+
+        ctx.fillStyle = '#f1c40f';
+        ctx.fillText("THANK YOU FOR PLAYING!", canvas.width/2, cY + 650);
     }
     
     // Draw Global Share UX Button
@@ -1024,7 +1065,7 @@ function render() {
         ctx.fillStyle = 'white';
         ctx.font = '12px "Press Start 2P"';
         ctx.textAlign = 'center';
-        ctx.fillText('[ SHARE HIGHSCORE! ]', canvas.width / 2, canvas.height - 55);
+        ctx.fillText('[ SAVE HIGHSCORE! ]', canvas.width / 2, canvas.height - 55);
     }
 }
 

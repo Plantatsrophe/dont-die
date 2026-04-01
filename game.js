@@ -114,17 +114,17 @@ function executeTouchStart(e) {
         
         if (cx >= canvas.width / 2 - 120 && cx <= canvas.width / 2 + 120 && cy >= canvas.height - 80 && cy <= canvas.height - 40) {
             try {
-                canvas.toBlob(blob => {
-                    if (blob) {
-                        const item = new ClipboardItem( { 'image/png': blob } );
-                        navigator.clipboard.write([item]).then(() => {
-                            alert('Highscore Screenshot copied to clipboard! You can now paste it directly.');
-                        }).catch(err => {
-                            console.error('Failed to copy image:', err);
-                            alert('Unable to copy screenshot to clipboard.');
-                        });
-                    }
-                }, 'image/png');
+                let dataUrl = canvas.toDataURL('image/png');
+                let a = document.createElement('a');
+                a.href = dataUrl;
+                a.download = 'highscore_' + player.score + '.png';
+                a.style.display = 'none';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                
+                // Fallback alert natively seamlessly!
+                setTimeout(() => alert('Highscore Screenshot Saved!'), 100);
             } catch (e) {
                 console.error("Clipboard export failed", e);
             }
@@ -316,6 +316,7 @@ function parseMap(resetEntities = true) {
                     let bType = ['masticator', 'sludge', 'warden', 'core', 'goliath'][biome];
                     boss = {
                         active: true, type: bType,
+                        startX: col * TILE_SIZE, startY: row * TILE_SIZE,
                         x: col * TILE_SIZE, y: row * TILE_SIZE,
                         width: TILE_SIZE * 2, height: TILE_SIZE * 2,
                         hp: (bType === 'masticator' ? 4 : 3), maxHp: (bType === 'masticator' ? 4 : 3), 

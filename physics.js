@@ -93,6 +93,14 @@ function updatePhysics(dt) {
                 timer = 60;
                 parseMap(false); // Preserve collected items across deaths
                 resetPlayerPosition();
+                if (boss && boss.active) {
+                    boss.x = boss.startX !== undefined ? boss.startX : boss.x;
+                    boss.y = boss.startY !== undefined ? boss.startY : boss.y;
+                    boss.vx = 0;
+                    boss.vy = 0;
+                    boss.phase = 0;
+                    boss.hasSeenPlayer = false;
+                }
                 gameState = 'PLAYING';
             }
         }
