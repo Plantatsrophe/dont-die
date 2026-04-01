@@ -229,6 +229,7 @@ function parseMap(resetEntities = true) {
     offscreenMapCanvas.width = mapCols * TILE_SIZE;
     offscreenMapCanvas.height = mapRows * TILE_SIZE;
 
+    let spawnFound = false;
     for (let row = 0; row < mapRows; row++) {
         let rowData = [];
         for (let col = 0; col < mapCols; col++) {
@@ -267,10 +268,11 @@ function parseMap(resetEntities = true) {
                 }
                 rowData.push(0);
                 // Spawn logically defaults locally in strings!
-            } else if (char === '7' || (row === 12 && col === 1)) {
+            } else if (char === '7' || (row === 12 && col === 1 && !spawnFound)) {
                 if (resetEntities) {
                     player.startX = col * TILE_SIZE + 6;
                     player.startY = (row + 1) * TILE_SIZE - player.height;
+                    spawnFound = true;
                 }
                 rowData.push(0);
             } else if (tile === 8) {
@@ -297,7 +299,7 @@ function parseMap(resetEntities = true) {
                 rowData.push(0);
             } else if (char === 'B') {
                 if (resetEntities) {
-                    let biome = Math.floor(currentLevel / 10) % 5;
+                    let biome = Math.floor(currentLevel / 20) % 5;
                     let bType = ['masticator', 'sludge', 'warden', 'core', 'goliath'][biome];
                     boss = {
                         active: true, type: bType,
@@ -402,9 +404,9 @@ function updateGame(dt) {
                 player.lives++;
                 playSound('powerup');
             } else if (i.type === 'checkpoint') {
-                if (player.startX !== i.x + 8 || player.startY !== i.y + 8) {
+                if (player.startX !== i.x + 8 || player.startY !== i.y - 2) {
                     player.startX = i.x + 8;
-                    player.startY = i.y + 8;
+                    player.startY = i.y - 2; // Spawn cleanly above and naturally drop on the platform
                     playSound('powerup');
                     
                     // Blast 20 particles explicitly visually denoting Checkpoint Grab

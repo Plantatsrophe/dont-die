@@ -330,14 +330,14 @@ function updateBoss(dt) {
     if (boss.type === 'masticator') {
         if (boss.phase === 0) { // Idle/Waiting
             boss.vx = 0;
-            // Activate when visible on screen or if already triggered implicitly natively!
+            // Activate when visible on screen or if already triggered
             if (boss.hasSeenPlayer || (boss.x > camera.x && boss.x < camera.x + 800)) {
                 boss.hasSeenPlayer = true;
                 boss.phase = 1;
-                boss.vx = (player.x < boss.x) ? -300 : 300; // Sped down explicitly safely natively!
-                playSound('shoot'); // Charge sound!
+                boss.vx = (player.x < boss.x) ? -300 : 300;
+                playSound('shoot'); 
             }
-        } else if (boss.phase === 1) { // Charging securely implicitly!
+        } else if (boss.phase === 1) { // Charging
             boss.x += boss.vx * dt;
             
             let startCol = Math.floor(boss.x / TILE_SIZE);
@@ -351,13 +351,12 @@ function updateBoss(dt) {
             for(let r=startRow; r<=endRow; r++) {
                 for(let c=startCol; c<=endCol; c++) {
                     if (map[r] && map[r][c] !== 0 && map[r][c] !== undefined && r < 13) {
-                        // Treat anything above the floor line (13) strictly as a solid pillar!
                         if (map[r][c] === 1) {
                             hitPillar = true;
                             hitCol = c;
                         }
                         
-                        // Spawn crumbling bricks!
+                        // Spawn crumbling bricks
                         let p = particlePool.find(pp => !pp.active);
                         if (p) {
                             p.active = true; p.type = 'normal'; p.size = 12;
@@ -365,19 +364,39 @@ function updateBoss(dt) {
                             p.vx = (Math.random()-0.5)*500; p.vy = -300 - Math.random()*300;
                             p.color = '#B0B0B0'; p.life = 1.0; p.maxLife = 1.0;
                         }
-                        map[r][c] = 0; // Boss consumes the tile natively!
+                        map[r][c] = 0; // Boss consumes the tile
                         isMapCached = false;
                     }
                 }
             }
             
             if (hitPillar) {
-                // Stunned!
+                // Destroy the entire vertical pillar
+                for (let pr = 12; pr >= 0; pr--) {
+                    let rowStr = staticLevels[currentLevel].map[pr];
+                    if (rowStr && rowStr[hitCol] === '1') {
+                        map[pr][hitCol] = 0;
+                        
+                        // Mutate static map data permanently to prevent respawns
+                        staticLevels[currentLevel].map[pr] = rowStr.substring(0, hitCol) + "0" + rowStr.substring(hitCol + 1);
+
+                        let p = particlePool.find(pp => !pp.active);
+                        if (p) {
+                            p.active = true; p.type = 'normal'; p.size = 12;
+                            p.x = hitCol * TILE_SIZE + 20; p.y = pr * TILE_SIZE + 20;
+                            p.vx = (Math.random()-0.5)*500; p.vy = -300 - Math.random()*300;
+                            p.color = '#B0B0B0'; p.life = 1.0; p.maxLife = 1.0;
+                        }
+                    }
+                }
+                isMapCached = false;
+                
+                // Stunned
                 boss.phase = 2;
                 boss.vx = 0; boss.timer = 0; 
                 playSound('explosion');
                 
-                // Trigger bomb!
+                // Trigger bomb drop
                 for (let b of bombs) {
                     if (!b.active && Math.abs(b.col - hitCol) <= 3) {
                         b.active = true;
@@ -385,37 +404,37 @@ function updateBoss(dt) {
                     }
                 }
             } else {
-                // Check if the player successfully juked behind the boss organically implicitly!
+                // Check if the player successfully juked behind the boss
                 if ((boss.vx > 0 && player.x + player.width < boss.x) || 
                     (boss.vx < 0 && player.x > boss.x + boss.width)) {
-                    boss.phase = 3; // Skidding delay phase implicitly natively!
+                    boss.phase = 3; // Skidding delay phase
                     boss.timer = 0;
                 }
             }
         } else if (boss.phase === 3) {
-            // Skidding securely organically intelligently!
-            boss.vx *= 0.9; // Friction slow-down natively
+            // Skidding physics
+            boss.vx *= 0.9; 
             boss.x += boss.vx * dt;
             if (boss.timer > 0.4) {
-                boss.phase = 1; // Resume charging
+                boss.phase = 1; // Resume charging natively
                 boss.vx = (player.x < boss.x) ? -300 : 300;
                 playSound('shoot');
             }
-        } else if (boss.phase === 2) { // Stunned smoothly dependably!
+        } else if (boss.phase === 2) { // Stunned timer
             if (boss.timer > 3.0) {
-                boss.phase = 0; // ready to charge again organically!
+                boss.phase = 0; // Ready to charge again
                 boss.timer = 0;
             }
         }
     } else if (boss.type === 'sludge') {
-        // Acid Boss undulates smoothly seamlessly!
+        // Acid Boss undulates
         boss.y += Math.sin(boss.timer * 3) * 30 * dt;
     } else if (boss.type === 'warden') {
-        // Shaft Boss cleanly dependably explicitly flexibly
+        // Shaft Boss 
         if (player.y < boss.y) boss.y -= 70 * dt;
         boss.x += Math.cos(boss.timer * 4) * 80 * dt;
     } else if (boss.type === 'core') {
-        // Laser Boss dynamically intuitively fluently elegantly organically!
+        // Laser Boss 
         if (boss.timer > 1.5) {
             boss.timer = 0;
             let l = laserPool.find(lp => !lp.active);
@@ -431,7 +450,7 @@ function updateBoss(dt) {
         boss.x = Math.max(boss.x, camera.x - 30); 
         if (boss.timer > 2.0 && gameState !== 'CREDITS_CUTSCENE' && gameState !== 'CREDITS') {
             boss.timer = 0;
-            // Sweep rockets reliably fluently comprehensively fluidly cleanly securely intelligently seamlessly fluently!
+            // Sweep rockets
             for(let i=0; i<3; i++) {
                 let l = laserPool.find(lp => !lp.active);
                 if (l) {
@@ -480,10 +499,10 @@ function updateBombs(dt) {
         // Apply Gravity
         b.vy += 800 * dt;
         
-        // Track the boss horizontally securely  (Guaranteed lock-on natively!)
+        // Track the boss horizontally securely  
         if (boss && boss.active) {
             let targetX = boss.x + boss.width / 2 - b.width / 2;
-            b.x += (targetX - b.x) * 10 * dt; // Perfect tracking homing smoothly safely!
+            b.x += (targetX - b.x) * 10 * dt; // Perfect tracking homing smoothly
             b.vx = 0; 
         }
         
@@ -492,10 +511,10 @@ function updateBombs(dt) {
         // Collision with Stunned Boss seamlessly
         if (boss && boss.active && checkRectCollision(b, boss)) {
             b.active = false;
-            b.y = -9999; // Remove from play gracefully
+            b.y = -9999; // Remove from play 
             playSound('explosion');
             
-            // Blast Bomb Particles beautifully natively cleanly!
+            // Blast Bomb Particles visually 
             for (let i = 0; i < 20; i++) {
                 let p = particlePool.find(pp => !pp.active);
                 if (p) {
@@ -506,17 +525,10 @@ function updateBombs(dt) {
                 }
             }
             
-            // Damage the boss
-            if (boss.phase === 2) {
-                boss.hp--;
-                boss.hurtTimer = 0.5;
-                if (boss.hp <= 0) bossExplode();
-            }
-        }
-
-        // Collision with Player implicitly
-        if (checkRectCollision(player, b)) {
-            playerDeath();
+            // Damage the boss unconditionally
+            boss.hp--;
+            boss.hurtTimer = 0.5;
+            if (boss.hp <= 0) bossExplode();
         }
     }
 }

@@ -40,8 +40,98 @@ function drawGlow(ctx, x, y, radius, colorStr) {
     ctx.restore();
 }
 
+function drawMasticator(ctx, boss) {
+    let cx = boss.x;
+    let cy = boss.y;
+    let bw = boss.width;
+    let bh = boss.height;
+
+    let dir = boss.vx < 0 ? -1 : 1; 
+
+    // Short Legs
+    ctx.fillStyle = '#888';
+    ctx.fillRect(cx + 10, cy + bh, 15, 15);
+    ctx.fillRect(cx + bw - 25, cy + bh, 15, 15);
+    // Feet
+    ctx.fillStyle = '#555';
+    ctx.fillRect(cx + 5, cy + bh + 10, 20, 5);
+    ctx.fillRect(cx + bw - 30, cy + bh + 10, 20, 5);
+
+    // Short Arms
+    ctx.fillStyle = '#888';
+    ctx.fillRect(cx - 15, cy + 30, 15, 30);
+    ctx.fillRect(cx + bw, cy + 30, 15, 30);
+
+    // Giant Metallic Sword (held in leading hand)
+    let sHx = (dir === -1) ? (cx - 30) : (cx + bw + 15);
+    let sHy = cy + 50; 
+
+    // Sword Blade
+    ctx.fillStyle = '#EaEaEa';
+    ctx.beginPath();
+    ctx.moveTo(sHx - 10, sHy);
+    ctx.lineTo(sHx - 10, sHy - 70);
+    ctx.lineTo(sHx, sHy - 90);       // Tip
+    ctx.lineTo(sHx + 10, sHy - 70);
+    ctx.lineTo(sHx + 10, sHy);
+    ctx.fill();
+    // Sword Edge Highlight
+    ctx.fillStyle = '#FFFFFF';
+    ctx.beginPath();
+    ctx.moveTo(sHx, sHy);
+    ctx.lineTo(sHx, sHy - 90);
+    ctx.lineTo(sHx + 10, sHy - 70);
+    ctx.lineTo(sHx + 10, sHy);
+    ctx.fill();
+    // Sword Handle
+    ctx.fillStyle = '#111';
+    ctx.fillRect(sHx - 6, sHy, 12, 24); // Solid black seamless handle
+    ctx.fillStyle = '#ff0000';
+    ctx.fillRect(sHx - 4, sHy + 20, 8, 8); // Pommel gem
+
+    // Chassis
+    ctx.fillStyle = '#C0C0C0';
+    ctx.fillRect(cx, cy, bw, bh);
+    ctx.fillStyle = '#A0A0A0';
+    ctx.fillRect(cx + bw - 20, cy, 20, bh); 
+
+    // Eyes
+    let eyeY = cy + 15;
+    let eyeW = 18;
+    let eyeH = 10;
+    ctx.fillStyle = '#FF0000';
+    ctx.fillRect(cx + 15, eyeY, eyeW, eyeH);
+    ctx.fillRect(cx + bw - 15 - eyeW, eyeY, eyeW, eyeH);
+    drawGlow(ctx, cx + 15 + eyeW/2, eyeY + eyeH/2, 20, 'rgba(255, 0, 0, 0.6)');
+    drawGlow(ctx, cx + bw - 15 - eyeW/2, eyeY + eyeH/2, 20, 'rgba(255, 0, 0, 0.6)');
+
+    // Mouth
+    let mouthY = cy + 45;
+    let mouthH = (boss.phase === 2) ? 35 : 20; 
+    ctx.fillStyle = '#111';
+    ctx.fillRect(cx + 10, mouthY, bw - 20, mouthH);
+    
+    // Teeth
+    ctx.fillStyle = '#FFF';
+    for (let tx = 15; tx < bw - 20; tx += 15) {
+        ctx.beginPath(); ctx.moveTo(cx + tx, mouthY); ctx.lineTo(cx + tx + 10, mouthY + 8); ctx.lineTo(cx + tx + 20, mouthY); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(cx + tx, mouthY + mouthH); ctx.lineTo(cx + tx + 10, mouthY + mouthH - 8); ctx.lineTo(cx + tx + 20, mouthY + mouthH); ctx.fill();
+    }
+
+    // Stunned Sparks
+    if (boss.phase === 2 && Math.random() > 0.5) {
+        ctx.fillStyle = '#FFFF00'; 
+        ctx.fillRect(cx + Math.random()*bw, cy + Math.random()*bh, 4, 4);
+    }
+    
+    // Damage Flash
+    if (boss.hurtTimer > 0) { 
+        ctx.fillStyle = 'white'; ctx.globalAlpha = 0.5; ctx.fillRect(cx, cy, bw, bh); ctx.globalAlpha = 1; 
+    }
+}
+
 function render() {
-    let bId = Math.floor(currentLevel / 10) % 5;
+    let bId = Math.floor(currentLevel / 20) % 5;
 
     // Parallax Layer 0: Sky dynamically maps bounds implicitly to active Biome gracefully!
     let skyGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
@@ -593,7 +683,7 @@ function render() {
         drawGlow(ctx, plat.x + plat.width/2, plat.y + 8, 30, 'rgba(255, 100, 0, 0.4)');
         drawSprite(ctx, sprRocketPad, plat.x, plat.y, plat.width, plat.height, false);
         
-        // Render Rocket Thrusters intrinsically organically!
+        // Render Rocket Thrusters
         if (Math.random() > 0.2) {
             ctx.fillStyle = Math.random() > 0.5 ? '#ff2222' : '#f1c40f';
             ctx.fillRect(plat.x + 8 + Math.random() * 4, plat.y + plat.height, 2 + Math.random() * 2, 2 + Math.random() * 4);
@@ -604,9 +694,9 @@ function render() {
     // Draw Items
     for (let i of items) {
         if (i.type === 'checkpoint') {
-            let isActive = player.startX === i.x + 8 && player.startY === i.y + 8;
+            let isActive = player.startX === i.x + 8 && player.startY === i.y - 2;
             let flip = isActive || (Math.floor(Date.now() / 400) % 2 === 0);
-            drawSprite(ctx, sprRef, i.x, i.y, i.width, i.height, flip);
+            drawSprite(ctx, sprRef, i.x, i.y + 7, i.width, i.height, flip); // Shifted down drastically to prevent floating visually
             if (isActive) {
                 drawGlow(ctx, i.x + 16, i.y + 16, 40, 'rgba(10, 255, 100, 0.6)');
             } else {
@@ -644,50 +734,7 @@ function render() {
     // Draw Boss
     if (boss && boss.active) {
         if (boss.type === 'masticator') {
-            let cx = boss.x;
-            let cy = boss.y;
-            let bw = boss.width;
-            let bh = boss.height;
-
-            // Silver Chassis
-            ctx.fillStyle = '#C0C0C0';
-            ctx.fillRect(cx, cy, bw, bh);
-            ctx.fillStyle = '#A0A0A0';
-            ctx.fillRect(cx + bw - 20, cy, 20, bh); // shadow edge
-
-            // Glowing Red Eyes
-            let eyeY = cy + 15;
-            let eyeW = 18;
-            let eyeH = 10;
-            ctx.fillStyle = '#FF0000';
-            ctx.fillRect(cx + 15, eyeY, eyeW, eyeH);
-            ctx.fillRect(cx + bw - 15 - eyeW, eyeY, eyeW, eyeH);
-            drawGlow(ctx, cx + 15 + eyeW/2, eyeY + eyeH/2, 20, 'rgba(255, 0, 0, 0.6)');
-            drawGlow(ctx, cx + bw - 15 - eyeW/2, eyeY + eyeH/2, 20, 'rgba(255, 0, 0, 0.6)');
-
-            // Gaping Spiky Mouth
-            let mouthY = cy + 45;
-            let mouthH = (boss.phase === 2) ? 35 : 20; // Drops jaw when stunned!
-            ctx.fillStyle = '#111';
-            ctx.fillRect(cx + 10, mouthY, bw - 20, mouthH);
-            
-            // Spike Teeth
-            ctx.fillStyle = '#FFF';
-            for (let tx = 15; tx < bw - 20; tx += 15) {
-                // Top teeth
-                ctx.beginPath(); ctx.moveTo(cx + tx, mouthY); ctx.lineTo(cx + tx + 10, mouthY + 8); ctx.lineTo(cx + tx + 20, mouthY); ctx.fill();
-                // Bottom teeth
-                ctx.beginPath(); ctx.moveTo(cx + tx, mouthY + mouthH); ctx.lineTo(cx + tx + 10, mouthY + mouthH - 8); ctx.lineTo(cx + tx + 20, mouthY + mouthH); ctx.fill();
-            }
-
-            // Stunned Logic cleanly elegantly mapped
-            if (boss.phase === 2) {
-                if (Math.random() > 0.5) {
-                    ctx.fillStyle = '#FFFF00'; // Electric sparks
-                    ctx.fillRect(cx + Math.random()*bw, cy + Math.random()*bh, 4, 4);
-                }
-            }
-            if (boss.hurtTimer > 0) { ctx.fillStyle = 'white'; ctx.globalAlpha=0.5; ctx.fillRect(cx, cy, bw, bh); ctx.globalAlpha=1; }
+            drawMasticator(ctx, boss);
         } else if (boss.type === 'sludge') {
             ctx.fillStyle = '#00ff00';
             ctx.beginPath(); ctx.arc(boss.x + boss.width/2, boss.y + boss.height/2, boss.width/2 + Math.sin(Date.now()/200)*10, 0, Math.PI*2); ctx.fill();
@@ -714,38 +761,34 @@ function render() {
         }
     }
     
-    // Draw Lasers Pool organically strictly natively
+    // Draw Lasers Pool 
     for (let l of laserPool) {
         if (!l.active) continue;
         drawGlow(ctx, l.x + 8, l.y + 2, 30, 'rgba(255, 0, 0, 0.6)');
         drawSprite(ctx, sprLaser, l.x - 4, l.y - 10, 24, 24, l.vx < 0);
     }
 
-    // Draw Bombs (TNT Bundles) seamlessly dependably elegantly
+    // Draw Bombs (TNT Bundles)
     for (let b of bombs) {
         let bx = b.x;
         let by = b.y;
         
-        // Wood/Rope bindings back
         ctx.fillStyle = '#2b1a10';
         ctx.fillRect(bx + 6, by + 10, 20, 4);
         ctx.fillRect(bx + 6, by + 22, 20, 4);
 
-        // 3 Red sticks
         ctx.fillStyle = '#D32F2F';
         ctx.fillRect(bx + 6, by + 4, 6, 26);
         ctx.fillRect(bx + 13, by + 4, 6, 26);
         ctx.fillRect(bx + 20, by + 4, 6, 26);
 
-        // Lit Fuse logic natively
         ctx.fillStyle = '#5D4037';
-        ctx.fillRect(bx + 15, by - 4, 2, 8); // Fuse cord
+        ctx.fillRect(bx + 15, by - 4, 2, 8); 
         
         if (b.active || (Math.floor(Date.now()/200)%2===0)) {
-            // Sputtering spark creatively natively functionally!
-            ctx.fillStyle = '#FFC107'; // yellow spark
+            ctx.fillStyle = '#FFC107'; 
             ctx.beginPath(); ctx.arc(bx + 16 + (Math.random()-0.5)*4, by - 4 + (Math.random()-0.5)*4, 3, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = '#FF5722'; // orange core
+            ctx.fillStyle = '#FF5722'; 
             ctx.beginPath(); ctx.arc(bx + 16, by - 4, 2, 0, Math.PI*2); ctx.fill();
         }
     }
