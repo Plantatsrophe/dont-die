@@ -7,4 +7,9 @@ import './input.js'; // Side-effect: registers all keyboard/touch event listener
 // Boot sequence
 parseMap();
 resetPlayerPosition();
+
+// Expose to window for console access (Cheats/Debugging)
+window.parseMap = parseMap;
+window.resetPlayerPosition = resetPlayerPosition;
+
 requestAnimationFrame(gameLoop);

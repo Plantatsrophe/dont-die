@@ -1,6 +1,6 @@
 import { G, player, canvas, keys, TILE_SIZE, laserPool, particlePool } from './globals.js';
 import { playSound } from './audio.js';
-import { parseMap, resetPlayerPosition } from './spawner.js';
+import { parseMap, resetPlayerPosition, resetFullGame } from './spawner.js';
 import { updatePhysics, checkRectCollision, playerDeath, bossExplode } from './physics.js';
 import { render } from './render.js';
 
@@ -21,11 +21,6 @@ export function handleUIAccept() {
     else if (G.gameState==='START') { G.introY=canvas.height*0.66; G.gameState='INTRO'; }
     else if (G.gameState==='INTRO') { G.gameState='INSTRUCTIONS'; }
     else if (G.gameState==='INSTRUCTIONS') { G.currentLevel=0; resetFullGame(); G.gameState='PLAYING'; }
-}
-function resetFullGame() {
-    player.lives=3; player.score=0; G.timer=60; parseMap(); resetPlayerPosition();
-    keys.ArrowLeft=false; keys.ArrowRight=false; keys.ArrowUp=false; keys.ArrowDown=false; keys.Space=false;
-    G.gameStartTime=new Date().getTime();
 }
 function updateGame(dt) {
     if (G.gameState==='PLAYING') {

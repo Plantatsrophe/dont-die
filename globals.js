@@ -62,6 +62,10 @@ export const G = {
     audioCtx: null,
 };
 
+// Expose to window for console access (Cheats/Debugging)
+window.G = G;
+window.player = player;
+
 // Bridge to db.js (already type="module", attaches functions to window)
 window.refreshLeaderboard = async function() {
     if (window.fetchHighScores) {
