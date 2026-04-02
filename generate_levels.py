@@ -73,20 +73,40 @@ def generate_acid(i, difficulty):
             level[0][c] = "1"
             level[13][c] = "A" 
             level[14][c] = "1"
-        for c in range(0, 15): level[13][c] = "1"
-        for c in range(85, 100): level[13][c] = "1"
-        level[12][98] = "0"
-        level[12][50] = "B" # Sludge Queen
         
-        # Safe Hover Spawn
-        for sc in range(1, 5):
-            level[8][sc] = "1"
-        level[7][2] = "7" # Player Spawn
-        level[7][3] = "C" # Checkpoint
-        level[7][4] = "H" # Hotdog
-        for c in range(40, 60): level[10][c] = "1"
-        level[8][25] = "V"
-        level[8][75] = "V"
+        # Safe Start
+        for c in range(0, 10): level[12][c] = "1"
+        level[11][2] = "7"; level[11][3] = "C"; level[11][4] = "H"
+        
+        # Valve 1 (Low)
+        for c in range(20, 25): level[10][c] = "1"
+        level[9][22] = "V"
+        level[11][13] = "P" # Link start to V1
+        level[10][17] = "P"
+        level[10][28] = "P" # Extra platform after Valve 1
+        
+        # Valve 2 (Mid)
+        for c in range(45, 50): level[7][c] = "1"
+        level[6][47] = "V"
+        level[8][32] = "P" # Link V1 to V2 path
+        level[9][38] = "P"
+        level[8][42] = "P"
+        
+        # Valve 3 (High)
+        for c in range(75, 80): level[4][c] = "1"
+        level[3][77] = "V"
+        level[5][55] = "P" # Link V2 to V3 path
+        level[6][62] = "P"
+        level[5][68] = "P"
+        level[4][72] = "P"
+        
+        # Boss in the middle
+        level[12][50] = "B"
+        
+        # Exit/Safe End
+        for c in range(90, 100): level[12][c] = "1"
+        level[11][95] = "0"
+        
         return level
 
     level = [["0"] * 100 for _ in range(15)]

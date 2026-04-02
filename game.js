@@ -1,4 +1,4 @@
-﻿function updateGame(dt) {
+function updateGame(dt) {
     if (gameState === 'PLAYING') {
         // Timer
         timerAcc += dt;
@@ -27,12 +27,26 @@
     if (gameState !== 'PLAYING') return;
 
     // Camera follow player (clamped)
-    camera.x = player.x - canvas.width / 2 + player.width / 2;
+    let camTargetX = player.x + player.width / 2;
+    let camTargetY = player.y + player.height / 2;
+
+    // Cinematic Camera Lock on Sinking Boss
+    if (boss && boss.active && boss.isSinking) {
+        camTargetX = boss.x + boss.width / 2;
+        camTargetY = boss.y + boss.height / 2;
+    }
+
+    // Smooth Panning (LERP)
+    let targetX = camTargetX - canvas.width / 2;
+    let targetY = camTargetY - canvas.height / 2;
+
+    camera.x += (targetX - camera.x) * 0.05; // 5% per frame (Slower, smoother pan)
+    camera.y += (targetY - camera.y) * 0.05;
+
     if (camera.x < 0) camera.x = 0;
     let maxCamX = mapCols * TILE_SIZE - canvas.width;
     if (camera.x > maxCamX) camera.x = maxCamX;
 
-    camera.y = player.y - canvas.height / 2 + player.height / 2;
     if (camera.y < 0) camera.y = 0;
     let maxCamY = mapRows * TILE_SIZE - canvas.height;
     if (camera.y > maxCamY) camera.y = maxCamY;
@@ -69,8 +83,13 @@
             } else if (i.type === 'valve') {
                 playSound('powerup');
                 if (boss && boss.active) {
+                    gameState = 'VALVE_CUTSCENE';
+                    valveCutsceneTimer = 0;
+                    activeValvePos = { x: i.x, y: i.y };
+                    purifiedValves.push({ x: i.x, y: i.y });
                     boss.hp--;
                     boss.hurtTimer = 0.5;
+                    isMapCached = false; // Force environment color update
                     playSound('explosion');
                     if (boss.hp <= 0) bossExplode();
                 }
@@ -231,7 +250,7 @@ function gameLoop(timestamp) {
     if (dt > 0.1) dt = 0.1; // Cap extreme lag
     lastTime = timestamp;
 
-    if (gameState === 'PLAYING' || gameState === 'DYING' || gameState === 'LEVEL_CLEAR') {
+    if (gameState === 'PLAYING' || gameState === 'DYING' || gameState === 'LEVEL_CLEAR' || gameState === 'VALVE_CUTSCENE') {
         const MAX_STEP = 0.016; // approx 60 FPS sub-steps
         while (dt > 0) {
             let step = Math.min(dt, MAX_STEP);

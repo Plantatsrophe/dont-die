@@ -161,11 +161,20 @@ function drawMasticator(ctx, boss) {
 
 function render() {
     let bId = Math.floor(currentLevel / 20) % 5;
+    
+    // Centralized Boss-Context HP Ratio for environment color shifting
+    let hpRatio = 1.0;
+    if (currentLevel === 39) { // Septicus Level
+        if (!boss || !boss.active || boss.hp <= 0 || boss.isSinking) hpRatio = 0.0;
+        else hpRatio = boss.hp / boss.maxHp;
+    }
 
     // Parallax Layer 0: Sky dynamically maps bounds implicitly to active Biome gracefully!
     let skyGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
     if (bId === 1) { // Acid
-        skyGradient.addColorStop(0, '#0a1a0f'); skyGradient.addColorStop(1, '#1b5c21');
+        let c1 = hpRatio > 0.5 ? '#0a1a0f' : (hpRatio > 0.1 ? '#0a161f' : '#0a0f1a');
+        let c2 = hpRatio > 0.5 ? '#1b5c21' : (hpRatio > 0.1 ? '#1b4a5c' : '#1b3a5c');
+        skyGradient.addColorStop(0, c1); skyGradient.addColorStop(1, c2);
     } else if (bId === 2) { // Shaft
         skyGradient.addColorStop(0, '#030014'); skyGradient.addColorStop(1, '#2c0c4a');
     } else if (bId === 3) { // Factory
@@ -220,9 +229,13 @@ function render() {
             if (hX < -100) hX += canvas.width + 200;
             
             let hDripY = 40 + ((Date.now() / (12 + (j%3)*4)) % (canvas.height - 80));
-            ctx.fillStyle = '#3ee855'; // Glowy Acid Green
+            
+            let dripCol = hpRatio > 0.5 ? '#3ee855' : (hpRatio > 0.1 ? '#3eb5e8' : '#00bbff');
+            let trailCol = hpRatio > 0.5 ? '#1b5c21' : (hpRatio > 0.1 ? '#1b3c4a' : '#1b3a5c');
+
+            ctx.fillStyle = dripCol; 
             ctx.fillRect(hX, hDripY, 3, 15 + (j%2)*5);
-            ctx.fillStyle = '#1b5c21'; // Dark trail
+            ctx.fillStyle = trailCol; 
             ctx.fillRect(hX, hDripY - 8, 3, 4);
         }
 
@@ -245,14 +258,14 @@ function render() {
             
             // Drip slipping off the joint
             let dripY = 120 + (i%3)*50 + ((Date.now() / (10 + (i%2)*5)) % (canvas.height - 150));
-            ctx.fillStyle = '#3ee855'; 
+            ctx.fillStyle = hpRatio > 0.5 ? '#3ee855' : (hpRatio > 0.1 ? '#3eb5e8' : '#00bbff'); 
             ctx.fillRect(x + 10, dripY, 3, 10 + (i%4)*5); // Stretched leading edge
             ctx.fillRect(x + 10, dripY - 5, 3, 3); // Trailing dot
         }
         // Horizontal Base Sludge River
-        ctx.fillStyle = '#07170a';
+        ctx.fillStyle = hpRatio > 0.5 ? '#07170a' : (hpRatio > 0.1 ? '#071217' : '#040b1a');
         ctx.fillRect(0, canvas.height - 40, canvas.width, 40);
-        ctx.fillStyle = '#1b5c21';
+        ctx.fillStyle = hpRatio > 0.5 ? '#1b5c21' : (hpRatio > 0.1 ? '#1b445c' : '#1b3a5c');
         let sOff = (Date.now() / 30) % 30;
         for (let i = 0; i < canvas.width; i += 30) {
             ctx.fillRect(i - sOff, canvas.height - 35, 15, 3);
@@ -617,6 +630,48 @@ function render() {
     // -- Start World Space --
     ctx.save();
     ctx.translate(-Math.floor(camera.x), -Math.floor(camera.y));
+    
+    // -- DRAW INDUSTRIAL CONDUITS (True Background) --
+    if (boss && boss.active && boss.type === 'septicus') {
+        for (let i of items) {
+            if (i.type === 'valve') {
+                let px = i.x - 4;
+                // Protrude exactly 1 tile below the floating platform
+                let py = (Math.floor(i.y / TILE_SIZE) + 3) * TILE_SIZE; 
+                
+                // 1. Vertical main conduit from CEILING (Worn Dull Rust)
+                ctx.fillStyle = '#5e4533'; 
+                ctx.fillRect(i.x, 0, TILE_SIZE, py - TILE_SIZE); // Body ends at mouth start
+                
+                // Muted Highlight for large surface
+                ctx.fillStyle = '#6d5241';
+                ctx.fillRect(i.x + 12, 0, 8, py - TILE_SIZE);
+                
+                // 2. Draw the Pipe Opening (Mouth) at the bottom of the protrusion
+                drawSprite(ctx, sprPipe, px, py - TILE_SIZE, 40, 40, false);
+                
+                // 3. Draw Water Stream (Starting from the mouth)
+                let pv = purifiedValves.find(v => v.x === i.x && v.y === i.y);
+                if (pv) {
+                    let isActiveCutscene = (activeValvePos && activeValvePos.x === pv.x && activeValvePos.y === pv.y);
+                    let streamWidth = isActiveCutscene ? 22 : 11;
+                    let streamAlpha = isActiveCutscene ? 1.0 : 0.7;
+                    ctx.save();
+                    ctx.globalAlpha = streamAlpha;
+                    ctx.fillStyle = '#1e90ff'; 
+                    let flowOffset = Math.sin(Date.now() * 0.01) * 3;
+                    let startY = py - 10;
+                    let endY = mapRows * TILE_SIZE; 
+                    ctx.fillRect(px + 10 + flowOffset, startY, streamWidth, endY - startY);
+                    ctx.fillStyle = '#87cefa'; 
+                    ctx.fillRect(px + 12 + flowOffset, startY, streamWidth / 4, endY - startY);
+                    let splashSize = isActiveCutscene ? 70 : 35;
+                    drawGlow(ctx, px + 20, endY - 5, splashSize, 'rgba(0, 187, 255, 0.5)');
+                    ctx.restore();
+                }
+            }
+        }
+    }
 
     // Hardware-Accelerated Static Map Pre-Rendering identically correctly!
     if (!isMapCached) {
@@ -690,21 +745,25 @@ function render() {
                     drawGlow(offscreenMapCtx, tx + TILE_SIZE/2, ty + TILE_SIZE/2 + 4, 30, 'rgba(255, 30, 0, 0.3)');
                 } else if (tile === 15) {
                     // Toxic Acid Pool rendering statically explicitly natively
-                    offscreenMapCtx.fillStyle = '#0a210f';
+                    let baseCol = hpRatio > 0.5 ? '#0a210f' : (hpRatio > 0.1 ? '#0a1d21' : '#0a0f21');
+                    let topCol = hpRatio > 0.5 ? '#1b5c21' : (hpRatio > 0.1 ? '#1b4e5c' : '#00bbff');
+                    let bubbleCol = hpRatio > 0.5 ? '#3ee855' : (hpRatio > 0.1 ? '#3ecae8' : '#ffffff');
+
+                    offscreenMapCtx.fillStyle = baseCol;
                     offscreenMapCtx.fillRect(tx, ty + 12, TILE_SIZE, TILE_SIZE - 12);
                     
-                    offscreenMapCtx.fillStyle = '#1b5c21';
+                    offscreenMapCtx.fillStyle = topCol;
                     offscreenMapCtx.fillRect(tx, ty + 12, TILE_SIZE, 4);
 
                     for(let b=0; b<3; b++) {
                         if (Math.random() > 0.2) {
-                            offscreenMapCtx.fillStyle = '#3ee855';
+                            offscreenMapCtx.fillStyle = bubbleCol;
                             offscreenMapCtx.beginPath();
                             offscreenMapCtx.arc(tx + 4 + Math.random() * 30, ty + 18 + Math.random() * 14, 1 + Math.random()*3, 0, Math.PI*2);
                             offscreenMapCtx.fill();
                         }
                     }
-                    drawGlow(offscreenMapCtx, tx + TILE_SIZE/2, ty + 16, 20, 'rgba(62, 232, 85, 0.4)');
+                    drawGlow(offscreenMapCtx, tx + TILE_SIZE/2, ty + 16, 20, hpRatio > 0.6 ? 'rgba(62, 232, 85, 0.4)' : 'rgba(0, 187, 255, 0.4)');
                 }
             }
         }
@@ -752,6 +811,7 @@ function render() {
         }
     }
 
+
     // Draw Items
     for (let i of items) {
         if (i.type === 'checkpoint') {
@@ -763,24 +823,36 @@ function render() {
             } else {
                 drawGlow(ctx, i.x + 16, i.y + 16, 20, 'rgba(255, 255, 255, 0.3)');
             }
-        } else if (!i.collected) {
-            if (i.type === 'hotdog') {
-                drawSprite(ctx, sprHotdog, i.x, i.y, i.width, i.height, false);
-            } else if (i.type === 'valve') {
-                ctx.fillStyle = '#ff0000';
-                ctx.fillRect(i.x + 4, i.y + 4, 24, 24);
-                drawGlow(ctx, i.x + 16, i.y + 16, 30, 'red');
-            } else if (i.type === 'detonator') {
-                ctx.fillStyle = '#ff5500';
-                ctx.fillRect(i.x, i.y + 16, 32, 16);
-                ctx.fillStyle = '#ff0000';
-                ctx.fillRect(i.x + 8, i.y + 8, 16, 8);
-                drawGlow(ctx, i.x + 16, i.y + 16, 50, 'rgba(255, 0, 0, 0.8)');
-            } else {
-                drawSprite(ctx, sprGear, i.x, i.y, i.width, i.height, false);
+        } else {
+            if (i.type === 'valve') {
+                let isPurifying = (activeValvePos && activeValvePos.x === i.x && activeValvePos.y === i.y);
+                let rotation = isPurifying ? (valveCutsceneTimer * 12) : 0; 
+                
+                ctx.save();
+                ctx.translate(i.x + 16, i.y + 16);
+                ctx.rotate(rotation);
+                drawSprite(ctx, sprValveWheel, -16, -16, 32, 32, false);
+                ctx.restore();
+                
+                // Mechanical Indicator Glow
+                let glowColor = i.collected ? 'rgba(0, 187, 255, 0.5)' : 'rgba(255, 0, 0, 0.4)';
+                drawGlow(ctx, i.x + 16, i.y + 16, i.collected ? 25 : 30, glowColor);
+            } else if (!i.collected) {
+                if (i.type === 'hotdog') {
+                    drawSprite(ctx, sprHotdog, i.x, i.y, i.width, i.height, false);
+                } else if (i.type === 'detonator') {
+                    ctx.fillStyle = '#ff5500';
+                    ctx.fillRect(i.x, i.y + 16, 32, 16);
+                    ctx.fillStyle = '#ff0000';
+                    ctx.fillRect(i.x + 8, i.y + 8, 16, 8);
+                    drawGlow(ctx, i.x + 16, i.y + 16, 50, 'rgba(255, 0, 0, 0.8)');
+                } else {
+                    drawSprite(ctx, sprGear, i.x, i.y, i.width, i.height, false);
+                }
             }
         }
     }
+
 
     // Draw Enemies
     for (let e of enemies) {
@@ -796,10 +868,76 @@ function render() {
     if (boss && boss.active) {
         if (boss.type === 'masticator') {
             drawMasticator(ctx, boss);
-        } else if (boss.type === 'sludge') {
-            ctx.fillStyle = '#00ff00';
-            ctx.beginPath(); ctx.arc(boss.x + boss.width/2, boss.y + boss.height/2, boss.width/2 + Math.sin(Date.now()/200)*10, 0, Math.PI*2); ctx.fill();
-            if (boss.hurtTimer > 0) { ctx.fillStyle = 'white'; ctx.globalAlpha=0.5; ctx.beginPath(); ctx.arc(boss.x + boss.width/2, boss.y + boss.height/2, boss.width/2, 0, Math.PI*2); ctx.fill(); ctx.globalAlpha=1; }
+        } else if (boss.type === 'septicus') {
+            // Septicus: Tall & Lean / Square Head (Dynamic Lighting)
+            let dir = boss.vx < 0 ? -1 : 1;
+            let vx = boss.vibrateX || 0; // Cinematic shaking Frame!
+            let glowSize = 40 + Math.sin(Date.now() / 200) * 10;
+            drawGlow(ctx, boss.x + boss.width / 2 + vx, boss.y + 20, glowSize, 'rgba(0, 255, 100, 0.4)');
+            drawSprite(ctx, sprSepticus, boss.x + vx, boss.y, boss.width, boss.height, dir < 0);
+            
+            // Draw Shovel arm and shovel
+            ctx.save();
+            let armLen = 15; // Shortened Arms
+            let handX = dir < 0 ? boss.x - armLen : boss.x + boss.width + armLen;
+            let handY = boss.y + boss.height/2 + 5; 
+            
+            // Draw horizontal arm segment (The L-shape base)
+            ctx.fillStyle = '#2a140b'; // Rusty Dark Rust
+            let armStartX = dir < 0 ? boss.x + 5 : boss.x + boss.width - 5;
+            ctx.fillRect(Math.min(armStartX, handX), handY - 4, Math.abs(handX - armStartX), 8);
+
+            // Draw Robust Hand (Grip)
+            ctx.fillStyle = '#170a05'; // Darker mechanical hand
+            ctx.fillRect(handX - 8, handY - 8, 16, 16);
+
+            ctx.translate(handX, handY);
+            
+            let angle = 0;
+            if (boss.phase === 2) { // Swinging
+                angle = (boss.timer * Math.PI - Math.PI/2) * (dir < 0 ? -1 : 1);
+            } else if (boss.phase === 1) { // Wind-up
+                angle = (Math.sin(Date.now()/50) * 0.2) + (dir < 0 ? 0.5 : -0.5);
+            } else {
+                angle = (Math.sin(Date.now()/500) * 0.1) + (dir < 0 ? 0.2 : -0.2);
+            }
+            ctx.rotate(angle);
+            
+            let shovelLen = 110; 
+            if (boss.phase !== 3) {
+                drawSprite(ctx, sprShovel, -20, -shovelLen, 40, shovelLen, false);
+            }
+            ctx.restore();
+
+            // Draw Giant Wrench arm and wrench (The L-shape)
+            ctx.save();
+            let wrenchArmLen = 15;
+            let otherHandX = dir < 0 ? boss.x + boss.width + wrenchArmLen : boss.x - wrenchArmLen;
+            
+            // Draw horizontal arm segment
+            let wArmStartX = dir < 0 ? boss.x + boss.width - 5 : boss.x + 5;
+            ctx.fillStyle = '#2a140b';
+            ctx.fillRect(Math.min(wArmStartX, otherHandX), handY - 4, Math.abs(otherHandX - wArmStartX), 8);
+
+            // Draw Robust Hand (Grip)
+            ctx.fillStyle = '#170a05'; 
+            ctx.fillRect(otherHandX - 8, handY - 8, 16, 16);
+
+            ctx.translate(otherHandX, handY);
+            ctx.rotate(dir < 0 ? -0.2 : 0.2); 
+            drawSprite(ctx, sprWrench, -15, -60, 30, 60, dir < 0);
+            ctx.restore();
+
+            // Draw thrown shovel projectiles (Phase 3 Barrage)
+            if (boss.projs) {
+                for (let p of boss.projs) {
+                    ctx.save();
+                    ctx.translate(p.x, p.y);
+                    ctx.rotate(p.timer * 12); // Fast spinning shovel throw
+                    drawSprite(ctx, sprShovel, -20, -20, 40, 40, false);
+                    ctx.restore();
+                }
+            }
         } else if (boss.type === 'warden') {
             ctx.fillStyle = '#444';
             ctx.beginPath(); ctx.arc(boss.x + boss.width/2, boss.y + boss.height/2, boss.width/2, 0, Math.PI*2); ctx.fill();

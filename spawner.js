@@ -1,4 +1,4 @@
-﻿function parseMap(resetEntities = true) {
+function parseMap(resetEntities = true) {
     let currentMapData = staticLevels[currentLevel].map;
     mapRows = currentMapData.length;
     mapCols = currentMapData[0].length;
@@ -88,15 +88,17 @@
             } else if (char === 'B') {
                 if (resetEntities) {
                     let biome = Math.floor(currentLevel / 20) % 5;
-                    let bType = ['masticator', 'sludge', 'warden', 'core', 'goliath'][biome];
+                    let bType = ['masticator', 'septicus', 'warden', 'core', 'goliath'][biome];
                     boss = {
                         active: true, type: bType,
-                        startX: col * TILE_SIZE, startY: row * TILE_SIZE,
-                        x: col * TILE_SIZE, y: row * TILE_SIZE,
-                        width: TILE_SIZE * 2, height: TILE_SIZE * 2,
+                        startX: col * TILE_SIZE, startY: row * TILE_SIZE - 40, // Adjusted for height
+                        x: col * TILE_SIZE, y: row * TILE_SIZE + 200, // Submerged
+                        width: (bType === 'septicus' ? 64 : TILE_SIZE * 2), 
+                        height: (bType === 'septicus' ? 120 : TILE_SIZE * 2),
                         hp: (bType === 'masticator' ? 4 : 3), maxHp: (bType === 'masticator' ? 4 : 3), 
                         phase: 0, timer: 0,
-                        vx: 0, vy: 0, hurtTimer: 0
+                        vx: 0, vy: 0, hurtTimer: 0,
+                        triggered: (bType !== 'septicus') // Only Septicus hides
                     };
                 }
                 rowData.push(0);
@@ -146,6 +148,14 @@ function resetFullGame() {
     timer = 60;
     parseMap();
     resetPlayerPosition();
+    
+    // Reset all key states natively organically
+    keys.ArrowLeft = false;
+    keys.ArrowRight = false;
+    keys.ArrowUp = false;
+    keys.ArrowDown = false;
+    keys.Space = false;
+    
     gameStartTime = new Date().getTime(); // Anchor runtime securely
 }
 

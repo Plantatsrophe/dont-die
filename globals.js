@@ -31,7 +31,10 @@ const laserPool = Array.from({length: MAX_LASERS}, () => ({ active: false, x: 0,
 const MAX_PARTICLES = 150;
 const particlePool = Array.from({length: MAX_PARTICLES}, () => ({ active: false, type: '', x: 0, y: 0, vx: 0, vy: 0, size: 0, life: 0, maxLife: 0 }));
 
-let gameState = 'START'; // START, INTRO, INSTRUCTIONS, PLAYING, DYING, LEVEL_CLEAR, GAMEOVER, WIN, ENTER_INITIALS
+let gameState = 'START'; // START, INTRO, INSTRUCTIONS, PLAYING, DYING, LEVEL_CLEAR, GAMEOVER, WIN, ENTER_INITIALS, VALVE_CUTSCENE
+let activeValvePos = null;
+let purifiedValves = []; // Persistent purified pipe locations
+let valveCutsceneTimer = 0;
 let introY = 0;
 const introText = `A Great Computer War rages across the planet...
 

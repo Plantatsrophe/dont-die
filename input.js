@@ -1,4 +1,4 @@
-﻿let lastDownPressTime = 0;
+let lastDownPressTime = 0;
 
 function processDownInput(el) {
     if (!keys.ArrowDown) {
@@ -150,8 +150,6 @@ document.addEventListener('touchcancel', handleTouch, { passive: false });
 document.addEventListener('mouseup', handleTouch, { passive: false });
 
 function handleTouch(e) {
-    if (gameState !== 'PLAYING') return;
-
     // Securely bypass and ignore legacy synthesized MouseEvents natively on mobile devices to prevent key resets!
     if (isTouchMode && !e.touches) return;
 

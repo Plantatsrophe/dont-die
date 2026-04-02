@@ -38,6 +38,13 @@ function playerDeath() {
     playSound('die');
     gameState = 'DYING';
     player.dyingTimer = 0;
+    
+    // Reset inputs immediately
+    keys.ArrowLeft = false;
+    keys.ArrowRight = false;
+    keys.ArrowUp = false;
+    keys.ArrowDown = false;
+    keys.Space = false;
 
     // Flush active hazard beams seamlessly logically intuitively explicitly securely!
     for (let l of laserPool) {
@@ -45,10 +52,14 @@ function playerDeath() {
     }
     
     // Stop Masticator immediately upon player death correctly smoothly gracefully!
-    if (boss && boss.active && boss.type === 'masticator') {
-        boss.phase = 0;
-        boss.vx = 0;
-        boss.hasSeenPlayer = false;
+    if (boss && boss.active) {
+        if (boss.type === 'masticator') {
+            boss.phase = 0;
+            boss.vx = 0;
+            boss.hasSeenPlayer = false;
+        }
+        // Despawn all active shovel projectiles immediately!
+        if (boss.projs) boss.projs = [];
     }
 
     // 4 Quadrant Fragmentation Matrix! dynamically allocated via strict pooling seamlessly!
@@ -132,6 +143,38 @@ function updatePhysics(dt) {
             gameState = 'WIN';
         }
         return; // Halt normal physics
+    }
+
+    if (gameState === 'VALVE_CUTSCENE') {
+        valveCutsceneTimer += dt;
+        if (valveCutsceneTimer > 5.0) {
+            gameState = 'PLAYING';
+            activeValvePos = null;
+            if (boss) boss.vibrateX = 0; // Solidify boss again
+        }
+
+        // Camera Pan Override (Focus on the pipe 40px below the valve)
+        if (activeValvePos) {
+            let targetX = activeValvePos.x - canvas.width / 2 + 16;
+            let targetY = (activeValvePos.y + 40) - canvas.height / 2 + 16;
+            camera.x += (targetX - camera.x) * 3 * dt;
+            camera.y += (targetY - camera.y) * 3 * dt;
+
+            // CRITICAL: Boundary Clamping (Prevents Browser Freeze)
+            if (camera.x < 0) camera.x = 0;
+            let maxCamX = mapCols * TILE_SIZE - canvas.width;
+            if (camera.x > maxCamX) camera.x = maxCamX;
+            if (camera.y < 0) camera.y = 0;
+            let maxCamY = mapRows * TILE_SIZE - canvas.height;
+            if (camera.y > maxCamY) camera.y = maxCamY;
+        }
+        
+        // Vibrate boss during cutscene
+        if (boss && boss.active) {
+            boss.vibrateX = Math.sin(Date.now() * 0.05) * 8; 
+        }
+
+        return; // Halt ALL normal physics 
     }
 
     // Input Handling
@@ -319,7 +362,7 @@ function updatePhysics(dt) {
 }
 
 function updateBoss(dt) {
-    if (!boss || !boss.active || boss.hp <= 0) return;
+    if (!boss || !boss.active || (boss.hp <= 0 && !boss.isSinking)) return;
     
     // Boss takes damage natively explicitly organically!
     if (boss.hurtTimer > 0) boss.hurtTimer -= dt;
@@ -431,9 +474,176 @@ function updateBoss(dt) {
                 boss.timer = 0;
             }
         }
-    } else if (boss.type === 'sludge') {
-        // Acid Boss undulates
-        boss.y += Math.sin(boss.timer * 3) * 30 * dt;
+    } else if (boss.type === 'septicus') {
+        // Advanced Septicus AI: Tracking, Jumping, and Shovel Throwing
+        
+        // --- SINKING DEATH CUTSCENE ---
+        if (boss.isSinking) {
+            boss.timer += dt;
+            boss.y += 80 * dt; // Cinematic SLOW SINK (800px deep over 10s)
+            if (boss.timer > 10.0) { // Sinking takes longer to reach depths
+                // Finalize death after 5 seconds
+                boss.isSinking = false; // Stop sinking loop
+                boss.active = false; // FINALLY DEACTIVATE
+            }
+            return; // EXIT Septicus block immediately! This prevents fall-through to Rising AI or Player-freezing early returns.
+        } else if (!boss.triggered) {
+            // Trigger when player is past the start and likely on the first moving platform
+            if (player.x > TILE_SIZE * 12) {
+                boss.triggered = true;
+                boss.x = player.x - boss.width/2; // Emerge directly under player!
+                playSound('powerup'); // Sound for trigger
+            }
+            boss.vx = 0; boss.vy = 0;
+            return; // Stay hidden
+        }
+        
+        // Rising Animation
+        if (boss.y > boss.startY) {
+            boss.y -= 350 * dt; // Faster, more surprising emergence!
+            if (boss.y < boss.startY) boss.y = boss.startY;
+            return; // Don't attack while rising
+        }
+
+        // --- SAFE ZONE LOGIC ---
+        // Stop all attacks and tracking if player retreats to the starting ledge
+        if (player.x < TILE_SIZE * 11) {
+            boss.vx = 0;
+            boss.phase = 0;
+            boss.timer = 0;
+            // Apply gravity so he stays grounded
+            boss.y += boss.vy * dt;
+            if (boss.y > boss.startY) {
+                boss.y = boss.startY;
+                boss.vy = 0;
+            } else {
+                boss.vy += 800 * dt;
+            }
+            return; 
+        }
+
+        // Apply Gravity to Boss for Jumping
+        if (!boss.vy) boss.vy = 0;
+        boss.y += boss.vy * dt;
+        if (boss.y > boss.startY) {
+            boss.y = boss.startY;
+            boss.vy = 0;
+        } else {
+            boss.vy += 800 * dt; // Gravity
+        }
+
+        let reach = 140;
+        let dist = Math.abs(player.x - (boss.x + boss.width/2));
+        
+        if (boss.phase === 0) { // Tracking
+            let trackSpeed = (boss.hp < 3) ? 140 : 100; // Faster in lower HP
+            if (player.x < boss.x + boss.width/2) boss.vx = -trackSpeed;
+            else boss.vx = trackSpeed;
+            boss.x += boss.vx * dt;
+            
+            // Limit boss to floor area
+            boss.x = Math.max(TILE_SIZE * 10, Math.min(TILE_SIZE * 90, boss.x));
+            
+            // JUMPING logic (HP 2 or less)
+            if (boss.hp <= 2 && boss.y >= boss.startY && player.y < boss.y - 120 && Math.random() < 0.02) {
+                boss.vy = -600; // Jump high!
+            }
+
+            // PHASE CHANGE logic
+            if (boss.hp === 1 && boss.timer > (boss.projs?.length > 0 ? 0 : 3.0)) {
+                boss.phase = 3; // Throw Shovel Barrage
+                boss.timer = 0;
+                boss.throwsLeft = 3; // Multi-throw barrage!
+            } else if (dist < reach && boss.timer > 2) {
+                boss.phase = 1; // Wind-up
+                boss.timer = 0;
+                boss.vx = 0;
+            }
+        } else if (boss.phase === 1) { // Wind-up
+            if (boss.timer > 0.8) {
+                boss.phase = 2; // Swing
+                boss.timer = 0;
+                playSound('shoot'); // Reuse sound for swing
+            }
+        } else if (boss.phase === 2) { // Swing
+            if (boss.timer > 1.0) {
+                boss.phase = 0; // Back to tracking
+                boss.timer = 0;
+            }
+            
+            // Shovel Collision Logic
+            let swingAngle = boss.timer * Math.PI; // 0 to 180 degrees
+            let shovelX = (boss.x + boss.width/2) + Math.cos(swingAngle) * reach * (player.x < boss.x ? -1 : 1);
+            let shovelY = (boss.y + boss.height/2) - Math.sin(swingAngle) * reach;
+            
+            let dx = player.x + player.width/2 - shovelX;
+            let dy = player.y + player.height/2 - shovelY;
+            if (Math.sqrt(dx*dx + dy*dy) < 22) {
+                playerDeath();
+            }
+        } else if (boss.phase === 3) { // Throw Shovel Barrage (HP 1 only)
+            if (!boss.projs) boss.projs = [];
+            
+            // Allow Chasing during barrage
+            let trackSpeed = 140;
+            if (player.x < boss.x + boss.width/2) boss.vx = -trackSpeed;
+            else boss.vx = trackSpeed;
+            boss.x += boss.vx * dt;
+            boss.x = Math.max(TILE_SIZE * 10, Math.min(TILE_SIZE * 90, boss.x));
+
+            if (boss.timer > 0.6 && boss.throwsLeft > 0) { // Fast barrage
+                boss.timer = 0;
+                boss.throwsLeft--;
+                
+                // Linear Aiming Logic (Fast, no gravity compensation needed)
+                let tx = player.x + player.width/2;
+                let ty = player.y + player.height/2;
+                let bx = boss.x + boss.width/2;
+                let by = boss.y + boss.height/2;
+                
+                let dx = tx - bx;
+                let dy = ty - by;
+                let dist = Math.sqrt(dx*dx + dy*dy);
+                
+                let speed = 600; 
+                let aimedVx = (dx / dist) * speed; 
+                let aimedVy = (dy / dist) * speed;
+                
+                boss.projs.push({ x: bx, y: by, vx: aimedVx, vy: aimedVy, timer: 0, linear: true });
+                playSound('shoot');
+            }
+            
+            if (boss.throwsLeft <= 0 && boss.timer > 1.5) {
+                boss.phase = 0;
+                boss.timer = 0;
+            }
+        } else if (boss.isSinking) {
+            // No attacks while sinking
+        }
+
+        // Global Boss Projectiles Update (Always update if any exist)
+        if (boss.projs) {
+            for (let i = boss.projs.length - 1; i >= 0; i--) {
+                let p = boss.projs[i];
+                if (!p) break; // Array was cleared mid-loop by playerDeath()
+                p.timer += dt;
+                p.x += p.vx * dt;
+                p.y += p.vy * dt;
+                if (!p.linear) p.vy += 600 * dt; // Gravity on normal shovels
+
+                // Precise Collision with projectile
+                let pdx = player.x + player.width/2 - p.x;
+                let pdy = player.y + player.height/2 - p.y;
+                if (Math.sqrt(pdx*pdx + pdy*pdy) < 25) {
+                    playerDeath();
+                }
+
+                // Remove far-off projectiles
+                if (p.y > boss.startY + 400 || p.x < 0 || p.x > mapCols * TILE_SIZE) {
+                    boss.projs.splice(i, 1);
+                }
+            }
+        }
     } else if (boss.type === 'warden') {
         // Shaft Boss 
         if (player.y < boss.y) boss.y -= 70 * dt;
@@ -471,9 +681,23 @@ function updateBoss(dt) {
 }
 
 function bossExplode() {
-    boss.active = false; // Deactivate locally explicitly fluently!
-    playSound('gameOver'); 
+    if (boss.type === 'septicus' && !boss.isSinking && boss.hp <= 0) {
+        boss.isSinking = true;
+        boss.timer = 0;
+        boss.vx = 0; boss.vy = 0;
+        boss.vibrateX = 0; // Solidify for final sink
+        if (boss.projs) boss.projs = []; // DESPAWN all frozen shovels immediately!
+        isMapCached = false; // Refresh map for victory blue
+        playSound('gameOver');
+        // Fall through to common portal/item logic below!
+    } else if (boss.isSinking) {
+        return; // Already sinking, don't re-trigger
+    } else {
+        boss.active = false; 
+        playSound('gameOver'); 
+    }
     
+    // Common Explosion Particles for ALL bosses
     for (let i=0; i<40; i++) {
         let p = particlePool.find(pp => !pp.active);
         if (p) {
@@ -492,6 +716,24 @@ function bossExplode() {
     if (boss.type !== 'goliath') {
         let pCol = Math.floor((boss.x+boss.width/2) / TILE_SIZE);
         let pRow = Math.floor((boss.y+boss.height) / TILE_SIZE);
+        
+        // Portal Placement Overrides
+        if (boss.type === 'septicus') {
+            pCol = 98; // Far right inherent natively!
+            pRow = 11;
+            
+            // Build bridge staircase for safe descent
+            // From Valve 3 (row 4, col 80ish) down to Exit (row 11, col 90ish)
+            for (let i = 0; i < 6; i++) {
+                let brRow = 5 + i;
+                let brCol = 82 + i * 2;
+                if (map[brRow]) {
+                    map[brRow][brCol] = 1;
+                    map[brRow][brCol + 1] = 1;
+                }
+            }
+        }
+        
         map[Math.max(0, pRow-1)][pCol] = 5;
         isMapCached = false;
     }
