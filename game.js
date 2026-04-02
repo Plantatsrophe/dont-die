@@ -1,285 +1,96 @@
-function updateGame(dt) {
-    if (gameState === 'PLAYING') {
-        // Timer
-        timerAcc += dt;
-        if (timerAcc >= 1) {
-            timer--;
-            timerAcc -= 1;
-            if (timer <= 0) {
-                playerDeath();
-            }
-        }
-    }
+import { G, player, canvas, keys, TILE_SIZE, laserPool, particlePool } from './globals.js';
+import { playSound } from './audio.js';
+import { parseMap, resetPlayerPosition } from './spawner.js';
+import { updatePhysics, checkRectCollision, playerDeath, bossExplode } from './physics.js';
+import { render } from './render.js';
 
-    updatePhysics(dt);
-    
-    // Global Particle update natively dynamically bounding to Object Pool natively!
-    for (let i = 0; i < particlePool.length; i++) {
-        let p = particlePool[i];
-        if (!p.active) continue;
-        p.x += p.vx * dt;
-        p.y += p.vy * dt;
-        p.life -= dt;
-        p.size *= 0.95; 
-        if (p.life <= 0) p.active = false;
-    }
-    
-    if (gameState !== 'PLAYING') return;
-
-    // Camera follow player (clamped)
-    let camTargetX = player.x + player.width / 2;
-    let camTargetY = player.y + player.height / 2;
-
-    // Cinematic Camera Lock on Sinking Boss
-    if (boss && boss.active && boss.isSinking) {
-        camTargetX = boss.x + boss.width / 2;
-        camTargetY = boss.y + boss.height / 2;
-    }
-
-    // Smooth Panning (LERP)
-    let targetX = camTargetX - canvas.width / 2;
-    let targetY = camTargetY - canvas.height / 2;
-
-    camera.x += (targetX - camera.x) * 0.05; // 5% per frame (Slower, smoother pan)
-    camera.y += (targetY - camera.y) * 0.05;
-
-    if (camera.x < 0) camera.x = 0;
-    let maxCamX = mapCols * TILE_SIZE - canvas.width;
-    if (camera.x > maxCamX) camera.x = maxCamX;
-
-    if (camera.y < 0) camera.y = 0;
-    let maxCamY = mapRows * TILE_SIZE - canvas.height;
-    if (camera.y > maxCamY) camera.y = maxCamY;
-
-    // Items update
-    for (let i of items) {
-        if (!i.collected && checkRectCollision(player, i)) {
-            i.collected = true;
-            if (i.type === 'hotdog') {
-                player.lives++;
-                playSound('powerup');
-            } else if (i.type === 'checkpoint') {
-                if (player.startX !== i.x + 8 || player.startY !== i.y - 2) {
-                    player.startX = i.x + 8;
-                    player.startY = i.y - 2; // Spawn cleanly above and naturally drop on the platform
-                    playSound('powerup');
-                    
-                    // Blast 20 particles explicitly visually denoting Checkpoint Grab
-                    for (let pCounter = 0; pCounter < 20; pCounter++) {
-                        let p = particlePool.find(pp => !pp.active);
-                        if (p) {
-                            p.active = true;
-                            p.type = 'checkpoint';
-                            p.x = i.x + 16;
-                            p.y = i.y + 16;
-                            p.vx = (Math.random() - 0.5) * 100;
-                            p.vy = -50 - Math.random() * 100;
-                            p.size = 6;
-                            p.life = 0.5 + Math.random() * 0.5;
-                            p.maxLife = 1.0;
-                        }
-                    }
-                }
-            } else if (i.type === 'valve') {
-                playSound('powerup');
-                if (boss && boss.active) {
-                    gameState = 'VALVE_CUTSCENE';
-                    valveCutsceneTimer = 0;
-                    activeValvePos = { x: i.x, y: i.y };
-                    purifiedValves.push({ x: i.x, y: i.y });
-                    boss.hp--;
-                    boss.hurtTimer = 0.5;
-                    isMapCached = false; // Force environment color update
-                    playSound('explosion');
-                    if (boss.hp <= 0) bossExplode();
-                }
-            } else if (i.type === 'detonator') {
-                playSound('powerup');
-                if (boss && boss.active) {
-                    bossExplode();
-                    player.cutsceneTimer = 0;
-                    gameState = 'CREDITS_CUTSCENE';
-                }
-            } else {
-                player.score += 1000;
-                playSound('collect');
-            }
-        }
-    }
-
-    // Autonomous Enemies update
-    let anyEnemyVisible = false;
-    for (let i = enemies.length - 1; i >= 0; i--) {
-        let e = enemies[i];
-
-        // Track for audio
-        if (e.x > camera.x && e.x < camera.x + canvas.width) {
-            anyEnemyVisible = true;
-        }
-
-        if (e.type === 'bot') {
-            let ogX = e.x;
-            e.x += e.vx * e.dir * dt;
-
-            let hitWall = false;
-            let eTiles = getCollidingTiles(e);
-            for (let t of eTiles) {
-                if (t.type === 1) hitWall = true;
-            }
-
-            // Pit check natively
-            let pitCheck = { x: e.x + (e.dir === 1 ? e.width : -1), y: e.y + e.height + 1, width: 1, height: 1 };
-            let pitTiles = getCollidingTiles(pitCheck);
-            let overPit = true;
-            for (let t of pitTiles) {
-                if (t.type === 1 || t.type === 6) overPit = false;
-            }
-
-            if (hitWall || overPit) {
-                e.x = ogX; // reverse out of wall/pit gracefully
-                e.dir *= -1;
-            }
-        } else if (e.type === 'laserBot') {
-            e.dir = player.x < e.x ? -1 : 1; // Always identically geometric facing!
-
-            // Line of Sight engagement tracking securely natively
-            if (Math.abs(player.y - e.y) < 150 && Math.abs(player.x - e.x) < 500) {
-                e.cooldown -= dt;
-                if (e.cooldown <= 0) {
-                    e.cooldown = 1.6; // Fire rhythm elegantly explicitly
-                    let l = laserPool.find(lp => !lp.active);
-                    if (l) {
-                        l.active = true;
-                        l.x = e.dir === 1 ? e.x + e.width : e.x - 16;
-                        l.y = e.y + 4;
-                        l.width = 16; 
-                        l.height = 4;
-                        l.vx = 350 * e.dir;
-                    }
-                    playSound('laser');
-                }
-            }
-        }
-
-        if (checkRectCollision(player, e)) {
-            // Check Stomp
-            let playerBottom = player.y + player.height;
-            let playerPrevBottom = playerBottom - player.vy * dt;
-
-            if (player.vy > 0 && playerPrevBottom <= e.y + 15) {
-                // Stomped!
-                playSound('stomp');
-                player.vy = keys.Space ? player.jumpPower * 0.9 : player.jumpPower * 0.6;
-                player.doubleJump = true;
-                player.score += 200;
-
-                // Scrap Gear Particles! Pool instantiated cleanly
-                for (let pCounter = 0; pCounter < 20; pCounter++) {
-                    let rad = Math.random() * Math.PI * 2;
-                    let spd = 50 + Math.random() * 150;
-                    let p = particlePool.find(pp => !pp.active);
-                    if (p) {
-                        p.active = true;
-                        p.type = 'gear';
-                        p.x = e.x + e.width / 2;
-                        p.y = e.y + e.height / 2;
-                        p.vx = Math.cos(rad) * spd;
-                        p.vy = Math.sin(rad) * spd - 50;
-                        p.size = 16;
-                        p.life = 0.8 + Math.random() * 0.4;
-                        p.maxLife = 1.2;
-                    }
-                }
-
-                enemies.splice(i, 1);
-            } else {
-                playerDeath();
-                return;
-            }
-        }
-    }
-
-    // Laser Physics Engine decoupled actively mapping memory pool intelligently
-    for (let i = 0; i < laserPool.length; i++) {
-        let l = laserPool[i];
-        if (!l.active) continue;
-
-        l.x += l.vx * dt;
-
-        let lTiles = getCollidingTiles(l);
-        let hitWall = false;
-        for (let t of lTiles) {
-            if (t.type === 1) hitWall = true;
-        }
-
-        if (hitWall || l.x < 0 || l.x > mapCols * TILE_SIZE) {
-            l.active = false;
-            continue;
-        }
-
-        if (checkRectCollision(player, l)) {
-            playerDeath();
-            return;
-        }
-    }
-
-    if (anyEnemyVisible) {
-        enemyWalkTimer += dt;
-        if (enemyWalkTimer > 0.12) { // Quick scratching speed
-            playSound('enemyMove');
-            enemyWalkTimer = 0;
-        }
-    }
-
-    // Platform structural oscillations naturally mapped seamlessly
-    for (let plat of platforms) {
-        plat.x += plat.vx * dt;
-        if (plat.x >= plat.maxX) {
-            plat.x = plat.maxX;
-            plat.vx *= -1;
-        } else if (plat.x <= plat.minX) {
-            plat.x = plat.minX;
-            plat.vx *= -1;
-        }
-    }
+function getCollidingTiles(rect) {
+    let tiles = [];
+    let sc=Math.floor((rect.x+0.0001)/TILE_SIZE), ec=Math.floor((rect.x+rect.width-0.0001)/TILE_SIZE);
+    let sr=Math.floor((rect.y+0.0001)/TILE_SIZE), er=Math.floor((rect.y+rect.height-0.0001)/TILE_SIZE);
+    for(let row=sr;row<=er;row++) for(let col=sc;col<=ec;col++)
+        if(row>=0&&row<G.mapRows&&col>=0&&col<G.mapCols)
+            tiles.push({row,col,type:G.map[row][col],rect:{x:col*TILE_SIZE,y:row*TILE_SIZE,width:TILE_SIZE,height:TILE_SIZE}});
+    return tiles;
 }
 
-let lastTime = 0;
-function gameLoop(timestamp) {
-    let dt = (timestamp - lastTime) / 1000;
-    if (dt > 0.1) dt = 0.1; // Cap extreme lag
-    lastTime = timestamp;
-
-    if (gameState === 'PLAYING' || gameState === 'DYING' || gameState === 'LEVEL_CLEAR' || gameState === 'VALVE_CUTSCENE') {
-        const MAX_STEP = 0.016; // approx 60 FPS sub-steps
-        while (dt > 0) {
-            let step = Math.min(dt, MAX_STEP);
-            updateGame(step);
-            dt -= step;
-            if (gameState === 'GAMEOVER' || gameState === 'WIN') break;
-        }
-    } else if (gameState === 'INTRO') {
-        introY -= 30 * dt; // Cinematic Scroll velocity
-        if (introY < -600) {
-            handleUIAccept(); // Auto-advance logically securely naturally
-        }
-    } else if (gameState === 'CREDITS_CUTSCENE') {
-        player.cutsceneTimer += dt;
-        if (player.cutsceneTimer > 5.0) {
-            gameState = 'CREDITS';
-            player.cutsceneTimer = 0;
-            playSound('win'); // Epic closing credits!
-        }
-    } else if (gameState === 'CREDITS') {
-        player.cutsceneTimer += dt;
+export function handleUIAccept() {
+    if (G.gameState==='ENTER_INITIALS') { window.saveScore(); resetFullGame(); G.gameState='START'; }
+    else if (G.gameState==='WIN') { G.currentLevel++; if(G.currentLevel>=40)G.currentLevel=0; G.timer=60; parseMap(); resetPlayerPosition(); G.gameState='PLAYING'; }
+    else if (G.gameState==='GAMEOVER'||G.gameState==='CREDITS') { G.gameState='ENTER_INITIALS'; }
+    else if (G.gameState==='START') { G.introY=canvas.height*0.66; G.gameState='INTRO'; }
+    else if (G.gameState==='INTRO') { G.gameState='INSTRUCTIONS'; }
+    else if (G.gameState==='INSTRUCTIONS') { G.currentLevel=0; resetFullGame(); G.gameState='PLAYING'; }
+}
+function resetFullGame() {
+    player.lives=3; player.score=0; G.timer=60; parseMap(); resetPlayerPosition();
+    keys.ArrowLeft=false; keys.ArrowRight=false; keys.ArrowUp=false; keys.ArrowDown=false; keys.Space=false;
+    G.gameStartTime=new Date().getTime();
+}
+function updateGame(dt) {
+    if (G.gameState==='PLAYING') {
+        G.timerAcc+=dt;
+        if(G.timerAcc>=1){G.timer--;G.timerAcc-=1;if(G.timer<=0)playerDeath();}
     }
+    updatePhysics(dt);
+    for(let p of particlePool){if(!p.active)continue;p.x+=p.vx*dt;p.y+=p.vy*dt;p.life-=dt;p.size*=0.95;if(p.life<=0)p.active=false;}
+    if(G.gameState!=='PLAYING') return;
+    const boss=G.boss;
+    let camTX=player.x+player.width/2, camTY=player.y+player.height/2;
+    if(boss&&boss.active&&boss.isSinking){camTX=boss.x+boss.width/2;camTY=boss.y+boss.height/2;}
+    G.camera.x+=(camTX-canvas.width/2-G.camera.x)*0.05;
+    G.camera.y+=(camTY-canvas.height/2-G.camera.y)*0.05;
+    G.camera.x=Math.max(0,Math.min(G.mapCols*TILE_SIZE-canvas.width,G.camera.x));
+    G.camera.y=Math.max(0,Math.min(G.mapRows*TILE_SIZE-canvas.height,G.camera.y));
+    for(let i of G.items){
+        if(!i.collected&&checkRectCollision(player,i)){
+            i.collected=true;
+            if(i.type==='hotdog'){player.lives++;playSound('powerup');}
+            else if(i.type==='checkpoint'){if(player.startX!==i.x+8||player.startY!==i.y-2){player.startX=i.x+8;player.startY=i.y-2;playSound('powerup');for(let pC=0;pC<20;pC++){let p=particlePool.find(pp=>!pp.active);if(p){p.active=true;p.type='checkpoint';p.x=i.x+16;p.y=i.y+16;p.vx=(Math.random()-0.5)*100;p.vy=-50-Math.random()*100;p.size=6;p.life=0.5+Math.random()*0.5;p.maxLife=1.0;}}}}
+            else if(i.type==='valve'){playSound('powerup');if(boss&&boss.active){G.gameState='VALVE_CUTSCENE';G.valveCutsceneTimer=0;G.activeValvePos={x:i.x,y:i.y};G.purifiedValves.push({x:i.x,y:i.y});boss.hp--;boss.hurtTimer=0.5;G.isMapCached=false;playSound('explosion');if(boss.hp<=0)bossExplode();}}
+            else if(i.type==='detonator'){playSound('powerup');if(boss&&boss.active){bossExplode();player.cutsceneTimer=0;G.gameState='CREDITS_CUTSCENE';}}
+            else{player.score+=1000;playSound('collect');}
+        }
+    }
+    let anyEnemyVisible=false;
+    for(let i=G.enemies.length-1;i>=0;i--){
+        let e=G.enemies[i];
+        if(e.x>G.camera.x&&e.x<G.camera.x+canvas.width) anyEnemyVisible=true;
+        if(e.type==='bot'){
+            let ogX=e.x; e.x+=e.vx*e.dir*dt;
+            let hitWall=false;
+            for(let t of getCollidingTiles(e)){if(t.type===1)hitWall=true;}
+            let pitCheck={x:e.x+(e.dir===1?e.width:-1),y:e.y+e.height+1,width:1,height:1};
+            let overPit=true;
+            for(let t of getCollidingTiles(pitCheck)){if(t.type===1||t.type===6)overPit=false;}
+            if(hitWall||overPit){e.x=ogX;e.dir*=-1;}
+        } else if(e.type==='laserBot'){
+            e.dir=player.x<e.x?-1:1;
+            if(Math.abs(player.y-e.y)<150&&Math.abs(player.x-e.x)<500){e.cooldown-=dt;if(e.cooldown<=0){e.cooldown=1.6;let l=laserPool.find(lp=>!lp.active);if(l){l.active=true;l.x=e.dir===1?e.x+e.width:e.x-16;l.y=e.y+4;l.width=16;l.height=4;l.vx=350*e.dir;}playSound('laser');}}
+        }
+        if(checkRectCollision(player,e)){
+            if(player.vy>0&&player.y+player.height-player.vy*dt<=e.y+15){playSound('stomp');player.vy=keys.Space?player.jumpPower*0.9:player.jumpPower*0.6;player.doubleJump=true;player.score+=200;for(let pC=0;pC<20;pC++){let rad=Math.random()*Math.PI*2,spd=50+Math.random()*150,p=particlePool.find(pp=>!pp.active);if(p){p.active=true;p.type='gear';p.x=e.x+e.width/2;p.y=e.y+e.height/2;p.vx=Math.cos(rad)*spd;p.vy=Math.sin(rad)*spd-50;p.size=16;p.life=0.8+Math.random()*0.4;p.maxLife=1.2;}}G.enemies.splice(i,1);}
+            else{playerDeath();return;}
+        }
+    }
+    for(let l of laserPool){if(!l.active)continue;l.x+=l.vx*dt;let hitWall=false;for(let t of getCollidingTiles(l)){if(t.type===1)hitWall=true;}if(hitWall||l.x<0||l.x>G.mapCols*TILE_SIZE){l.active=false;continue;}if(checkRectCollision(player,l)){playerDeath();return;}}
+    if(anyEnemyVisible){G.enemyWalkTimer+=dt;if(G.enemyWalkTimer>0.12){playSound('enemyMove');G.enemyWalkTimer=0;}}
+    for(let plat of G.platforms){plat.x+=plat.vx*dt;if(plat.x>=plat.maxX){plat.x=plat.maxX;plat.vx*=-1;}else if(plat.x<=plat.minX){plat.x=plat.minX;plat.vx*=-1;}}
+}
 
+let lastTime=0;
+export function gameLoop(timestamp) {
+    let dt=(timestamp-lastTime)/1000; if(dt>0.1)dt=0.1; lastTime=timestamp;
+    if(G.gameState==='PLAYING'||G.gameState==='DYING'||G.gameState==='LEVEL_CLEAR'||G.gameState==='VALVE_CUTSCENE'){
+        const MAX_STEP=0.016; let rem=dt;
+        while(rem>0){let step=Math.min(rem,MAX_STEP);updateGame(step);rem-=step;if(G.gameState==='GAMEOVER'||G.gameState==='WIN')break;}
+    } else if(G.gameState==='INTRO'){
+        G.introY-=30*dt; if(G.introY<-600) handleUIAccept();
+    } else if(G.gameState==='CREDITS_CUTSCENE'){
+        player.cutsceneTimer+=dt; if(player.cutsceneTimer>5.0){G.gameState='CREDITS';player.cutsceneTimer=0;playSound('win');}
+    } else if(G.gameState==='CREDITS'){
+        player.cutsceneTimer+=dt;
+    }
     render();
     requestAnimationFrame(gameLoop);
 }
-
-// Init
-parseMap();
-resetPlayerPosition();
-requestAnimationFrame(gameLoop);
-

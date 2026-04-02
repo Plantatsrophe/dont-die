@@ -1,12 +1,15 @@
+import { G, player, keys, canvas } from './globals.js';
+import { initAudio, startBackgroundMusic, playSound } from './audio.js';
+import { parseMap, resetPlayerPosition, resetFullGame } from './spawner.js';
+import { handleUIAccept } from './game.js';
+
+
 let lastDownPressTime = 0;
 
 function processDownInput(el) {
     if (!keys.ArrowDown) {
         let now = Date.now();
-        if (now - lastDownPressTime < 300) {
-            player.droppingThrough = true;
-            setTimeout(() => { player.droppingThrough = false; }, 200);
-        }
+        if (now - lastDownPressTime < 300) { player.droppingThrough = true; setTimeout(() => { player.droppingThrough = false; }, 200); }
         lastDownPressTime = now;
     }
     keys.ArrowDown = true;
@@ -14,78 +17,32 @@ function processDownInput(el) {
 }
 
 window.addEventListener('keydown', (e) => {
-    document.getElementById('touch-controls').style.display = 'none'; // Auto-hide on Desktop
-
-    if (!audioCtx) initAudio();
-
-    if (gameState === 'START' && !isMusicPlaying) {
-        startBackgroundMusic();
-    }
-
+    document.getElementById('touch-controls').style.display = 'none';
+    if (!G.audioCtx) initAudio();
+    if (G.gameState === 'START' && !G.isMusicPlaying) startBackgroundMusic();
     if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.ArrowLeft = true;
     if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.ArrowRight = true;
     if (e.code === 'ArrowUp' || e.code === 'KeyW') keys.ArrowUp = true;
     if (e.code === 'ArrowDown' || e.code === 'KeyS') processDownInput(null);
-    if (e.code === 'Space') {
-        if (!spacePressed) {
-            handleJump();
-            spacePressed = true;
-        }
-    }
-
-    if (gameState === 'ENTER_INITIALS') {
-        if (e.code === 'ArrowLeft') initialIndex = Math.max(0, initialIndex - 1);
-        if (e.code === 'ArrowRight') initialIndex = Math.min(2, initialIndex + 1);
-        if (e.code === 'ArrowUp') {
-            let code = initials[initialIndex].charCodeAt(0);
-            code++; if (code > 90) code = 65;
-            initials[initialIndex] = String.fromCharCode(code);
-        }
-        if (e.code === 'ArrowDown') {
-            let code = initials[initialIndex].charCodeAt(0);
-            code--; if (code < 65) code = 90;
-            initials[initialIndex] = String.fromCharCode(code);
-        }
+    if (e.code === 'Space') { if (!G.spacePressed) { handleJump(); G.spacePressed = true; } }
+    if (G.gameState === 'ENTER_INITIALS') {
+        if (e.code === 'ArrowLeft') G.initialIndex = Math.max(0, G.initialIndex - 1);
+        if (e.code === 'ArrowRight') G.initialIndex = Math.min(2, G.initialIndex + 1);
+        if (e.code === 'ArrowUp') { let code = G.initials[G.initialIndex].charCodeAt(0)+1; if(code>90)code=65; G.initials[G.initialIndex]=String.fromCharCode(code); }
+        if (e.code === 'ArrowDown') { let code = G.initials[G.initialIndex].charCodeAt(0)-1; if(code<65)code=90; G.initials[G.initialIndex]=String.fromCharCode(code); }
         if (e.code === 'Enter') handleUIAccept();
-    } else if (gameState === 'START' || gameState === 'INTRO' || gameState === 'GAMEOVER' || gameState === 'WIN' || gameState === 'INSTRUCTIONS' || gameState === 'CREDITS') {
+    } else if (G.gameState === 'START' || G.gameState === 'INTRO' || G.gameState === 'GAMEOVER' || G.gameState === 'WIN' || G.gameState === 'INSTRUCTIONS' || G.gameState === 'CREDITS') {
         if (e.code === 'Enter') handleUIAccept();
     }
 });
 
-function handleUIAccept() {
-    if (gameState === 'ENTER_INITIALS') {
-        saveScore();
-        resetFullGame();
-        gameState = 'START';
-    } else if (gameState === 'WIN') {
-        currentLevel++;
-        if (currentLevel >= staticLevels.length) currentLevel = 0;
-        timer = 60;
-        parseMap();
-        resetPlayerPosition();
-        gameState = 'PLAYING';
-    } else if (gameState === 'GAMEOVER' || gameState === 'CREDITS') {
-        gameState = 'ENTER_INITIALS';
-    } else if (gameState === 'START') {
-        introY = document.getElementById('gameCanvas').height * 0.66;
-        gameState = 'INTRO';
-    } else if (gameState === 'INTRO') {
-        gameState = 'INSTRUCTIONS';
-    } else if (gameState === 'INSTRUCTIONS') {
-        currentLevel = 0;
-        resetFullGame();
-        initAudio();
-        startBackgroundMusic();
-        gameState = 'PLAYING';
-    }
-}
 
 window.addEventListener('keyup', (e) => {
     if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.ArrowLeft = false;
     if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.ArrowRight = false;
     if (e.code === 'ArrowUp' || e.code === 'KeyW') keys.ArrowUp = false;
     if (e.code === 'ArrowDown' || e.code === 'KeyS') keys.ArrowDown = false;
-    if (e.code === 'Space') spacePressed = false;
+    if (e.code === 'Space') G.spacePressed = false;
 });
 
 // --- TOUCH CONTROLS ---
@@ -101,10 +58,9 @@ function executeTouchStart(e) {
         }
     }
 
-    if (!audioCtx) initAudio();
-    if (gameState === 'START' && !isMusicPlaying) startBackgroundMusic();
-
-    if (gameState === 'WIN' || gameState === 'GAMEOVER' || gameState === 'ENTER_INITIALS') {
+    if (!G.audioCtx) initAudio();
+    if (G.gameState === 'START' && !G.isMusicPlaying) startBackgroundMusic();
+    if (G.gameState === 'WIN' || G.gameState === 'GAMEOVER' || G.gameState === 'ENTER_INITIALS') {
         let cX = e.touches ? e.touches[0].clientX : e.clientX;
         let cY = e.touches ? e.touches[0].clientY : e.clientY;
         let canvas = document.getElementById('gameCanvas');
@@ -132,7 +88,7 @@ function executeTouchStart(e) {
         }
     }
 
-    if (gameState === 'WIN' || gameState === 'GAMEOVER' || gameState === 'START' || gameState === 'INTRO' || gameState === 'INSTRUCTIONS' || gameState === 'ENTER_INITIALS' || gameState === 'CREDITS') {
+    if (G.gameState === 'WIN' || G.gameState === 'GAMEOVER' || G.gameState === 'START' || G.gameState === 'INTRO' || G.gameState === 'INSTRUCTIONS' || G.gameState === 'ENTER_INITIALS' || G.gameState === 'CREDITS') {
         handleUIAccept();
         return;
     }
@@ -195,29 +151,12 @@ function handleTouch(e) {
     }
 
     if (currentlyPressingSpace) {
-        if (!spacePressed) {
-            handleJump();
-            spacePressed = true;
-        }
-    } else {
-        spacePressed = false;
-    }
+        if (!G.spacePressed) { handleJump(); G.spacePressed = true; }
+    } else { G.spacePressed = false; }
 }
-// ----------------------
 
 function handleJump() {
-    if (gameState !== 'PLAYING') return;
-
-    if (player.isOnGround || player.isClimbing) {
-        player.vy = player.jumpPower;
-        player.isOnGround = false;
-        player.isClimbing = false;
-        player.doubleJump = true;
-        playSound('jump');
-    } else if (player.doubleJump) {
-        player.vy = player.jumpPower * 0.9;
-        player.doubleJump = false;
-        playSound('jump');
-    }
+    if (G.gameState !== 'PLAYING') return;
+    if (player.isOnGround || player.isClimbing) { player.vy = player.jumpPower; player.isOnGround = false; player.isClimbing = false; player.doubleJump = true; playSound('jump'); }
+    else if (player.doubleJump) { player.vy = player.jumpPower * 0.9; player.doubleJump = false; playSound('jump'); }
 }
-

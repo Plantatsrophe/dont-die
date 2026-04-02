@@ -1,3 +1,11 @@
+import { G, player, keys, canvas, ctx, offscreenMapCanvas, offscreenMapCtx, TILE_SIZE, laserPool, particlePool, introText } from './globals.js';
+import { pal, sprHero, sprHeroDead, sprBot, sprRef, sprGear, sprPortal, sprHotdog, sprLaserBot, sprLaser, sprRocketPad, sprSepticus, sprPipe, sprShovel, sprWrench, sprButton, sprButtonBlue, sprValveWheel } from './assets.js';
+import { checkRectCollision } from './physics.js';
+
+// Aliases so existing render body code continues to work without rewriting every line
+const getG = () => G;
+const camera = G.camera; // IMPORTANT: this is a live reference to the same object
+
 function drawSprite(ctx, spr, x, y, w, h, flipX) {
     let gridSize = Math.sqrt(spr.length);
     let pxW = w / gridSize;
@@ -46,8 +54,8 @@ function drawMasticator(ctx, boss) {
     let bw = boss.width;
     let bh = boss.height;
 
-    let dir = boss.vx < 0 ? -1 : 1; 
-    let walkParam = (boss.vx !== 0) ? Date.now() / 100 : 0;
+    let dir = G.boss.vx < 0 ? -1 : 1; 
+    let walkParam = (G.boss.vx !== 0) ? Date.now() / 100 : 0;
     
     let leg1 = (walkParam > 0) ? Math.sin(walkParam) * 12 : 0;
     let leg2 = (walkParam > 0) ? Math.sin(walkParam + Math.PI) * 12 : 0;
@@ -136,7 +144,7 @@ function drawMasticator(ctx, boss) {
 
     // Mouth
     let mouthY = cy + 45;
-    let mouthH = (boss.phase === 2) ? 35 : 20; 
+    let mouthH = (G.boss.phase === 2) ? 35 : 20; 
     ctx.fillStyle = '#111';
     ctx.fillRect(cx + 10, mouthY, bw - 20, mouthH);
     
@@ -148,7 +156,7 @@ function drawMasticator(ctx, boss) {
     }
 
     // Stunned Sparks
-    if (boss.phase === 2 && Math.random() > 0.5) {
+    if (G.boss.phase === 2 && Math.random() > 0.5) {
         ctx.fillStyle = '#FFFF00'; 
         ctx.fillRect(cx + Math.random()*bw, cy + Math.random()*bh, 4, 4);
     }
@@ -159,8 +167,31 @@ function drawMasticator(ctx, boss) {
     }
 }
 
-function render() {
-    let bId = Math.floor(currentLevel / 20) % 5;
+export function render() {
+    // Pull current mutable state via G aliases
+    const currentLevel = G.currentLevel;
+    const bId = Math.floor(currentLevel / 20) % 5;
+    const boss = G.boss;
+    const map = G.map;
+    const mapRows = G.mapRows;
+    const mapCols = G.mapCols;
+    const items = G.items;
+    const enemies = G.enemies;
+    const platforms = G.platforms;
+    const bombs = G.bombs;
+    const particles = G.particles;
+    const gameState = G.gameState;
+    const initials = G.initials;
+    const initialIndex = G.initialIndex;
+    const highScores = G.highScores;
+    const activeValvePos = G.activeValvePos;
+    const purifiedValves = G.purifiedValves;
+    const valveCutsceneTimer = G.valveCutsceneTimer;
+    const introY = G.introY;
+    const timer = G.timer;
+    const timerAcc = G.timerAcc;
+    const winTimer = G.winTimer;
+
     
     // Centralized Boss-Context HP Ratio for environment color shifting
     let hpRatio = 1.0;
@@ -674,7 +705,7 @@ function render() {
     }
 
     // Hardware-Accelerated Static Map Pre-Rendering identically correctly!
-    if (!isMapCached) {
+    if (!G.isMapCached) {
         offscreenMapCtx.clearRect(0, 0, offscreenMapCanvas.width, offscreenMapCanvas.height);
         
         for (let row = 0; row < mapRows; row++) {
@@ -767,7 +798,7 @@ function render() {
                 }
             }
         }
-        isMapCached = true;
+        G.isMapCached = true;
     }
 
     // Instantly blast the cached buffer to the active screen explicitly efficiently safely cleanly!

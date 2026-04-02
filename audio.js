@@ -1,9 +1,10 @@
-let isMusicPlaying = false;
+import { G } from './globals.js';
+
 let nextNoteTime = 0;
 let currentNoteIndex = 0;
-let tempo = 125; 
-let secondsPerBeat = 60.0 / tempo;
-let stepTime = secondsPerBeat / 4; // 16th notes natively
+const tempo = 125;
+const secondsPerBeat = 60.0 / tempo;
+const stepTime = secondsPerBeat / 4;
 
 const notes = {
     'E2': 82.41, 'F2': 87.31, 'G2': 98.00, 'G#2': 103.83, 'A2': 110.00, 'B2': 123.47,
@@ -35,10 +36,10 @@ const melodyPattern = [
 function scheduleNote(beatNumber, time) {
     let bass = bassPattern[beatNumber % bassPattern.length];
     if (bass !== '-1') {
-        let osc = audioCtx.createOscillator();
-        let gain = audioCtx.createGain();
+        let osc = G.audioCtx.createOscillator();
+        let gain = G.audioCtx.createGain();
         osc.connect(gain);
-        gain.connect(audioCtx.destination);
+        gain.connect(G.audioCtx.destination);
         osc.type = 'square';
         osc.frequency.setValueAtTime(notes[bass], time);
         gain.gain.setValueAtTime(0.025, time); // Aggressive but balanced organically
@@ -49,10 +50,10 @@ function scheduleNote(beatNumber, time) {
 
     let mel = melodyPattern[beatNumber % melodyPattern.length];
     if (mel !== '-1') {
-        let osc = audioCtx.createOscillator();
-        let gain = audioCtx.createGain();
+        let osc = G.audioCtx.createOscillator();
+        let gain = G.audioCtx.createGain();
         osc.connect(gain);
-        gain.connect(audioCtx.destination);
+        gain.connect(G.audioCtx.destination);
         osc.type = 'triangle'; // Softer lead cleanly cutting through the mix natively
         osc.frequency.setValueAtTime(notes[mel], time);
         gain.gain.setValueAtTime(0.04, time); 
@@ -63,10 +64,8 @@ function scheduleNote(beatNumber, time) {
 }
 
 function musicScheduler() {
-    if (!isMusicPlaying || !audioCtx) return;
-    
-    // Look-ahead natively buffering 100ms
-    while (nextNoteTime < audioCtx.currentTime + 0.1) {
+    if (!G.isMusicPlaying || !G.audioCtx) return;
+    while (nextNoteTime < G.audioCtx.currentTime + 0.1) {
         scheduleNote(currentNoteIndex, nextNoteTime);
         nextNoteTime += stepTime;
         currentNoteIndex++;
@@ -74,33 +73,31 @@ function musicScheduler() {
     setTimeout(musicScheduler, 25);
 }
 
-function startBackgroundMusic() {
-    if (!audioCtx) return;
-    if (isMusicPlaying) return;
-    isMusicPlaying = true;
-    nextNoteTime = audioCtx.currentTime + 0.05;
+export function startBackgroundMusic() {
+    if (!G.audioCtx || G.isMusicPlaying) return;
+    G.isMusicPlaying = true;
+    nextNoteTime = G.audioCtx.currentTime + 0.05;
     musicScheduler();
 }
-
-function stopBackgroundMusic() {
-    isMusicPlaying = false;
+export function stopBackgroundMusic() {
+    G.isMusicPlaying = false;
 }
 
-function initAudio() {
-    if (!audioCtx) {
-        let AudioContext = window.AudioContext || window.webkitAudioContext;
-        if (AudioContext) audioCtx = new AudioContext();
+export function initAudio() {
+    if (!G.audioCtx) {
+        let AC = window.AudioContext || window.webkitAudioContext;
+        if (AC) G.audioCtx = new AC();
     }
 }
 
-function playSound(type) {
-    if (!audioCtx) return;
-    const t = audioCtx.currentTime;
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
+export function playSound(type) {
+    if (!G.audioCtx) return;
+    const t = G.audioCtx.currentTime;
+    const osc = G.audioCtx.createOscillator();
+    const gain = G.audioCtx.createGain();
     
     osc.connect(gain);
-    gain.connect(audioCtx.destination);
+    gain.connect(G.audioCtx.destination);
     
     if (type === 'jump') {
         osc.type = 'square';
@@ -137,7 +134,7 @@ function playSound(type) {
         osc.frequency.exponentialRampToValueAtTime(40, t + 2.0);
         
         // Add a second oscillator for dissonance
-        const osc2 = audioCtx.createOscillator();
+        const osc2 = G.audioCtx.createOscillator();
         osc2.type = 'square';
         osc2.frequency.setValueAtTime(215, t); // Slightly out of tune
         osc2.frequency.exponentialRampToValueAtTime(35, t + 2.0);
@@ -159,7 +156,7 @@ function playSound(type) {
         osc.frequency.setValueAtTime(1567.98, t + 0.6); // G6 (held)
         
         // Support layer
-        const oscChime = audioCtx.createOscillator();
+        const oscChime = G.audioCtx.createOscillator();
         oscChime.type = 'triangle';
         oscChime.frequency.setValueAtTime(1046.50, t);
         oscChime.frequency.setValueAtTime(1318.51, t + 0.1);
@@ -189,10 +186,10 @@ function playSound(type) {
         gain.gain.setValueAtTime(0.15, t);
         gain.gain.exponentialRampToValueAtTime(0.01, t + 0.15);
         
-        let osc2 = audioCtx.createOscillator();
-        let gain2 = audioCtx.createGain();
+        let osc2 = G.audioCtx.createOscillator();
+        let gain2 = G.audioCtx.createGain();
         osc2.connect(gain2);
-        gain2.connect(audioCtx.destination);
+        gain2.connect(G.audioCtx.destination);
         osc2.type = 'sawtooth';
         osc2.frequency.setValueAtTime(700, t + 0.15);
         osc2.frequency.exponentialRampToValueAtTime(100, t + 0.3);
@@ -203,16 +200,16 @@ function playSound(type) {
         osc2.start(t + 0.15); osc2.stop(t + 0.3);
     } else if (type === 'enemyMove') {
         // Scratchy critters scurrying - Highpass filtered White Noise
-        const bufferSize = audioCtx.sampleRate * 0.04; // 40ms burst
-        const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+        const bufferSize = G.audioCtx.sampleRate * 0.04; // 40ms burst
+        const buffer = G.audioCtx.createBuffer(1, bufferSize, G.audioCtx.sampleRate);
         const data = buffer.getChannelData(0);
         for (let i = 0; i < bufferSize; i++) {
             data[i] = (Math.random() * 2 - 1) * 0.5;
         }
-        const noise = audioCtx.createBufferSource();
+        const noise = G.audioCtx.createBufferSource();
         noise.buffer = buffer;
         
-        const filter = audioCtx.createBiquadFilter();
+        const filter = G.audioCtx.createBiquadFilter();
         filter.type = 'highpass';
         filter.frequency.value = 4000; // emphasize the scratchiness
         
