@@ -1,5 +1,5 @@
-import { G, player, ctx, laserPool, particlePool } from './globals.js';
-import { sprRocketPad, sprRef, sprValveWheel, sprHotdog, sprGear, sprBot, sprLaserBot, sprLaser, sprHeroDead } from './assets.js';
+import { G, player, ctx, laserPool, particlePool } from '../core/globals.js';
+import { sprRocketPad, sprRef, sprValveWheel, sprHotdog, sprGear, sprBot, sprLaserBot, sprLaser, sprHeroDead } from '../assets/assets.js';
 import { drawSprite, drawGlow } from './render_utils.js';
 
 export function renderEntities() {

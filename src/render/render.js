@@ -1,4 +1,4 @@
-import { G, canvas, ctx, offscreenMapCanvas } from './globals.js';
+import { G, canvas, ctx, offscreenMapCanvas } from '../core/globals.js';
 import { renderParallax, renderParallaxLayer2 } from './render_parallax.js';
 import { renderStartScreen, renderIntroScreen, renderInstructions } from './render_menus.js';
 import { renderConduits, preRenderMap, renderAnimatedTiles } from './render_world.js';

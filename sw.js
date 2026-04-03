@@ -3,19 +3,19 @@ const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './manifest.json',
-  './icon.svg',
+  './src/assets/images/icon.svg',
   './style.css',
-  './assets.js',
-  './audio.js',
-  './db.js',
-  './globals.js',
-  './levels.js',
-  './physics.js',
-  './render.js',
-  './input.js',
-  './spawner.js',
-  './game.js',
-  './logo.js'
+  './src/assets/assets.js',
+  './src/assets/audio.js',
+  './src/data/db.js',
+  './src/core/globals.js',
+  './src/data/levels.js',
+  './src/core/physics.js',
+  './src/render/render.js',
+  './src/core/input.js',
+  './src/logic/spawner.js',
+  './src/core/game.js',
+  './src/assets/logo.js'
 ];
 
 self.addEventListener('install', (e) => {

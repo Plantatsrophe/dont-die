@@ -1,4 +1,4 @@
-import { G } from './globals.js';
+import { G } from '../core/globals.js';
 
 let nextNoteTime = 0;
 let currentNoteIndex = 0;

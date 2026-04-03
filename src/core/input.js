@@ -1,6 +1,6 @@
 import { G, player, keys, canvas } from './globals.js';
-import { initAudio, startBackgroundMusic, playSound } from './audio.js';
-import { parseMap, resetPlayerPosition, resetFullGame } from './spawner.js';
+import { initAudio, startBackgroundMusic, playSound } from '../assets/audio.js';
+import { parseMap, resetPlayerPosition, resetFullGame } from '../logic/spawner.js';
 import { handleUIAccept } from './game.js';
 
 

@@ -1,5 +1,5 @@
-import { G, player, ctx, TILE_SIZE } from './globals.js';
-import { sprSepticus1, sprSepticus2, sprSepticus3, sprSepticus4, sprSepticus5, sprManhole } from './assets.js';
+import { G, ctx, TILE_SIZE, particlePool } from '../core/globals.js';
+import { sprSepticus1, sprSepticus2, sprSepticus3, sprSepticus4, sprSepticus5 } from '../assets/assets.js';
 import { drawSprite, drawGlow } from './render_utils.js';
 
 export function drawMasticator(boss) {

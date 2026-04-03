@@ -1,4 +1,8 @@
-import { pal } from './assets.js';
+const pal = {
+  0: null, 1: '#f1c27d', 2: '#ff2222', 3: '#f1c40f', 4: '#5c4033',
+  5: '#888888', 6: '#444444', 7: '#2ecc71', 8: '#ffffff', 9: '#00ffff',
+  10: '#000000', 11: '#3366cc', 12: '#8b4513', 13: '#222222', 14: '#3ee855', 15: '#00bbff'
+};
 
 export function drawSprite(ctx, spr, x, y, w, h, flipX) {
     let gridSize = Math.sqrt(spr.length);

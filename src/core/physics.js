@@ -1,7 +1,7 @@
 import { G, player, keys, canvas, TILE_SIZE, laserPool, particlePool } from './globals.js';
-import { staticLevels } from './levels.js';
-import { playSound, stopBackgroundMusic } from './audio.js';
-import { parseMap, resetPlayerPosition } from './spawner.js';
+import { staticLevels } from '../data/levels.js';
+import { playSound, stopBackgroundMusic } from '../assets/audio.js';
+import { parseMap, resetPlayerPosition } from '../logic/spawner.js';
 
 export function checkRectCollision(r1, r2) {
     return r1.x < r2.x+r2.width && r1.x+r1.width > r2.x && r1.y < r2.y+r2.height && r1.y+r1.height > r2.y;

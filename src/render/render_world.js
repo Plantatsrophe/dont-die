@@ -1,5 +1,5 @@
-import { G, canvas, ctx, offscreenMapCanvas, offscreenMapCtx, TILE_SIZE } from './globals.js';
-import { sprPortal, sprPipe } from './assets.js';
+import { G, canvas, ctx, offscreenMapCanvas, offscreenMapCtx, TILE_SIZE } from '../core/globals.js';
+import { sprPortal, sprPipe } from '../assets/assets.js';
 import { drawSprite, drawGlow } from './render_utils.js';
 
 export function renderConduits() {
