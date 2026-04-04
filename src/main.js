@@ -1,8 +1,8 @@
 // main.js — Single entry point for the Don't Die game
 // Imports trigger all module side-effects (event listeners in input.js, etc.)
-import { parseMap, resetPlayerPosition } from './logic/spawner.js';
-import { gameLoop } from './core/game.js';
-import './core/input.js'; // Side-effect: registers all keyboard/touch event listeners
+import { parseMap, resetPlayerPosition } from './logic/spawner.js?v=105';
+import { gameLoop } from './core/game.js?v=105';
+import './core/input.js?v=105'; 
 
 // Boot sequence
 parseMap();

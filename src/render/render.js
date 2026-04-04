@@ -1,11 +1,11 @@
-import { G, canvas, ctx, offscreenMapCanvas } from '../core/globals.js';
-import { renderParallax, renderParallaxLayer2 } from './render_parallax.js';
-import { renderStartScreen, renderIntroScreen, renderInstructions } from './render_menus.js';
-import { renderConduits, preRenderMap, renderAnimatedTiles } from './render_world.js';
-import { renderEntities } from './render_entities.js';
-import { renderBoss } from './render_bosses.js';
-import { renderPlayer, renderPlayerCutscene } from './render_player.js';
-import { renderHUD, renderOverlays, renderCredits, renderShareButton } from './render_ui.js';
+import { G, canvas, ctx, offscreenMapCanvas } from '../core/globals.js?v=105';
+import { renderParallax, renderParallaxLayer2 } from './render_parallax.js?v=105';
+import { renderStartScreen, renderIntroScreen, renderInstructions } from './render_menus.js?v=105';
+import { renderConduits, preRenderMap, renderAnimatedTiles } from './render_world.js?v=105';
+import { renderEntities } from './render_entities.js?v=105';
+import { renderBoss } from './render_bosses.js?v=105';
+import { renderPlayer, renderPlayerCutscene } from './render_player.js?v=105';
+import { renderHUD, renderOverlays, renderCredits, renderShareButton } from './render_ui.js?v=105';
 
 export function render() {
     const { gameState, camera } = G;

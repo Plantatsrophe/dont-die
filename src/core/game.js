@@ -1,9 +1,11 @@
-import { G, player, canvas, keys, TILE_SIZE, laserPool, particlePool } from './globals.js';
+import { G, player, canvas, keys, TILE_SIZE, laserPool, particlePool } from './globals.js?v=105';
 import { staticLevels } from '../data/levels.js?v=105';
-import { playSound } from '../assets/audio.js';
-import { parseMap, resetPlayerPosition, resetFullGame } from '../logic/spawner.js';
-import { updatePhysics, checkRectCollision, playerDeath, bossExplode } from './physics.js';
-import { render } from '../render/render.js';
+import { playSound } from '../assets/audio.js?v=105';
+import { parseMap, resetPlayerPosition, resetFullGame } from '../logic/spawner.js?v=105';
+import { updatePhysics } from './physics.js?v=105';
+import { checkRectCollision, playerDeath } from './physics_utils.js?v=105';
+import { bossExplode } from './physics_boss.js?v=105';
+import { render } from '../render/render.js?v=105';
 
 function getCollidingTiles(rect) {
     let tiles = [];

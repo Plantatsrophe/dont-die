@@ -31,9 +31,18 @@
             <div id="btn-jump" class="touch-btn space-btn">SPACE</div>
         </div>
     </div>
-    <script src="src/assets/logo.js?v=105"></script>
+
     <script type="module" src="src/data/db.js?v=105"></script>
     <script type="module" src="src/main.js?v=105"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js?v=105')
+                    .then(reg => console.log('Service Worker registered explicitly!'))
+                    .catch(err => console.log('Service Worker registration failed structurally: ', err));
+            });
+        }
+    </script>
 </body>
 
 </html>

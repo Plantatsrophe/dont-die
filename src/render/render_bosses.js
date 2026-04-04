@@ -1,6 +1,6 @@
-import { G, ctx, TILE_SIZE, particlePool } from '../core/globals.js';
+import { G, ctx, TILE_SIZE, particlePool } from '../core/globals.js?v=105';
 import { sprSepticus1, sprSepticus2, sprSepticus3, sprSepticus4, sprSepticus5, sprManhole } from '../assets/assets.js?v=105';
-import { drawSprite, drawGlow } from './render_utils.js';
+import { drawSprite, drawGlow } from './render_utils.js?v=105';
 
 export function drawMasticator(boss) {
     let cx = boss.x, cy = boss.y - 15, bw = boss.width, bh = boss.height, dir = G.boss.vx < 0 ? -1 : 1; 

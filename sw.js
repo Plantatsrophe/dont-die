@@ -20,11 +20,23 @@ const ASSETS_TO_CACHE = [
   './src/render/render_player.js',
   './src/render/render_ui.js',
   './src/render/render_utils.js',
+  './src/render/render_biomes.js',
   './src/core/input.js',
   './src/logic/spawner.js',
+  './src/logic/entity_spawner.js',
   './src/core/game.js',
   './src/main.js',
-  './src/assets/logo.js'
+  './src/assets/images/logo.png',
+  './src/assets/sprites_hero.js',
+  './src/assets/sprites_enemies.js',
+  './src/assets/sprites_bosses.js',
+  './src/assets/sprites_biomes.js',
+  './src/core/physics_utils.js',
+  './src/core/physics_boss.js',
+  './src/core/input_utils.js',
+  './src/core/input_touch.js',
+  './src/assets/audio_music.js',
+  './src/assets/audio_sfx.js'
 ];
 
 self.addEventListener('install', (e) => {

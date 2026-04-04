@@ -1,14 +1,14 @@
-import { G, canvas, ctx, introText, player } from '../core/globals.js';
+import { G, canvas, ctx, introText, player } from '../core/globals.js?v=105';
 import { sprHero, sprHotdog, sprBot, sprGear, sprRef } from '../assets/assets.js?v=105';
-import { drawSprite, drawKey } from './render_utils.js';
+import { drawSprite, drawKey } from './render_utils.js?v=105';
 
 export function renderStartScreen() {
     ctx.save();
     ctx.globalAlpha = 1.0; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
     ctx.fillStyle = 'black'; ctx.fillRect(0, 0, canvas.width, canvas.height);
     
-    if (!window.logoLoaded && typeof logoBase64 !== 'undefined') { window.logoLoaded = new Image(); window.logoLoaded.src = logoBase64; }
-    let logoImg = window.logoLoaded;
+    if (!window.logoImg) { window.logoImg = new Image(); window.logoImg.src = 'src/assets/images/logo.png?v=105'; }
+    let logoImg = window.logoImg;
     if (logoImg && logoImg.complete && logoImg.naturalWidth > 0) {
         if (!window.logoOsc) {
             let nw = 160, ratio = logoImg.naturalWidth / logoImg.naturalHeight, nh = Math.round(160 / ratio);
