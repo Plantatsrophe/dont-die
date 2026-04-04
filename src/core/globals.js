@@ -14,7 +14,8 @@ export const player = {
     x: 0, y: 0, startX: 0, startY: 0, width: 32, height: 40,
     vx: 0, vy: 0, speed: 250, jumpPower: -450, gravity: 1200,
     walkTimer: 0, isOnGround: false, doubleJump: false,
-    isClimbing: false, lives: 3, score: 0, color: '#3498db'
+    isClimbing: false, lives: 3, score: 0, color: '#3498db',
+    riding: null, rideOffsetX: 0
 };
 export const keys = { ArrowLeft: false, ArrowRight: false, ArrowUp: false, ArrowDown: false, Space: false };
 
@@ -59,6 +60,8 @@ export const G = {
     boss: { active: false },
     camera: { x: 0, y: 0 },
     isMapCached: false,
+    acidPurified: false,
+    cleanedPipes: [],
     audioCtx: null,
 };
 

@@ -26,13 +26,14 @@ export function playerDeath() {
         let qx=(i%2===0)?0:0.5, qy=(i<2)?0:0.5, p=particlePool.find(pp=>!pp.active);
         if (p) { p.active=true; p.type='playerQuad'; p.qx=qx; p.qy=qy; p.x=player.x+(qx*player.width)+(player.width/4); p.y=player.y+(qy*player.height)+(player.height/4); p.vx=(qx===0?-1:1)*(150+Math.random()*50); p.vy=(qy===0?-1:1)*(150+Math.random()*50)-100; p.size=Math.max(player.width,player.height)/2; p.life=1.5; p.maxLife=2.0; p.flip=player.lastDir===-1; }
     }
-    player.vx=0; player.vy=0; player.isOnGround=false; player.isClimbing=false;
+    player.vx=0; player.vy=0; player.isOnGround=false; player.isClimbing=false; player.riding = null;
 }
 export function bossExplode() {
     const boss = G.boss;
     if (boss.type==='septicus'&&!boss.isSinking&&boss.hp<=0) {
         boss.isSinking=true; boss.timer=0; boss.vx=0; boss.vy=0; boss.vibrateX=0;
-        if (boss.projs) boss.projs=[]; G.isMapCached=false; playSound('gameOver');
+        G.acidPurified=true; G.isMapCached=false;
+        if (boss.projs) boss.projs=[]; playSound('gameOver');
     } else if (boss.isSinking) { return; } else { boss.active=false; playSound('gameOver'); }
     for (let i=0;i<40;i++) { let p=particlePool.find(pp=>!pp.active); if(p){p.active=true;p.type='normal';p.size=15;p.x=boss.x+Math.random()*boss.width;p.y=boss.y+Math.random()*boss.height;p.vx=(Math.random()-0.5)*500;p.vy=(Math.random()-0.5)*500;p.life=1.0;p.maxLife=1.0;} }
     for (let it of G.items) { if (it.type==='valve'||it.type==='detonator') it.collected=true; }
@@ -78,7 +79,7 @@ function updateBoss(dt) {
         } else if (boss.phase===3) { boss.vx*=0.9; boss.x+=boss.vx*dt; if(boss.timer>0.4){boss.phase=1;boss.vx=(player.x<boss.x)?-300:300;playSound('shoot');} }
         else if (boss.phase===2) { if(boss.timer>3.0){boss.phase=0;boss.timer=0;} }
     } else if (boss.type==='septicus') {
-        if (boss.isSinking) { boss.y+=80*dt; if(boss.timer>10.0){boss.isSinking=false;boss.active=false;} return; }
+        if (boss.isSinking) { boss.y+=18*dt; if(boss.timer>10.0){boss.isSinking=false;boss.active=false;} return; }
         else if (!boss.triggered) { if(player.x>TILE_SIZE*12){boss.triggered=true;boss.x=player.x-boss.width/2;playSound('powerup');} boss.vx=0;boss.vy=0; return; }
         if (boss.y>boss.startY) { boss.y-=350*dt; if(boss.y<boss.startY)boss.y=boss.startY; return; }
         if (player.x<TILE_SIZE*11) { boss.vx=0;boss.phase=0;boss.timer=0;boss.y+=boss.vy*dt;if(boss.y>boss.startY){boss.y=boss.startY;boss.vy=0;}else boss.vy+=800*dt; return; }
@@ -86,7 +87,7 @@ function updateBoss(dt) {
         if (boss.y>boss.startY){boss.y=boss.startY;boss.vy=0;} else boss.vy+=800*dt;
         let reach=140, dist=Math.abs(player.x-(boss.x+boss.width/2));
         if (boss.phase===0) {
-            let spd=(boss.hp<3)?140:100; boss.vx=(player.x<boss.x+boss.width/2)?-spd:spd; boss.x+=boss.vx*dt;
+            let spd=(boss.hp<3)?220:180; boss.vx=(player.x<boss.x+boss.width/2)?-spd:spd; boss.x+=boss.vx*dt;
             boss.x=Math.max(TILE_SIZE*10,Math.min(TILE_SIZE*90,boss.x));
             if(boss.hp<=2&&boss.y>=boss.startY&&player.y<boss.y-120&&Math.random()<0.02) boss.vy=-600;
             if(boss.hp===1&&boss.timer>(boss.projs?.length>0?0:3.0)){boss.phase=3;boss.timer=0;boss.throwsLeft=3;}
@@ -99,7 +100,7 @@ function updateBoss(dt) {
             if(Math.sqrt(dx2*dx2+dy2*dy2)<22) playerDeath();
         } else if (boss.phase===3) {
             if(!boss.projs) boss.projs=[]; let spd2=140; boss.vx=(player.x<boss.x+boss.width/2)?-spd2:spd2; boss.x+=boss.vx*dt; boss.x=Math.max(TILE_SIZE*10,Math.min(TILE_SIZE*90,boss.x));
-            if(boss.timer>0.6&&boss.throwsLeft>0){boss.timer=0;boss.throwsLeft--;let tx=player.x+player.width/2,ty=player.y+player.height/2,bx=boss.x+boss.width/2,by=boss.y+boss.height/2,ddx=tx-bx,ddy=ty-by,dst=Math.sqrt(ddx*ddx+ddy*ddy),spd3=600;boss.projs.push({x:bx,y:by,vx:(ddx/dst)*spd3,vy:(ddy/dst)*spd3,timer:0,linear:true});playSound('shoot');}
+            if(boss.timer>0.6&&boss.throwsLeft>0){boss.timer=0;boss.throwsLeft--;let tx=player.x+player.width/2,ty=player.y+player.height/2,bx=boss.x+boss.width/2,by=boss.y+boss.height/2,ddx=tx-bx,ddy=ty-by,dst=Math.sqrt(ddx*ddx+ddy*ddy),spd3=500;boss.projs.push({x:bx,y:by,vx:(ddx/dst)*spd3,vy:(ddy/dst)*spd3,timer:0,linear:true});playSound('shoot');}
             if(boss.throwsLeft<=0&&boss.timer>1.5){boss.phase=0;boss.timer=0;}
         }
         if (boss.projs) {
@@ -115,6 +116,18 @@ function updateBoss(dt) {
     }
 }
 export function updatePhysics(dt) {
+    for (let plat of G.platforms) {
+        if (plat.vx !== 0) {
+            plat.x += plat.vx * dt;
+            if (plat.x >= plat.maxX) { plat.x = plat.maxX; plat.vx *= -1; }
+            else if (plat.x <= plat.minX) { plat.x = plat.minX; plat.vx *= -1; }
+        }
+        if (plat.vy !== 0) {
+            plat.y += plat.vy * dt;
+            if (plat.y >= plat.maxY) { plat.y = plat.maxY; plat.vy *= -1; }
+            else if (plat.y <= plat.minY) { plat.y = plat.minY; plat.vy *= -1; }
+        }
+    }
     if (G.gameState==='DYING') {
         player.dyingTimer+=dt;
         if (player.dyingTimer>1.8) {
@@ -143,9 +156,11 @@ export function updatePhysics(dt) {
         if(G.boss&&G.boss.active) G.boss.vibrateX=Math.sin(Date.now()*0.05)*8;
         return;
     }
-    player.vx=0;
-    if(keys.ArrowLeft) player.vx=-player.speed;
-    if(keys.ArrowRight) player.vx=player.speed;
+    // Standard Player Movement
+    player.vx = 0;
+    if (keys.ArrowLeft) player.vx = -player.speed;
+    if (keys.ArrowRight) player.vx = player.speed;
+
     let lcrect={x:player.x,y:player.y,width:player.width,height:player.height+1};
     let ladderTiles=getCollidingTiles(lcrect), clashing=getCollidingTiles(player);
     let onLadder=false,hitSpike=false,hitGoal=false;
@@ -160,18 +175,36 @@ export function updatePhysics(dt) {
     if(onLadder){if(keys.ArrowUp||keys.ArrowDown){player.isClimbing=true;player.doubleJump=false;}}else player.isClimbing=false;
     if(player.isClimbing){player.vy=0;if(keys.ArrowUp)player.vy=-player.speed*0.6;if(keys.ArrowDown)player.vy=player.speed*0.6;}
     else{player.vy+=player.gravity*dt;if(player.vy>800)player.vy=800;}
-    player.x+=player.vx*dt;
+    
+    player.x += player.vx * dt;
     for(let t of getCollidingTiles(player)){if(t.type===1){let fl=t.col>0&&t.col<G.mapCols-1&&((G.mapRows===15&&t.row>0&&t.row<13)||(G.mapRows===60&&t.row>0&&t.row<59));if(!fl){if(player.vx>0)player.x=t.rect.x-player.width;else if(player.vx<0)player.x=t.rect.x+t.rect.width;player.vx=0;}}}
-    player.isOnGround=false; player.y+=player.vy*dt;
-    let onPlatform=false;
-    for(let plat of G.platforms){if(player.vy>=0&&player.x+player.width>plat.x&&player.x<plat.x+plat.width&&player.y+player.height>=plat.y&&(player.y+player.height-player.vy*dt)<=plat.y+4){player.y=plat.y-player.height;player.isOnGround=true;player.doubleJump=false;player.vy=0;player.x+=plat.vx*dt;onPlatform=true;break;}}
-    for(let t of getCollidingTiles(player)){
-        if(onPlatform)break;
-        if(t.type===1){let fl=t.col>0&&t.col<G.mapCols-1&&((G.mapRows===15&&t.row>0&&t.row<13)||(G.mapRows===60&&t.row>0&&t.row<59));
-            if(fl){if(player.vy>0&&!player.droppingThrough&&player.y-player.vy*dt+player.height<=t.rect.y+0.1){player.y=t.rect.y-player.height;player.isOnGround=true;player.doubleJump=false;player.vy=0;}}
-            else{if(player.vy>0){player.y=t.rect.y-player.height;player.isOnGround=true;player.doubleJump=false;player.vy=0;}else if(player.vy<0){player.y=t.rect.y+t.rect.height;player.vy=0;}}
-        } else if(t.type===6){if(player.vy>0&&!keys.ArrowDown&&player.y-player.vy*dt+player.height<=t.rect.y+0.1){player.y=t.rect.y-player.height;player.isOnGround=true;player.doubleJump=false;player.vy=0;}}
+    player.y += player.vy * dt;
+    
+    player.isOnGround = false;
+
+    // Standard Platform Collision
+    for (let plat of G.platforms) {
+        if (player.vy >= 0 && 
+            player.x + player.width > plat.x && 
+            player.x < plat.x + plat.width && 
+            player.y + player.height >= plat.y && 
+            (player.y + player.height - (player.vy * dt)) <= plat.y + 10) {
+            
+            player.y = plat.y - player.height;
+            player.isOnGround = true;
+            player.doubleJump = false;
+            player.vy = 0;
+            // Simple Carry (non-parenting)
+            player.x += plat.vx * dt;
+            break;
+        }
     }
+
+    for(let t of getCollidingTiles(player)){
+        if(t.type===1){let fl=t.col>0&&t.col<G.mapCols-1&&((G.mapRows===15&&t.row>0&&t.row<13)||(G.mapRows===60&&t.row>0&&t.row<59));if(fl){if(player.vy>0&&!player.droppingThrough&&player.y-player.vy*dt+player.height <= t.rect.y+0.1){player.y=t.rect.y-player.height;player.isOnGround=true;player.doubleJump=false;player.vy=0;}}else{if(player.vy>0){player.y=t.rect.y-player.height;player.isOnGround=true;player.doubleJump=false;player.vy=0;}else if(player.vy<0){player.y=t.rect.y+t.rect.height;player.vy=0;}}}
+        else if(t.type===6){if(player.vy>0&&!keys.ArrowDown&&player.y-player.vy*dt+player.height <= t.rect.y+0.1){player.y=t.rect.y-player.height;player.isOnGround=true;player.doubleJump=false;player.vy=0;}}
+    }
+
     if(player.isOnGround&&player.vx!==0&&!player.isClimbing){player.walkTimer+=dt;if(player.walkTimer>0.15){playSound('playerMove');player.walkTimer=0;}}else player.walkTimer=0;
     if(player.y>G.mapRows*TILE_SIZE) playerDeath();
     if(player.x<0) player.x=0;

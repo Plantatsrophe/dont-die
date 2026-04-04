@@ -1,11 +1,12 @@
 import { G, player, ctx, laserPool, particlePool } from '../core/globals.js';
-import { sprRocketPad, sprRef, sprValveWheel, sprHotdog, sprGear, sprBot, sprLaserBot, sprLaser, sprHeroDead } from '../assets/assets.js';
+import { sprRocketPad, sprSewerGrate, sprRef, sprValveWheel, sprHotdog, sprGear, sprBot, sprLaserBot, sprLaser, sprHeroDead } from '../assets/assets.js';
 import { drawSprite, drawGlow } from './render_utils.js';
 
 export function renderEntities() {
     const { platforms, items, enemies, bombs, activeValvePos, valveCutsceneTimer, timerAcc } = G;
 
     // Moving Platforms
+    let biome = Math.floor(G.currentLevel / 20) % 5;
     for (let plat of platforms) {
         drawGlow(ctx, plat.x + plat.width/2, plat.y + 8, 30, 'rgba(255, 100, 0, 0.4)');
         drawSprite(ctx, sprRocketPad, plat.x, plat.y, plat.width, plat.height, false);

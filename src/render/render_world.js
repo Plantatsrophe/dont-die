@@ -4,10 +4,10 @@ import { drawSprite, drawGlow } from './render_utils.js';
 
 export function renderConduits() {
     const { items, purifiedValves, activeValvePos, valveCutsceneTimer, mapRows } = G;
-    if (G.boss && G.boss.active && G.boss.type === 'septicus') {
+    if (G.boss && G.boss.type === 'septicus') {
         for (let i of items) {
-            if (i.type === 'valve') {
-                let px = i.x - 4, py = (Math.floor(i.y / TILE_SIZE) + 3) * TILE_SIZE; 
+            if (i.type === 'valve' || i.type === 'detonator') {
+                let px = i.x, py = (Math.floor(i.y / TILE_SIZE) + 3) * TILE_SIZE; 
                 ctx.fillStyle = '#5e4533'; ctx.fillRect(i.x, 0, TILE_SIZE, py - TILE_SIZE);
                 ctx.fillStyle = '#6d5241'; ctx.fillRect(i.x + 12, 0, 8, py - TILE_SIZE);
                 drawSprite(ctx, sprPipe, px, py - TILE_SIZE, 40, 40, false);
@@ -47,9 +47,15 @@ export function preRenderMap() {
                 for (let s = 0; s < spikesCount; s++) { offscreenMapCtx.moveTo(tx + s * w + w/2, ty + TILE_SIZE/2); offscreenMapCtx.lineTo(tx + (s+1) * w, ty + TILE_SIZE); offscreenMapCtx.lineTo(tx + s * w, ty + TILE_SIZE); }
                 offscreenMapCtx.fill(); drawGlow(offscreenMapCtx, tx + TILE_SIZE/2, ty + TILE_SIZE/2 + 4, 30, 'rgba(255, 30, 0, 0.3)');
             } else if (tile === 15) {
-                offscreenMapCtx.fillStyle = '#0a210f'; offscreenMapCtx.fillRect(tx, ty + 12, TILE_SIZE, TILE_SIZE - 12);
-                offscreenMapCtx.fillStyle = '#1b5c21'; offscreenMapCtx.fillRect(tx, ty + 12, TILE_SIZE, 4);
-                drawGlow(offscreenMapCtx, tx + TILE_SIZE/2, ty + 16, 20, 'rgba(62, 232, 85, 0.4)');
+                if (G.acidPurified) {
+                    offscreenMapCtx.fillStyle = '#003366'; offscreenMapCtx.fillRect(tx, ty + 12, TILE_SIZE, TILE_SIZE - 12);
+                    offscreenMapCtx.fillStyle = '#1e90ff'; offscreenMapCtx.fillRect(tx, ty + 12, TILE_SIZE, 4);
+                    drawGlow(offscreenMapCtx, tx + TILE_SIZE/2, ty + 16, 20, 'rgba(0, 187, 255, 0.4)');
+                } else {
+                    offscreenMapCtx.fillStyle = '#0a210f'; offscreenMapCtx.fillRect(tx, ty + 12, TILE_SIZE, TILE_SIZE - 12);
+                    offscreenMapCtx.fillStyle = '#1b5c21'; offscreenMapCtx.fillRect(tx, ty + 12, TILE_SIZE, 4);
+                    drawGlow(offscreenMapCtx, tx + TILE_SIZE/2, ty + 16, 20, 'rgba(62, 232, 85, 0.4)');
+                }
             }
         }
     }

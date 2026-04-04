@@ -1,7 +1,12 @@
 import { G, player, keys, TILE_SIZE, offscreenMapCanvas } from '../core/globals.js';
 import { staticLevels } from '../data/levels.js';
 
+let lastLevel = -1;
 export function parseMap(resetEntities = true) {
+    if (G.currentLevel !== lastLevel) {
+        G.cleanedPipes = [];
+        lastLevel = G.currentLevel;
+    }
     let currentMapData = staticLevels[G.currentLevel].map;
     G.mapRows = currentMapData.length;
     G.mapCols = currentMapData[0].length;
@@ -10,9 +15,11 @@ export function parseMap(resetEntities = true) {
         G.items = []; G.enemies = []; G.lasers = [];
         G.platforms = []; G.bombs = [];
         G.boss = { active: false };
+        G.purifiedValves = [];
     }
     G.particles = [];
     G.isMapCached = false;
+    G.acidPurified = false;
     offscreenMapCanvas.width = G.mapCols * TILE_SIZE;
     offscreenMapCanvas.height = G.mapRows * TILE_SIZE;
 
@@ -35,8 +42,23 @@ export function parseMap(resetEntities = true) {
             } else if (tile === 14) {
                 if (resetEntities) G.items.push({ x: col*TILE_SIZE, y: row*TILE_SIZE, width: 32, height: 32, collected: false, type: 'checkpoint' });
                 rowData.push(0);
-            } else if (char === 'P') {
-                if (resetEntities) G.platforms.push({ x: col*TILE_SIZE, y: row*TILE_SIZE+8, width: TILE_SIZE*1.5, height: 16, vx: 60, minX: (col-3)*TILE_SIZE, maxX: (col+3)*TILE_SIZE });
+            } else if (tile === 6) {
+                if (resetEntities) {
+                    let pWidth = 64, pHeight = 16;
+                    let spd = 60 + Math.random() * 40;
+                    let dir = Math.random() > 0.5 ? 1 : -1;
+                    let range = TILE_SIZE * 3;
+                    let plat = { 
+                        x: col * TILE_SIZE, y: row * TILE_SIZE + 8, width: pWidth, height: pHeight,
+                        vx: spd * dir, vy: 0,
+                        minX: (col - 3) * TILE_SIZE, maxX: (col + 3) * TILE_SIZE,
+                        minY: (row - 3) * TILE_SIZE + 8, maxY: (row + 3) * TILE_SIZE + 8
+                    };
+                    // Randomize starting position within range
+                    let offset = Math.random() * range * 2;
+                    plat.x = plat.minX + (offset % (range * 2));
+                    G.platforms.push(plat);
+                }
                 rowData.push(0);
             } else if (char === '7' || (row === 12 && col === 1 && !spawnFound)) {
                 if (resetEntities) { player.startX = col*TILE_SIZE+6; player.startY = (row+1)*TILE_SIZE - player.height; spawnFound = true; }
