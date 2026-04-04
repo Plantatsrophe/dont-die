@@ -66,7 +66,14 @@ export const G = {
     acidPurified: false,
     cleanedPipes: [],
     audioCtx: null,
+    _chk: 0x5f3759df // Initial checksum salt
 };
+
+const CHK_SALT = 0x5f3759df;
+export function addScore(amt) {
+    player.score += amt;
+    G._chk = (player.score ^ CHK_SALT) * 2;
+}
 
 // Expose to window for console access (Cheats/Debugging)
 window.G = G;
@@ -82,6 +89,15 @@ window.refreshLeaderboard = async function() {
 window.saveScore = async function() {
     let name = G.initials.join('');
     let playtimeMs = new Date().getTime() - G.gameStartTime;
+
+    // Integrity Check validation
+    const expected = (player.score ^ CHK_SALT) * 2;
+    if (player.score > 0 && G._chk !== expected) {
+        console.error("High Score Integrity Check Failed. Submission discarded.");
+        alert("CHEAT DETECTED: Score parity mismatch. Your score will not be saved.");
+        return;
+    }
+
     G.highScores.push({ name, score: player.score });
     G.highScores.sort((a, b) => b.score - a.score);
     G.highScores = G.highScores.slice(0, 10);

@@ -1,4 +1,4 @@
-import { G, player, canvas, keys, TILE_SIZE, laserPool, particlePool } from './globals.js?v=105';
+import { G, player, canvas, keys, TILE_SIZE, laserPool, particlePool, addScore } from './globals.js?v=105';
 import { staticLevels } from '../data/levels.js?v=105';
 import { playSound } from '../assets/audio.js?v=105';
 import { parseMap, resetPlayerPosition, resetFullGame } from '../logic/spawner.js?v=105';
@@ -47,7 +47,7 @@ function updateGame(dt) {
             else if(i.type==='checkpoint'){if(player.startX!==i.x+8||player.startY!==i.y-2){player.startX=i.x+8;player.startY=i.y-2;playSound('powerup');for(let pC=0;pC<20;pC++){let p=particlePool.find(pp=>!pp.active);if(p){p.active=true;p.type='checkpoint';p.x=i.x+16;p.y=i.y+16;p.vx=(Math.random()-0.5)*100;p.vy=-50-Math.random()*100;p.size=6;p.life=0.5+Math.random()*0.5;p.maxLife=1.0;}}}}
             else if(i.type==='valve'){playSound('powerup');if(boss&&boss.active){G.gameState='VALVE_CUTSCENE';G.valveCutsceneTimer=0;G.activeValvePos={x:i.x,y:i.y};G.purifiedValves.push({x:i.x,y:i.y});boss.hp--;boss.hurtTimer=0.5;G.isMapCached=false;playSound('explosion');if(boss.hp<=0)bossExplode();}}
             else if(i.type==='detonator'){playSound('powerup');if(boss&&boss.active){bossExplode();player.cutsceneTimer=0;G.gameState='CREDITS_CUTSCENE';}}
-            else{player.score+=1000;playSound('collect');}
+            else{addScore(1000);playSound('collect');}
         }
     }
     let anyEnemyVisible=false;
@@ -67,7 +67,7 @@ function updateGame(dt) {
             if(Math.abs(player.y-e.y)<150&&Math.abs(player.x-e.x)<500){e.cooldown-=dt;if(e.cooldown<=0){e.cooldown=1.6;let l=laserPool.find(lp=>!lp.active);if(l){l.active=true;l.x=e.dir===1?e.x+e.width:e.x-16;l.y=e.y+4;l.width=16;l.height=4;l.vx=350*e.dir;}playSound('laser');}}
         }
         if(checkRectCollision(player,e)){
-            if(player.vy>0&&player.y+player.height-player.vy*dt<=e.y+15){playSound('stomp');player.vy=keys.Space?player.jumpPower*0.9:player.jumpPower*0.6;player.doubleJump=true;player.score+=200;for(let pC=0;pC<20;pC++){let rad=Math.random()*Math.PI*2,spd=50+Math.random()*150,p=particlePool.find(pp=>!pp.active);if(p){p.active=true;p.type='gear';p.x=e.x+e.width/2;p.y=e.y+e.height/2;p.vx=Math.cos(rad)*spd;p.vy=Math.sin(rad)*spd-50;p.size=16;p.life=0.8+Math.random()*0.4;p.maxLife=1.2;}}G.enemies.splice(i,1);}
+            if(player.vy>0&&player.y+player.height-player.vy*dt<=e.y+15){playSound('stomp');player.vy=keys.Space?player.jumpPower*0.9:player.jumpPower*0.6;player.doubleJump=true;addScore(200);for(let pC=0;pC<20;pC++){let rad=Math.random()*Math.PI*2,spd=50+Math.random()*150,p=particlePool.find(pp=>!pp.active);if(p){p.active=true;p.type='gear';p.x=e.x+e.width/2;p.y=e.y+e.height/2;p.vx=Math.cos(rad)*spd;p.vy=Math.sin(rad)*spd-50;p.size=16;p.life=0.8+Math.random()*0.4;p.maxLife=1.2;}}G.enemies.splice(i,1);}
             else{playerDeath();return;}
         }
     }

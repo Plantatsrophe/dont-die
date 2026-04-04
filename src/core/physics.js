@@ -1,4 +1,4 @@
-import { G, player, keys, canvas, TILE_SIZE } from './globals.js?v=105';
+import { G, player, keys, canvas, TILE_SIZE, addScore } from './globals.js?v=105';
 import { playSound, stopBackgroundMusic } from '../assets/audio.js?v=105';
 import { parseMap, resetPlayerPosition } from '../logic/spawner.js?v=105';
 import { getCollidingTiles, playerDeath, checkRectCollision } from './physics_utils.js?v=105';
@@ -70,7 +70,7 @@ export function updatePhysics(dt) {
         if(t.type===5){hitGoal=true;player.portalX=t.rect.x+16;player.portalY=t.rect.y+16;}
     }
     if(hitSpike){playerDeath();return;}
-    if(hitGoal&&G.gameState!=='LEVEL_CLEAR'){G.gameState='LEVEL_CLEAR';G.winTimer=0;playSound('win');player.score+=G.timer*100;return;}
+    if(hitGoal&&G.gameState!=='LEVEL_CLEAR'){G.gameState='LEVEL_CLEAR';G.winTimer=0;playSound('win');addScore(G.timer*100);return;}
     if(onLadder){if(keys.ArrowUp||keys.ArrowDown){player.isClimbing=true;player.doubleJump=false;}}else player.isClimbing=false;
     if(player.isClimbing){player.vy=0;if(keys.ArrowUp)player.vy=-player.speed*0.6;if(keys.ArrowDown)player.vy=player.speed*0.6;}
     else{player.vy+=player.gravity*dt;if(player.vy>800)player.vy=800;}
