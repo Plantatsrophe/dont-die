@@ -1,5 +1,5 @@
 import { G, player, keys, TILE_SIZE, offscreenMapCanvas } from '../core/globals.js';
-import { staticLevels } from '../data/levels.js';
+import { staticLevels } from '../data/levels.js?v=105';
 
 let lastLevel = -1;
 export function parseMap(resetEntities = true) {

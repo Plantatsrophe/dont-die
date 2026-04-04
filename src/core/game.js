@@ -1,5 +1,5 @@
 import { G, player, canvas, keys, TILE_SIZE, laserPool, particlePool } from './globals.js';
-import { staticLevels } from '../data/levels.js';
+import { staticLevels } from '../data/levels.js?v=105';
 import { playSound } from '../assets/audio.js';
 import { parseMap, resetPlayerPosition, resetFullGame } from '../logic/spawner.js';
 import { updatePhysics, checkRectCollision, playerDeath, bossExplode } from './physics.js';
