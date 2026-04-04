@@ -20,7 +20,7 @@ We've packed 100 hand-crafted levels into this thing. It starts easy enough in t
 ## What's Inside?
 - **100 Levels**: Five different biomes including the Slums, Sewers, Central Shaft, and the massive Factory.
 - **Nasty Enemies**: Roaming bots and stationary Laser Bots that track your every move. Pro tip: Stomp them from above for `+200pts`.
-- **Items**: Snag Cash for points or find Hotdogs for an extra life. You're going to need every single one of them.
+- **Items**: Snag Gears for points or find Hotdogs for an extra life. You're going to need every single one of them.
 - **Synthwave Soundtrack**: Procedurally generated music using the Web Audio API—no MP3s, just pure code-driven synth.
 - **Global High Scores**: Save your legacy to the local leaderboard.
 

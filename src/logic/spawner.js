@@ -23,7 +23,7 @@ export function parseMap(resetEntities = true) {
             if (char === 'H') tile = 11; else if (char === 'C') tile = 14; else if (char === 'A') tile = 15;
 
             if (tile === 4) {
-                if (resetEntities) G.items.push({ x: col*TILE_SIZE+8, y: row*TILE_SIZE+8, width: 24, height: 24, collected: false, type: 'cash' });
+                if (resetEntities) G.items.push({ x: col*TILE_SIZE+8, y: row*TILE_SIZE+8, width: 24, height: 24, collected: false, type: 'gears' });
                 rowData.push(0);
             } else if (tile === 11) {
                 if (resetEntities) G.items.push({ x: col*TILE_SIZE+8, y: row*TILE_SIZE+8, width: 24, height: 24, collected: false, type: 'hotdog' });
