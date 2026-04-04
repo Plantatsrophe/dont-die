@@ -1,5 +1,5 @@
 import { G, canvas, ctx, TILE_SIZE } from '../core/globals.js';
-import { sprGear } from '../assets/assets.js';
+import { sprGear } from '../assets/assets.js?v=105';
 import { drawSprite } from './render_utils.js';
 
 export function renderParallax() {

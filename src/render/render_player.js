@@ -1,5 +1,5 @@
 import { G, player, ctx, keys } from '../core/globals.js';
-import { sprHero, sprRef, sprPortal, sprHeroDead } from '../assets/assets.js';
+import { sprHero, sprRef, sprPortal, sprHeroDead } from '../assets/assets.js?v=105';
 import { drawSprite, drawGlow } from './render_utils.js';
 
 export function renderPlayer() {

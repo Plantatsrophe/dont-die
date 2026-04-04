@@ -1,5 +1,5 @@
 import { G, canvas, ctx, introText, player } from '../core/globals.js';
-import { sprHero, sprHotdog, sprBot, sprGear, sprRef } from '../assets/assets.js';
+import { sprHero, sprHotdog, sprBot, sprGear, sprRef } from '../assets/assets.js?v=105';
 import { drawSprite, drawKey } from './render_utils.js';
 
 export function renderStartScreen() {
