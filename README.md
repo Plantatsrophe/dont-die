@@ -1,37 +1,43 @@
-# Don't Die - A GRFC™ Game
+# DON'T DIE 💀
 
-A completely native, zero-dependency, intense 8-bit web browser platformer scaling across an incredible 100 hand-crafted static maps, featuring dynamically generated Synthwave audio, tracking Laser Bots, and a classic arcade High-Score structure natively persisting to your browser's local storage.
+A brutal, zero-dependency retro platformer for your browser. 100 levels of pure pixelated pain.
 
-## Setup & Play
-All you need is a browser. There are no Webpack builds or Node modules required. 
-Simply open `index.html` natively inside Chrome, Edge, or Firefox and press **Enter** to start!
+## The Pitch
+You're a little guy in a big, dangerous world. There are lasers, spikes, bots, and pits. Your goal is pretty simple: **Don't Die.** 
 
-## Controls
-* **Movement:** `W,A,S,D` or `Arrow Keys`
-* **Jump:** `Spacebar` (Tap twice to gracefully Execute a Double-Jump) 
-* **UI Navigation:** `Arrow Keys` to scroll initials, `Enter` to lock them in! 
+We've packed 100 hand-crafted levels into this thing. It starts easy enough in the Slums, but by the time you're deep in the Sewers or facing the Goliath boss in the final gauntlet, you'll be wishing for a "Pause" button (there isn't one).
 
-## Core Mechanics
-- **100 Dynamic Levels**: The game structurally scales over 100 grueling gauntlets mapped physically to 15x100 column arrays. The density of lethal Floor Spikes, Platform jumps, and Vertical ladders organically scales the longer you survive mathematically!
-- **Enemies & Combat**: Features standard roaming Bots and heavily armed, stationary Laser Bots that natively track your geographical coordinates firing lethal energy beams. Stomp them exclusively from directly overhead to critically score `+200pts`.
-- **Items**: Snag Cash (`+1000pts`) floating near vertical platforms, or discover Hotdogs securely giving you `+1` Life buff to your structural reserves.
+## How to Play
+1. Open `index.html` in any modern browser (Chrome, Firefox, Edge).
+2. Hit **Enter** to start.
+3. Reach the exit portal in each level to progress. 
 
-## Codebase Architecture
-The engine explicitly separates raw game logic natively across multiple structural script imports cleanly:
+### Controls
+* **Move:** `W,A,S,D` or `Arrow Keys`
+* **Jump:** `Spacebar` (Tap it twice for a double-jump)
+* **Enter:** Confirm your initials on the high-score screen.
 
-* `index.html` - The Master DOM entry point declaring the `gameCanvas` mathematically.
-* `game.js` - Global Event Listeners, State Transitions, and the native Object Engine mechanically pushing AI processing cleanly.
-* `physics.js` - Sweeping AABB geometries securely managing dynamic gravity, momentum checking natively verifying `map` boundaries.
-* `render.js` - Highly optimized array mappings natively executing sub-pixel renders dynamically spanning Parallax gradients linearly.
-* `assets.js` - Lightweight native index arrays mathematically storing pure CSS hex codes to draw pixel graphics securely natively entirely without external image packages. 
-* `audio.js` - Fully custom `125BPM` Web Audio API Sequence Synthesizer mechanically playing Castlevania-style tracker hooks natively directly using deep sine/square oscillators cleanly.
-* `globals.js` - Dedicated memory bounds locally referencing universal engine arrays. 
-* `levels.js` - 100 generated massive 15x100 exact raw string structures actively parsed exactly block by block correctly structurally initializing maps.
-* `style.css` - Raw web typography logic structurally.
+## What's Inside?
+- **100 Levels**: Five different biomes including the Slums, Sewers, Central Shaft, and the massive Factory.
+- **Nasty Enemies**: Roaming bots and stationary Laser Bots that track your every move. Pro tip: Stomp them from above for `+200pts`.
+- **Items**: Snag Cash for points or find Hotdogs for an extra life. You're going to need every single one of them.
+- **Synthwave Soundtrack**: Procedurally generated music using the Web Audio API—no MP3s, just pure code-driven synth.
+- **Global High Scores**: Save your legacy to the local leaderboard.
 
-## Generating Custom Maps
-If you want to edit the structural layout of the entire 100 map gauntlet organically, do not manually edit the raw `levels.js` variables securely! Instead, natively deploy the custom Python map engine:
+## Project Structure (For the Devs)
+The game is built with vanilla JavaScript—no Webpack, no NPM, no bloat.
+- [main.js](file:///e:/Dont%20Die/dont-die/src/main.js): The entry point.
+- [game.js](file:///e:/Dont%20Die/dont-die/src/core/game.js): The main game loop and state management.
+- [physics.js](file:///e:/Dont%20Die/dont-die/src/core/physics.js): Character movement and AABB collision.
+- [render/](file:///e:/Dont%20Die/dont-die/src/render/): Modular rendering engine (Canvas-based).
+- [levels.js](file:///e:/Dont%20Die/dont-die/src/data/levels.js): The map data for the entire 100-level gauntlet.
+- [sw.js](file:///e:/Dont%20Die/dont-die/sw.js): Service worker for offline support (PWA).
+
+## Custom Maps
+If the 100 levels aren't enough, you can regenerate the entire world using the Python script:
 ```bash
 python generate_levels.py
 ```
-This stochastically generates entirely fresh maps injecting hazards and  Bots  
+
+---
+*Good luck. You'll need it.*
