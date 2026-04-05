@@ -120,6 +120,13 @@ export interface IBomb extends IEntity {
     row: number;
 }
 
+export interface ILevel {
+    level: number;
+    biome: string;
+    isBoss: boolean;
+    map: string[];
+}
+
 export interface IGlobals {
     gameState: GameState;
     activeValvePos: { x: number, y: number } | null;
@@ -170,7 +177,7 @@ declare global {
         nextLevel: () => void;
         addLives: (n: number) => void;
         godMode: (on?: boolean) => void;
-        staticLevels: any[];
+        staticLevels: ILevel[];
         logoImg?: HTMLImageElement;
         logoOsc?: HTMLCanvasElement;
         fetchHighScores: () => Promise<{ initials: string, score: number }[]>;
