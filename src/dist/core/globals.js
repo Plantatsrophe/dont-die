@@ -89,8 +89,11 @@ window.refreshLeaderboard = async function () {
     if (window.fetchHighScores) {
         let scores = await window.fetchHighScores();
         G.highScores = scores.map(s => ({ name: s.initials, score: s.score }));
+        G.isMapCached = false; // Trigger a redraw if needed
     }
 };
+if (window.fetchHighScores)
+    window.refreshLeaderboard();
 window.saveScore = async function () {
     let name = G.initials.join('');
     let playtimeMs = new Date().getTime() - G.gameStartTime;

@@ -180,7 +180,7 @@ declare global {
         staticLevels: ILevel[];
         logoImg?: HTMLImageElement;
         logoOsc?: HTMLCanvasElement;
-        fetchHighScores: () => Promise<{ initials: string, score: number }[]>;
-        submitHighScore: (initials: string, score: number, playtime: number) => Promise<void>;
+        fetchHighScores?: () => Promise<{ initials: string, score: number }[]>;
+        submitHighScore?: (initials: string, score: number, playtime: number) => Promise<void>;
     }
 }

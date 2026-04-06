@@ -6,6 +6,8 @@ import './core/input.js';
 // Boot sequence
 parseMap();
 resetPlayerPosition();
+if (window.refreshLeaderboard)
+    window.refreshLeaderboard();
 // Expose to window for console access (Cheats/Debugging)
 window.parseMap = parseMap;
 window.resetPlayerPosition = resetPlayerPosition;
