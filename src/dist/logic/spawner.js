@@ -5,6 +5,7 @@ let lastLevel = -1;
 export function parseMap(resetEntities = true) {
     if (G.currentLevel !== lastLevel) {
         G.cleanedPipes = [];
+        G.checkpointPos = null;
         lastLevel = G.currentLevel;
     }
     let currentMapData = staticLevels[G.currentLevel].map;
@@ -57,8 +58,10 @@ export function parseMap(resetEntities = true) {
                 rowData.push(0);
             }
             else if (char === '7' || (row === 8 && col === 1 && !spawnFound)) {
-                player.startX = col * TILE_SIZE + 6;
-                player.startY = (row + 1) * TILE_SIZE - player.height;
+                if (!G.checkpointPos) {
+                    player.startX = col * TILE_SIZE + 6;
+                    player.startY = (row + 1) * TILE_SIZE - player.height;
+                }
                 spawnFound = true;
                 rowData.push(0);
             }
@@ -100,8 +103,14 @@ export function parseMap(resetEntities = true) {
     }
 }
 export function resetPlayerPosition() {
-    player.x = player.startX;
-    player.y = player.startY;
+    if (G.checkpointPos) {
+        player.x = G.checkpointPos.x;
+        player.y = G.checkpointPos.y;
+    }
+    else {
+        player.x = player.startX;
+        player.y = player.startY;
+    }
     player.vx = 0;
     player.vy = 0;
     player.droppingThrough = false;

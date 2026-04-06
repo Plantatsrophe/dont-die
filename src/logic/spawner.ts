@@ -4,7 +4,7 @@ import { spawnMovingPlatform, spawnBoss } from './entity_spawner.js';
 
 let lastLevel = -1;
 export function parseMap(resetEntities = true) {
-    if (G.currentLevel !== lastLevel) { G.cleanedPipes = []; lastLevel = G.currentLevel; }
+    if (G.currentLevel !== lastLevel) { G.cleanedPipes = []; G.checkpointPos = null; lastLevel = G.currentLevel; }
     let currentMapData = staticLevels[G.currentLevel].map;
     G.mapRows = currentMapData.length; G.mapCols = currentMapData[0].length;
     G.map = [];
@@ -36,7 +36,10 @@ export function parseMap(resetEntities = true) {
                 if (resetEntities) spawnMovingPlatform(char, row, col, currentMapData);
                 rowData.push(0);
             } else if (char === '7' || (row === 8 && col === 1 && !spawnFound)) {
-                player.startX = col*TILE_SIZE+6; player.startY = (row+1)*TILE_SIZE - player.height; spawnFound = true;
+                if (!G.checkpointPos) {
+                    player.startX = col*TILE_SIZE+6; player.startY = (row+1)*TILE_SIZE - player.height;
+                }
+                spawnFound = true;
                 rowData.push(0);
             } else if (tile === 8) {
                 if (resetEntities) G.enemies.push({ type:'bot', x:col*TILE_SIZE+8, y:(row+1)*TILE_SIZE-24, width:24, height:24, vx:50, vy:0, dir:1, cooldown:0 });
@@ -65,7 +68,11 @@ export function parseMap(resetEntities = true) {
 }
 
 export function resetPlayerPosition() {
-    player.x = player.startX; player.y = player.startY;
+    if (G.checkpointPos) {
+        player.x = G.checkpointPos.x; player.y = G.checkpointPos.y;
+    } else {
+        player.x = player.startX; player.y = player.startY;
+    }
     player.vx = 0; player.vy = 0;
     player.droppingThrough = false; player.isOnGround = false; player.isClimbing = false;
 }

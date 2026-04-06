@@ -24,7 +24,7 @@ export function renderParallax() {
         skyGradient.addColorStop(0.5, cMurk);
         skyGradient.addColorStop(1, cDeep);
     } else if (bId === 2) { // Mine
-        skyGradient.addColorStop(0, '#030014'); skyGradient.addColorStop(1, '#2c0c4a');
+        skyGradient.addColorStop(0, '#0a0805'); skyGradient.addColorStop(1, '#261a12');
     } else if (bId === 3) { // Factory
         skyGradient.addColorStop(0, '#050f14'); skyGradient.addColorStop(1, '#1a4159');
     } else if (bId === 4) { // Goliath

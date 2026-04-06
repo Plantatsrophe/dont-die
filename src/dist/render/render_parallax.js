@@ -21,8 +21,8 @@ export function renderParallax() {
         skyGradient.addColorStop(1, cDeep);
     }
     else if (bId === 2) { // Mine
-        skyGradient.addColorStop(0, '#030014');
-        skyGradient.addColorStop(1, '#2c0c4a');
+        skyGradient.addColorStop(0, '#0a0805');
+        skyGradient.addColorStop(1, '#261a12');
     }
     else if (bId === 3) { // Factory
         skyGradient.addColorStop(0, '#050f14');
