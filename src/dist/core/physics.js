@@ -109,7 +109,7 @@ export function updatePhysics(dt) {
     let ladderTiles = getCollidingTiles(lcrect), clashing = getCollidingTiles(player);
     let onLadder = false, hitSpike = false, hitGoal = false;
     for (let t of ladderTiles)
-        if (t.type === 2 || t.type === 6)
+        if (t.type === 2 || t.type === 6 || t.type === 9)
             onLadder = true;
     for (let t of clashing) {
         if (t.type === 3 && checkRectCollision(player, { x: t.rect.x + 8, y: t.rect.y + 20, width: 24, height: 20 }))
@@ -132,6 +132,13 @@ export function updatePhysics(dt) {
         playSound('win');
         addScore(G.timer * 100);
         return;
+    }
+    for (let item of G.items) {
+        if (item.type === 'checkpoint' && !item.collected && checkRectCollision(player, item)) {
+            item.collected = true;
+            G.checkpointPos = { x: item.x, y: item.y };
+            playSound('collect');
+        }
     }
     if (onLadder) {
         if (keys.ArrowUp || keys.ArrowDown) {
@@ -220,6 +227,14 @@ export function updatePhysics(dt) {
         }
         else if (t.type === 6) {
             if (player.vy > 0 && !player.droppingThrough && player.y - player.vy * dt + player.height <= t.rect.y + 0.1) {
+                player.y = t.rect.y - player.height;
+                player.isOnGround = true;
+                player.doubleJump = false;
+                player.vy = 0;
+            }
+        }
+        else if (t.type === 2 || t.type === 9) {
+            if (!player.isClimbing && !keys.ArrowDown && player.vy >= 0 && player.y - player.vy * dt + player.height <= t.rect.y + 0.1) {
                 player.y = t.rect.y - player.height;
                 player.isOnGround = true;
                 player.doubleJump = false;

@@ -64,7 +64,7 @@ export function updatePhysics(dt: number) {
     let lcrect={x:player.x,y:player.y,width:player.width,height:player.height+1};
     let ladderTiles=getCollidingTiles(lcrect), clashing=getCollidingTiles(player);
     let onLadder=false,hitSpike=false,hitGoal=false;
-    for(let t of ladderTiles) if(t.type===2||t.type===6) onLadder=true;
+    for(let t of ladderTiles) if(t.type===2||t.type===6||t.type===9) onLadder=true;
     for(let t of clashing) {
         if(t.type===3&&checkRectCollision(player,{x:t.rect.x+8,y:t.rect.y+20,width:24,height:20})) hitSpike=true;
         if(t.type===15) hitSpike=true;
@@ -72,6 +72,13 @@ export function updatePhysics(dt: number) {
     }
     if(hitSpike){playerDeath();return;}
     if(hitGoal&&(G.gameState as any)!=='LEVEL_CLEAR'){G.gameState='LEVEL_CLEAR';G.winTimer=0;playSound('win');addScore(G.timer*100);return;}
+    for(let item of G.items) {
+        if(item.type==='checkpoint' && !item.collected && checkRectCollision(player, item)) {
+            item.collected = true;
+            G.checkpointPos = { x: item.x, y: item.y };
+            playSound('collect');
+        }
+    }
     if(onLadder){if(keys.ArrowUp||keys.ArrowDown){player.isClimbing=true;player.doubleJump=false;}}else player.isClimbing=false;
     if(player.isClimbing){player.vy=0;if(keys.ArrowUp)player.vy=-player.speed*0.6;if(keys.ArrowDown)player.vy=player.speed*0.6;}
     else{player.vy+=player.gravity*dt;if(player.vy>800)player.vy=800;}
@@ -103,6 +110,11 @@ export function updatePhysics(dt: number) {
             }
         }
         else if(t.type===6){if(player.vy>0&&!player.droppingThrough&&player.y-player.vy*dt+player.height <= t.rect.y+0.1){player.y=t.rect.y-player.height;player.isOnGround=true;player.doubleJump=false;player.vy=0;}}
+        else if(t.type===2||t.type===9){
+            if(!player.isClimbing&&!keys.ArrowDown&&player.vy>=0&&player.y-player.vy*dt+player.height <= t.rect.y+0.1){
+                player.y=t.rect.y-player.height;player.isOnGround=true;player.doubleJump=false;player.vy=0;
+            }
+        }
     }
     if(player.isOnGround&&player.vx!==0&&!player.isClimbing){player.walkTimer+=dt;if(player.walkTimer>0.15){playSound('playerMove');player.walkTimer=0;}}else player.walkTimer=0;
     if(player.y>G.mapRows*TILE_SIZE) playerDeath();

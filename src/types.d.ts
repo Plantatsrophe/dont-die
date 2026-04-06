@@ -162,6 +162,7 @@ export interface IGlobals {
     _chk: number;
     nextLaserIndex: number;
     nextParticleIndex: number;
+    checkpointPos: { x: number, y: number } | null;
 }
 
 declare global {

@@ -70,7 +70,8 @@ export const G: IGlobals = {
     audioCtx: null,
     _chk: 0x5f3759df, // Initial checksum salt
     nextLaserIndex: 0,
-    nextParticleIndex: 0
+    nextParticleIndex: 0,
+    checkpointPos: null
 };
 
 const CHK_SALT = 0x5f3759df;

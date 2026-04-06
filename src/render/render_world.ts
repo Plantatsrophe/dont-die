@@ -27,18 +27,61 @@ export function renderConduits() {
 
 export function preRenderMap() {
     if (G.isMapCached) return;
-    const { map, mapRows, mapCols } = G;
+    const { map, mapRows, mapCols, currentLevel } = G;
+    const bId = Math.floor(currentLevel / 20) % 5;
+
     offscreenMapCanvas.width = mapCols * TILE_SIZE; offscreenMapCanvas.height = mapRows * TILE_SIZE;
     offscreenMapCtx.clearRect(0, 0, offscreenMapCanvas.width, offscreenMapCanvas.height);
     for (let row = 0; row < mapRows; row++) {
         for (let col = 0; col < mapCols; col++) {
             let tile = map[row][col], tx = col * TILE_SIZE, ty = row * TILE_SIZE;
             if (tile === 1 || tile === 6) {
-                offscreenMapCtx.fillStyle = '#2f2c2b'; offscreenMapCtx.fillRect(tx, ty, TILE_SIZE, TILE_SIZE);
-                offscreenMapCtx.fillStyle = '#6e3c15'; offscreenMapCtx.fillRect(tx, ty, TILE_SIZE, 4);
-                offscreenMapCtx.fillStyle = '#110d0c'; offscreenMapCtx.fillRect(tx, ty + 4, TILE_SIZE, 2);
-                offscreenMapCtx.strokeStyle = '#1a1818'; offscreenMapCtx.lineWidth = 2; offscreenMapCtx.strokeRect(tx + 2, ty + 2, TILE_SIZE - 4, TILE_SIZE - 4);
-            } else if (tile === 2) {
+                if (bId === 2) { // Mine: Earthy/Rocky
+                    offscreenMapCtx.fillStyle = '#1a120b'; offscreenMapCtx.fillRect(tx, ty, TILE_SIZE, TILE_SIZE);
+                    offscreenMapCtx.fillStyle = '#2b1d12'; 
+                    // Jagged rock shapes
+                    offscreenMapCtx.beginPath();
+                    offscreenMapCtx.moveTo(tx, ty + 20); offscreenMapCtx.lineTo(tx + 20, ty + 10); offscreenMapCtx.lineTo(tx + 40, ty + 25); offscreenMapCtx.lineTo(tx + 40, ty + 40); offscreenMapCtx.lineTo(tx, ty + 40);
+                    offscreenMapCtx.fill();
+                    
+                    // Cracks
+                    offscreenMapCtx.strokeStyle = '#0a0805'; offscreenMapCtx.lineWidth = 1;
+                    offscreenMapCtx.beginPath(); offscreenMapCtx.moveTo(tx + 5, ty + 15); offscreenMapCtx.lineTo(tx + 15, ty + 25); offscreenMapCtx.stroke();
+                    
+                    // Top: Rough wood/soil
+                    offscreenMapCtx.fillStyle = '#3d2b1f'; offscreenMapCtx.fillRect(tx, ty, TILE_SIZE, 6);
+                    offscreenMapCtx.fillStyle = '#1a120b'; offscreenMapCtx.fillRect(tx, ty + 6, TILE_SIZE, 2);
+                    
+                    // Ore flecks
+                    if ((row * 7 + col * 3) % 11 < 3) {
+                        offscreenMapCtx.fillStyle = (col % 2 === 0) ? '#ffd700' : '#ff8c00';
+                        offscreenMapCtx.fillRect(tx + 12 + (row%4)*4, ty + 12 + (col%4)*4, 2, 2);
+                    }
+                    // Wet highlight
+                    offscreenMapCtx.fillStyle = 'rgba(255, 255, 255, 0.05)'; offscreenMapCtx.fillRect(tx, ty, TILE_SIZE, 1);
+                } else {
+                    // Generic / Slums
+                    offscreenMapCtx.fillStyle = '#2f2c2b'; offscreenMapCtx.fillRect(tx, ty, TILE_SIZE, TILE_SIZE);
+                    offscreenMapCtx.fillStyle = '#6e3c15'; offscreenMapCtx.fillRect(tx, ty, TILE_SIZE, 4);
+                    offscreenMapCtx.fillStyle = '#110d0c'; offscreenMapCtx.fillRect(tx, ty + 4, TILE_SIZE, 2);
+                    offscreenMapCtx.strokeStyle = '#1a1818'; offscreenMapCtx.lineWidth = 2; offscreenMapCtx.strokeRect(tx + 2, ty + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+                }
+            } else if (tile === 2 || tile === 9) {
+                if (tile === 9) {
+                    if (bId === 2) { // Mine
+                        offscreenMapCtx.fillStyle = '#1a120b'; offscreenMapCtx.fillRect(tx, ty, TILE_SIZE, TILE_SIZE);
+                        offscreenMapCtx.fillStyle = '#2b1d12'; offscreenMapCtx.beginPath(); offscreenMapCtx.moveTo(tx, ty + 20); offscreenMapCtx.lineTo(tx + 20, ty + 10); offscreenMapCtx.lineTo(tx + 40, ty + 25); offscreenMapCtx.lineTo(tx + 40, ty + 40); offscreenMapCtx.lineTo(tx, ty + 40); offscreenMapCtx.fill();
+                        offscreenMapCtx.strokeStyle = '#0a0805'; offscreenMapCtx.lineWidth = 1; offscreenMapCtx.beginPath(); offscreenMapCtx.moveTo(tx + 5, ty + 15); offscreenMapCtx.lineTo(tx + 15, ty + 25); offscreenMapCtx.stroke();
+                        offscreenMapCtx.fillStyle = '#3d2b1f'; offscreenMapCtx.fillRect(tx, ty, TILE_SIZE, 6); offscreenMapCtx.fillStyle = '#1a120b'; offscreenMapCtx.fillRect(tx, ty + 6, TILE_SIZE, 2);
+                        if ((row * 7 + col * 3) % 11 < 3) { offscreenMapCtx.fillStyle = (col % 2 === 0) ? '#ffd700' : '#ff8c00'; offscreenMapCtx.fillRect(tx + 12 + (row%4)*4, ty + 12 + (col%4)*4, 2, 2); }
+                        offscreenMapCtx.fillStyle = 'rgba(255, 255, 255, 0.05)'; offscreenMapCtx.fillRect(tx, ty, TILE_SIZE, 1);
+                    } else { // Slums
+                        offscreenMapCtx.fillStyle = '#2f2c2b'; offscreenMapCtx.fillRect(tx, ty, TILE_SIZE, TILE_SIZE);
+                        offscreenMapCtx.fillStyle = '#6e3c15'; offscreenMapCtx.fillRect(tx, ty, TILE_SIZE, 4);
+                        offscreenMapCtx.fillStyle = '#110d0c'; offscreenMapCtx.fillRect(tx, ty + 4, TILE_SIZE, 2);
+                        offscreenMapCtx.strokeStyle = '#1a1818'; offscreenMapCtx.lineWidth = 2; offscreenMapCtx.strokeRect(tx + 2, ty + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+                    }
+                }
                 offscreenMapCtx.fillStyle = '#4a3d38'; offscreenMapCtx.fillRect(tx + 10, ty, 5, TILE_SIZE); offscreenMapCtx.fillRect(tx + 25, ty, 5, TILE_SIZE);
                 for (let i = 0; i < 4; i++) { offscreenMapCtx.fillStyle = '#78432a'; offscreenMapCtx.fillRect(tx + 10, ty + i * 10 + 5, 20, 3); }
             } else if (tile === 3) {
