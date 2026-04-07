@@ -1,116 +1,149 @@
 """
-GLITCH BOSS SPRITE GENERATOR
+GLITCH BOSS SPRITE GENERATOR V4
 Generates 4 frames of a 64x64 pixel array for the 'Glitch' boss.
-Output: src/assets/sprites_glitch.ts
+Focus: Detailed Face, 3-Point Jester Hat, and Wireframe Steed.
 """
 
 def generate_frame(frame_idx):
     size = 64
     grid = [[0 for _ in range(size)] for _ in range(size)]
     
-    # Offsets based on frame
-    y_off = 0
-    if frame_idx == 1: y_off = -2 # Frame 2: Shifted up 2
-    if frame_idx == 3: y_off = 1  # Frame 4: Shifted down 1
+    # COLOR MAPPING
+    BLACK = 5
+    SILVER = 10
+    TURQUOISE = 11
+    METALLIC_BLUE = 18
+    WHITE = 7
     
-    # 1. DEFINE STEED BODY (Metallic Blue + Black plating)
-    # Body main block (approx y 30-50, x 10-50)
-    for r in range(32, 48):
-        for c in range(10, 52):
+    # Animation Offsets
+    y_off = 0
+    if frame_idx == 1: y_off = -2 # Frame 2: Up 2
+    if frame_idx == 3: y_off = 1  # Frame 4: Down 1
+    
+    # MOTIF GENERATOR
+    def get_suit_color(r, c):
+        # Flicker logic for Frame 3
+        pattern_color = WHITE if frame_idx == 2 else BLACK
+        is_pattern = (c + r // 2) % 3 == 0 or (c * 2 + r) % 5 == 0
+        return pattern_color if is_pattern else SILVER
+
+    # 1. WIREFRAME STEED
+    # Body Main
+    for r in range(35, 52):
+        for c in range(12, 55):
             tr = r + y_off
             if 0 <= tr < size:
-                # Plating pattern
-                if (c + r) % 8 < 2:
-                    grid[tr][c] = 10 # Black Plate
-                else:
-                    grid[tr][c] = 11 # Metallic Blue
+                # Wireframe geometry
+                if r == 35 or r == 51 or c == 12 or c == 54 or (c + r) % 12 == 0:
+                    grid[tr][c] = METALLIC_BLUE
                     
-    # Steed Neck / Head
-    for r in range(25, 35):
-        for c in range(48, 60):
-            tr = r + y_off
-            # Angular neck
-            if c - 48 >= (r - 25):
-                if 0 <= tr < size and c < size:
-                    grid[tr][c] = 11
-                    
-    # Muzzle Energy Core (Turquoise)
-    for r in range(28, 33):
-        for c in range(56, 62):
+    # Steed Head & Muzzle
+    for r in range(18, 30):
+        for c in range(48, 64):
             tr = r + y_off
             if 0 <= tr < size and c < size:
-                grid[tr][c] = 18
-
-    # Steed Legs (Gallop Animation)
-    leg_pos = [
-        # Front Left, Front Right, Back Left, Back Right
-        [ (50, 48), (55, 48), (15, 48), (20, 48) ], # Frame 1: Standard
-        [ (52, 48), (57, 48), (17, 48), (22, 48) ], # Frame 2: Moving
-        [ (60, 44), (63, 44), (5, 44), (8, 44) ],   # Frame 3: Extended
-        [ (50, 48), (55, 48), (15, 48), (20, 48) ], # Frame 4: Returning
-    ]
-    
-    for lx, ly in leg_pos[frame_idx]:
-        for dr in range(0, 14):
-            for dc in range(-2, 3):
-                tr = ly + dr + y_off
-                tc = lx + dc
-                if 0 <= tr < size and 0 <= tc < size:
-                    grid[tr][tc] = 11
-                    # White Joint Highlights
-                    if dr % 6 == 0:
-                        grid[tr][tc] = 8
-
-    # 2. RIDER (GLITCH) - Silver + Black Circuitry
-    # Torso
-    rider_y_base = 15
-    rider_x_base = 25
-    torso_width = 16
-    torso_height = 20
-    
-    if frame_idx == 2: # Frame 3: Torso low
-        rider_y_base += 4
-        
-    for r in range(rider_y_base, rider_y_base + torso_height):
-        for c in range(rider_x_base - torso_width//2, rider_x_base + torso_width//2):
-            tr = r + y_off
-            if 0 <= tr < size and 0 <= c < size:
-                # Circuitry Pattern
-                is_pattern = (c * r) % 7 == 0 or (c + r) % 5 == 0
-                
-                # Frame 2: Patterns flicker with Cyan
-                if frame_idx == 1 and is_pattern:
-                    grid[tr][c] = 9 if (r + c + frame_idx) % 2 == 0 else 10
-                elif is_pattern:
-                    grid[tr][c] = 10 # Black
-                else:
-                    grid[tr][c] = 5  # Silver
+                if c > 58: # Muzzle
+                    grid[tr][c] = TURQUOISE
+                elif r == 18 or r == 29 or c == 48:
+                    grid[tr][c] = METALLIC_BLUE
                     
-    # Jester Hat (Two horns)
-    for r in range(rider_y_base - 12, rider_y_base):
-        for c in range(rider_x_base - 10, rider_x_base + 11):
-            tr = r + y_off
-            if 0 <= tr < size and 0 <= c < size:
-                # Horn logic
-                dx = abs(c - rider_x_base)
-                if dx > 4 and r - (rider_y_base - 12) > (dx - 5):
-                    # alternating colors
-                    grid[tr][c] = 10 if c < rider_x_base else 5
-                    # Bells (Metallic Blue)
-                    if r == rider_y_base - 12:
-                        grid[tr][c] = 11
+    # Googly Eye (Fixed position relative to head)
+    eye_x, eye_y = 58, 22 + y_off # x:58, y:18 relative might be too high, using 22 for anatomy
+    if 0 <= eye_y < size:
+        for dr in range(-1, 2):
+            for dc in range(-1, 2):
+                grid[eye_y + dr][eye_x + dc] = WHITE
+        grid[eye_y][eye_x] = BLACK
 
-    # 3. EMPTY ZONES (MANDATORY)
-    # Hair: (20, 15) to (44, 25)
-    for r in range(15, 26):
-        for c in range(20, 45):
+    # Legs (Animated)
+    leg_ext = [12, 10, 12, 16][frame_idx] # F4: Legs extended
+    for lx in [15, 25, 42, 50]:
+        for dr in range(leg_ext):
+            tr = 51 + dr + y_off
+            if 0 <= tr < size:
+                grid[tr][lx] = METALLIC_BLUE
+                if dr % 5 == 0: grid[tr][lx] = TURQUOISE
+
+    # 2. RIDER (GLITCH)
+    rider_x = 22
+    rider_y = 35 + y_off
+    
+    # Torso & Limbs (Slightly larger for detail)
+    for dr in range(-20, 0):
+        for dc in range(-10, 11):
+            tr = rider_y + dr
+            tc = rider_x + dc
+            if 0 <= tr < size and 0 <= tc < size:
+                # Droid silhouette
+                d = abs(dc)
+                if (dr < -15 and d < 6) or (-15 <= dr < -5 and d < 9) or (dr >= -5 and d < 8):
+                    grid[tr][tc] = get_suit_color(tr, tc)
+
+    # DETAILED FACE (Silver base with Black markings)
+    face_y = rider_y - 20
+    for dr in range(-6, 2):
+        for dc in range(-4, 5):
+            tr = face_y + dr
+            tc = rider_x + dc
+            if 0 <= tr < size and 0 <= tc < size:
+                # Face Base
+                grid[tr][tc] = SILVER
+                
+                # Eye Starbursts (Black points around eyes)
+                is_eye = (dr == -3 or dr == -2) and (abs(dc) == 2)
+                is_star = abs(dr + 2.5) + abs(abs(dc) - 2) < 2.5
+                
+                # Mouth circuitry
+                is_mouth = (dr == 0) and abs(dc) < 3
+                is_lip_line = (dr == 1) and abs(dc) < 2
+                
+                # Flicker Frame logic
+                marking_color = WHITE if frame_idx == 2 else BLACK
+                
+                if is_eye:
+                    grid[tr][tc] = BLACK # Eye socket
+                    if (dr == -3 and abs(dc) == 2): grid[tr][tc] = WHITE # Glint
+                elif is_star or is_mouth:
+                    grid[tr][tc] = marking_color
+                elif is_lip_line:
+                    grid[tr][tc] = BLACK
+
+    # 3-POINT JESTER HAT
+    hat_y = face_y - 8
+    for dr in range(-12, 0):
+        for dc in range(-18, 19):
+            # Points trailing for frame 2
+            sway = 0
+            if frame_idx == 1: sway = 6 # Trailing
+            
+            p_dist = abs(dc)
+            # Three distinct points
+            is_point = False
+            p_idx = 0
+            if p_dist > 12: # Outer points
+                is_point = (dr + sway//2) > (p_dist - 20)
+                p_idx = 1
+            elif p_dist < 4: # Center point
+                is_point = (dr) > -12
+                p_idx = 2
+                
+            if is_point:
+                tr_h = hat_y + dr
+                tc_h = rider_x + dc
+                if 0 <= tr_h < size and 0 <= tc_h < size:
+                    # Silver points with Black tips
+                    grid[tr_h][tc_h] = SILVER if dr > -10 else BLACK
+
+    # 3. EMPTY ZONES (12x12)
+    # Hair: Behind rider's head (approx x 10, y 5)
+    for r in range(5, 17):
+        for c in range(10, 22):
             tr = r + y_off
             if 0 <= tr < size:
                 grid[tr][c] = 0
-                
-    # Tail Anchor: Back of steed (approx x 5-15, y 35-45)
-    for r in range(35, 46):
-        for c in range(5, 16):
+    # Tail: Behind horse
+    for r in range(35, 47):
+        for c in range(0, 12):
             tr = r + y_off
             if 0 <= tr < size:
                 grid[tr][c] = 0
@@ -120,19 +153,17 @@ def generate_frame(frame_idx):
 def save_sprites():
     with open('src/assets/sprites_glitch.ts', 'w') as f:
         f.write("/**\n")
-        f.write(" * GLITCH BOSS ASSETS\n")
-        f.write(" * Rider on Virtual Steed (64x64)\n")
+        f.write(" * GLITCH BOSS ASSETS V4\n")
+        f.write(" * Focus: Detailed Face & 3-Point Hat\n")
         f.write(" */\n\n")
         for i in range(4):
             grid = generate_frame(i)
-            # Flatten grid
-            flat = [pixel for row in grid for pixel in row]
+            flat = [p for r in grid for p in r]
             f.write(f"export const sprGlitch{i+1} = [\n")
-            # Write in chunks of 64 for readability
             for row in range(64):
                 f.write("  " + ",".join(map(str, flat[row*64:(row+1)*64])) + ",\n")
             f.write("];\n\n")
 
 if __name__ == "__main__":
     save_sprites()
-    print("Generated src/assets/sprites_glitch.ts")
+    print("Regenerated src/assets/sprites_glitch.ts with Facial Detail V4.")

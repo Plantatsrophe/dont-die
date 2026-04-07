@@ -132,6 +132,10 @@ export function spawnBoss(col, row) {
         vibrateX: 0,
         hasSeenPlayer: false,
         squash: 1.0,
-        squashTimer: 0
+        squashTimer: 0,
+        hairTrail1: [],
+        hairTrail2: [],
+        maneTrail: [],
+        tailTrail: []
     };
 }

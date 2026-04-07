@@ -109,10 +109,10 @@ export function parseMap(resetEntities = true) {
                 if (resetEntities) spawnBoss(col, row);
                 rowData.push(0);
             } else if (char === 'V') { // Septicus Valve
-                if (resetEntities) G.items.push({ x:col*TILE_SIZE, y:row*TILE_SIZE, width:32, height:32, collected:false, type:'valve' });
+                if (resetEntities && biomeId === 1) G.items.push({ x:col*TILE_SIZE, y:row*TILE_SIZE, width:32, height:32, collected:false, type:'valve' });
                 rowData.push(0);
             } else if (char === 'D') { // Final Game Detonator
-                if (resetEntities) G.items.push({ x:col*TILE_SIZE, y:row*TILE_SIZE, width:32, height:32, collected:false, type:'detonator' });
+                if (resetEntities && biomeId === 4) G.items.push({ x:col*TILE_SIZE, y:row*TILE_SIZE, width:32, height:32, collected:false, type:'detonator' });
                 rowData.push(0);
             } else if (char === 'M') { // Masticator Destruction Bomb
                 if (resetEntities) G.bombs.push({ active:false, x:col*TILE_SIZE+4, y:row*TILE_SIZE, width:32, height:32, vx:0, vy:0, col, row, type:'bomb' });
@@ -187,10 +187,12 @@ window.addLives = function(n: number = 1) {
     return `Added ${n} lives. Current lives: ${player.lives}`;
 };
 
-window.godMode = function(on: boolean = true) {
-    if (on) player.lives = 999;
-    else player.lives = 3;
-    return `God Mode ${on ? 'Enabled' : 'Disabled'}`;
+window.godMode = function(on: boolean | undefined) {
+    if (on === undefined) player.isInvincible = !player.isInvincible;
+    else player.isInvincible = on;
+    
+    if (player.isInvincible) player.lives = 999; // Purely cosmetic life pool
+    return `God Mode ${player.isInvincible ? 'ENABLED (True Invincibility)' : 'DISABLED'}`;
 };
 
 // Convenience property proxy for index-based jumping

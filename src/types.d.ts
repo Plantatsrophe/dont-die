@@ -54,6 +54,7 @@ export interface IPlayer {
     portalY?: number; // Target Y for level-clear warp
     cutsceneTimer?: number; // Accumulator for cinematic sequences
     droppingThrough?: boolean; // Flag to ignore one-way floor collisions
+    isInvincible?: boolean; // God mode toggle
 }
 
 /**
@@ -107,6 +108,7 @@ export interface IItem extends IEntity {
  */
 export interface ILaser extends IEntity {
     vx: number;
+    vy?: number;
 }
 
 /**
@@ -146,6 +148,10 @@ export interface IBoss extends IEntity {
     squash: number; // Scale factor for landing impact
     squashTimer: number;
     projs?: any[]; // Dynamic list of secondary boss hazards
+    hairTrail1?: { x: number, y: number }[]; // Movement history for rider hair (Pony Tail 1)
+    hairTrail2?: { x: number, y: number }[]; // Movement history for rider hair (Pony Tail 2)
+    maneTrail?: { x: number, y: number }[]; // Movement history for steed mane
+    tailTrail?: { x: number, y: number }[]; // Movement history for steed tail
 }
 
 /**

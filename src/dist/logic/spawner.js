@@ -122,12 +122,12 @@ export function parseMap(resetEntities = true) {
                 rowData.push(0);
             }
             else if (char === 'V') { // Septicus Valve
-                if (resetEntities)
+                if (resetEntities && biomeId === 1)
                     G.items.push({ x: col * TILE_SIZE, y: row * TILE_SIZE, width: 32, height: 32, collected: false, type: 'valve' });
                 rowData.push(0);
             }
             else if (char === 'D') { // Final Game Detonator
-                if (resetEntities)
+                if (resetEntities && biomeId === 4)
                     G.items.push({ x: col * TILE_SIZE, y: row * TILE_SIZE, width: 32, height: 32, collected: false, type: 'detonator' });
                 rowData.push(0);
             }
@@ -203,12 +203,14 @@ window.addLives = function (n = 1) {
     player.lives += n;
     return `Added ${n} lives. Current lives: ${player.lives}`;
 };
-window.godMode = function (on = true) {
-    if (on)
-        player.lives = 999;
+window.godMode = function (on) {
+    if (on === undefined)
+        player.isInvincible = !player.isInvincible;
     else
-        player.lives = 3;
-    return `God Mode ${on ? 'Enabled' : 'Disabled'}`;
+        player.isInvincible = on;
+    if (player.isInvincible)
+        player.lives = 999; // Purely cosmetic life pool
+    return `God Mode ${player.isInvincible ? 'ENABLED (True Invincibility)' : 'DISABLED'}`;
 };
 // Convenience property proxy for index-based jumping
 Object.defineProperty(window, 'currentLevel', {

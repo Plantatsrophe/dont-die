@@ -5,7 +5,7 @@
  * Handles procedural limb animations, clipping effects, and dynamic scaling.
  */
 
-import { G, ctx, TILE_SIZE, particlePool } from '../core/globals.js';
+import { G, ctx, TILE_SIZE, particlePool, player } from '../core/globals.js';
 import { sprSepticus1, sprSepticus2, sprSepticus3, sprSepticus4, sprSepticus5, sprManhole, sprAuhGr1, sprAuhGr2, sprAuhGr3, sprGlitch1, sprGlitch2, sprGlitch3, sprGlitch4 } from '../assets/assets.js';
 import { drawSprite, drawGlow } from './render_utils.js';
 import type { IBoss } from '../types.js';
@@ -55,6 +55,86 @@ export function drawMasticator(boss: IBoss) {
     
     // Damage feedback overlay
     if (boss.hurtTimer > 0) { ctx.fillStyle = 'white'; ctx.globalAlpha = 0.5; ctx.fillRect(cx, cy, bw, bh); ctx.globalAlpha = 1; }
+}
+
+/**
+ * Generic Procedural Fiber Rendering
+ * Draws multiple glow-strands for a given trail of points.
+ */
+function drawFiberStrands(points: {x:number, y:number}[] | undefined, strandCount: number, colorHue: number, isFlipped: boolean, alpha: number = 0.8, boss?: IBoss, isMedusa: boolean = false, broadness: number = 1.0, tallness: number = 0.0, baseSpread: number = 0.0) {
+    if (!points || points.length < 2) return;
+    
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.globalAlpha = alpha;
+    ctx.lineWidth = 1.2;
+    
+    const time = Date.now();
+    const dragDir = isFlipped ? 1.2 : -1.2; // Trail pulls opposite of facing
+    
+    // Atmospheric Pulse Logic: Orbs now maintain a permanent 13px footprint
+    // and have a faint, slow 'breathing' sine wave even when idle.
+    let orbRadius = 0;
+    let orbAlpha = 0;
+    let tipX = 0, tipY = 0;
+    if (isMedusa && boss) {
+        orbRadius = 15; // ZERO SNAPPING: Footprint is now physically locked
+        
+        // Base Breathing Pulse (Oscillates between 0.1 and 0.25 alpha)
+        const idleAlpha = 0.15 + Math.sin(Date.now() * 0.004) * 0.1;
+        
+        // CHARGE UP: 0.8s leading up to firing (0.7 to 1.5s)
+        if (boss.timer >= 0.7) {
+            const charge = (boss.timer - 0.7) / 0.8;
+            // Sine-based easing (ease-in-out) for much smoother swelling
+            const swell = Math.sin(charge * Math.PI / 2);
+            orbAlpha = idleAlpha + (0.85 - idleAlpha) * swell;
+        }
+        // FADE OUT: 0.4s immediately after firing (0.0 to 0.4s)
+        else if (boss.timer <= 0.4) {
+            const fade = boss.timer / 0.4;
+            // Sine-based easing (ease-out) for smooth dissipation
+            const dissipate = 1.0 - Math.sin(fade * Math.PI / 2);
+            orbAlpha = idleAlpha + (0.85 - idleAlpha) * dissipate;
+        }
+        else {
+            orbAlpha = idleAlpha; // Maintain breathing state during the middle of the cycle
+        }
+        
+        // Tip dynamically tracks the physical end of the chain
+        tipX = points[points.length - 1].x;
+        tipY = points[points.length - 1].y;
+    }
+    
+    for (let i = 0; i < strandCount; i++) {
+        // Performance optimization: bloom only on primary strands
+        ctx.shadowBlur = (i < 2) ? 6 : 0;
+        ctx.shadowColor = `hsl(${(colorHue + i * 20) % 360}, 100%, 50%)`;
+        ctx.strokeStyle = `hsl(${(colorHue + i * 20) % 360}, 100%, 75%)`;
+        
+        ctx.beginPath();
+        for (let j = 0; j < points.length; j++) {
+            const p = points[j];
+            // Broadness scales rendering spread across strands
+            // baseSpread creates a flat offset even at j=0 so strands root from multiple distinct points
+            const spread = (i - strandCount/2) * (baseSpread + broadness * (j * 0.5));
+            let drawX = p.x + spread; 
+            let drawY = p.y - (j * tallness); // tallness pulls hair vertically visually
+            
+            if (j === 0) ctx.moveTo(drawX, drawY);
+            else ctx.lineTo(drawX, drawY);
+        }
+        ctx.stroke();
+        
+        // Draw bright laser nodes at the tips for Medusa mode
+        if (isMedusa && orbAlpha > 0) {
+            ctx.save();
+            // Stable Radius Fade: Pass opaque color to keep gradient footprint and use second parameter for alpha
+            drawGlow(ctx, tipX, tipY, orbRadius, `rgba(255, 255, 255, 1.0)`, orbAlpha);
+            ctx.restore(); 
+        } 
+    }
+    ctx.restore();
 }
 
 /**
@@ -110,15 +190,44 @@ export function renderBoss() {
         ctx.restore();
     } else if (boss.type === 'glitch') {
         // Glitch: Rider on Virtual Steed (64x64)
+        const dir = player.x < boss.x ? -1 : 1;
+        const isFlipped = dir < 0;
+        
+        // Render procedural fiber optics BEFORE the sprite (Rider hair, Steed mane, Steed tail)
+        const time = Date.now() * 0.1;
+        // Two Pony Tails for Rider
+        drawFiberStrands(boss.hairTrail1, 5, time, isFlipped, 1.0, boss, true, 0.5); 
+        drawFiberStrands(boss.hairTrail2, 5, time + 20, isFlipped, 0.9, boss, true, 0.5); 
+        
+        // Mane and Tail for Steed (Broad mane, long tail)
+        // Mane: Narrower (0.6) and shorter height (tallness 1.0), with robust base spread (2.5) to sprout from multiple neck points
+        drawFiberStrands(boss.maneTrail, 8, 180, isFlipped, 0.8, undefined, false, 0.6, 1.0, 2.5);  
+        drawFiberStrands(boss.tailTrail, 6, 260, isFlipped, 0.9, undefined, false, 1.2);      // Extended rump tail
+        
         const frames = [sprGlitch1, sprGlitch2, sprGlitch3, sprGlitch4];
         const frameIdx = Math.floor(G.timerAcc * 10) % frames.length; // 10 FPS gallop
-        const dir = boss.vx < 0 ? -1 : 1;
         
         ctx.save();
         // Shift sprite slightly based on direction for lean
         const lean = dir === 1 ? 0 : 0; 
         drawSprite(ctx, frames[frameIdx], boss.x + lean, boss.y, boss.width, boss.height, dir < 0, 64);
         
+        // --- ADD ORBS OF LIGHT IN NEGATIVE SPACE ---
+        // Coordinates match the hair-gap anchors (hX1, hX2, hY1 from physics_boss)
+        const gapX1 = boss.x + (isFlipped ? 65 : 13);
+        const gapX2 = boss.x + (isFlipped ? 37 : 41);
+        const gapY = boss.y + 12;
+        
+        const pulse = Math.sin(time * 0.05) * 5;
+        
+        // Inner intense white core
+        drawGlow(ctx, gapX1, gapY, 15 + pulse, 'rgba(255, 255, 255, 0.9)');
+        drawGlow(ctx, gapX2, gapY, 15 + pulse, 'rgba(255, 255, 255, 0.9)');
+        
+        // Outer colorful halos (Cyan / Magenta)
+        drawGlow(ctx, gapX1, gapY, 35 + pulse, 'rgba(0, 255, 255, 0.6)');
+        drawGlow(ctx, gapX2, gapY, 35 + pulse, 'rgba(255, 0, 255, 0.6)');
+
         // Atmospheric Cyan Glow around the core muzzle area (approx right side if facing right)
         const glowX = dir === 1 ? boss.x + boss.width - 8 : boss.x + 8;
         drawGlow(ctx, glowX, boss.y + boss.height * 0.6, 40, 'rgba(0, 255, 255, 0.4)');

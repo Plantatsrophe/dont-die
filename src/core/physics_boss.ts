@@ -6,6 +6,46 @@ import { updateMasticator } from './physics_boss_masticator.js';
 import { updateSepticus } from './physics_boss_septicus.js';
 
 /**
+ * Inverse Kinematics (IK) physics chain for highly procedural fiber optics. 
+ * Allows strings to float like "living snakes" and prevents positional wrapping when turning.
+ */
+function updateLivingChain(chain: {x:number, y:number}[], targetLength: number, headX: number, headY: number, idealDist: number, waveOffset: number, windX: number = 0, windY: number = 0, wiggle: number = 0.5) {
+    if (chain.length < targetLength) {
+        chain.length = 0; // reset
+        for (let i = 0; i < targetLength; i++) chain.push({x: headX, y: headY});
+    }
+
+    // Attach head
+    chain[0].x = headX;
+    chain[0].y = headY;
+    
+    // Ambient breathing / living force
+    const time = Date.now() * 0.005;
+
+    // Resolve IK Constraints (forward kinematic pass)
+    for (let i = 1; i < chain.length; i++) {
+        let p0 = chain[i-1];
+        let p1 = chain[i];
+        
+        // Autonomous life (wriggle and float like snakes, plus directional environmental wind)
+        // TIP-SCALING: Movement becomes exponentially stronger towards the tips of the hair
+        const tipFactor = (i / chain.length) * wiggle;
+        p1.x += Math.sin(time + i * 0.5 + waveOffset) * tipFactor + windX;
+        p1.y += Math.cos(time * 0.8 + i * 0.4 + waveOffset) * tipFactor + windY;
+
+        // Stick constraint calculation (forces consistent distance)
+        let dx = p0.x - p1.x;
+        let dy = p0.y - p1.y;
+        let dist = Math.sqrt(dx * dx + dy * dy) || 1;
+        
+        let diff = dist - idealDist;
+        // Spring stiffness: 0.5 pushes/pulls it halfway to the ideal distance per frame
+        p1.x += (dx / dist) * diff * 0.8; 
+        p1.y += (dy / dist) * diff * 0.8;
+    }
+}
+
+/**
  * Triggers the spectacular destruction sequence for any defeated boss.
  * Cleans up entity state, unlocks exits/valves, and mutates the current map
  * layout to permit the player to progress.
@@ -114,11 +154,62 @@ export function updateBoss(dt: number) {
         updateAuhGr(boss, dt);
     } else if (boss.type === 'glitch') {
         // Glitch Boss (Level 79) - Shoots rapid-fire straight lasers directly at the player
+        if (!boss.hairTrail1) boss.hairTrail1 = [];
+        if (!boss.hairTrail2) boss.hairTrail2 = [];
+        if (!boss.maneTrail) boss.maneTrail = [];
+        if (!boss.tailTrail) boss.tailTrail = [];
+        
+        // --- MOVEMENT LOGIC ---
+        // Stationary: Glitch stays put so physics can be observed clearly.
+        boss.vx = 0;
+        
+        // Procedural Anchor Math (64x64 grid)
+        const isFlipped = player.x < boss.x;
+        const dragDir = isFlipped ? 1.5 : -1.5; // Wind force pulling opposite of facing direction
+        
+        // 1. Rider Hair (Two Pony Tails centered perfectly in the raised wide gaps)
+        const hX1 = boss.x + (isFlipped ? 65 : 13), hY = boss.y + 12; 
+        const hX2 = boss.x + (isFlipped ? 37 : 41);
+        
+        // Anti-Gravity Snake Vectors (pull outward from ears, and strongly upward)
+        const pullX1 = isFlipped ? 1.5 : -1.5;
+        const pullX2 = isFlipped ? -1.5 : 1.5;
+        
+        updateLivingChain(boss.hairTrail1, 20, hX1, hY, 2.0, 0, pullX1, -2.0, 3.5);   
+        updateLivingChain(boss.hairTrail2, 20, hX2, hY, 2.0, 100, pullX2, -2.0, 3.5);
+
+        // 2. Steed Mane (Just behind the head)
+        const mX = boss.x + (isFlipped ? 18 : 46), mY = boss.y + 24;
+        updateLivingChain(boss.maneTrail, 8, mX, mY, 2.5, 50, 0, 0, 0.8);
+
+        // 3. Steed Tail (Extended rump tail trailing behind)
+        const tX = boss.x + (isFlipped ? 58 : 6), tY = boss.y + 48;
+        updateLivingChain(boss.tailTrail, 25, tX, tY, 2.0, 200, dragDir, 0, 0.8);
+
         if (boss.timer > 1.5) { 
             boss.timer = 0; 
-            let l = getNextLaser(); l.active = true; l.width = 16; l.height = 8; 
-            l.x = boss.x + boss.width/2; l.y = player.y + player.height/2; 
-            l.vx = Math.random() > 0.5 ? -250 : 250; 
+            const trails = [boss.hairTrail1, boss.hairTrail2];
+            
+            for (let trail of trails) {
+                if (!trail || trail.length === 0) continue;
+                let l = getNextLaser(); l.active = true; l.width = 16; l.height = 8; 
+                
+                // Calculate the true physical tip for this specific pony tail
+                const tipNode = trail[trail.length - 1];
+                const tipX = tipNode.x;
+                const tipY = tipNode.y; 
+                
+                l.x = tipX; 
+                l.y = tipY; 
+                
+                // Calculate angled trajectory towards the player's center
+                const ldx = player.x + player.width/2 - tipX;
+                const ldy = player.y + player.height/2 - tipY;
+                const ldist = Math.sqrt(ldx * ldx + ldy * ldy) || 1;
+                
+                l.vx = (ldx / ldist) * 350; 
+                l.vy = (ldy / ldist) * 350;
+            }
             playSound('shoot'); 
         }
     } else if (boss.type === 'goliath') {

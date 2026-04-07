@@ -13,9 +13,9 @@
  */
 const pal: { [key: number]: string | null } = {
   0: null, 1: '#f1c27d', 2: '#ff2222', 3: '#f1c40f', 4: '#5c4033',
-  5: '#C0C0C0', 6: '#444444', 7: '#2ecc71', 8: '#ffffff', 9: '#00ffff',
-  10: '#050505', 11: '#0066ff', 12: '#8b4513', 13: '#222222', 14: '#3ee855', 15: '#1e90ff', 16: '#5e4533',
-  17: '#ff00ff', 18: '#00cccc'
+  5: '#050505', 6: '#444444', 7: '#ffffff', 8: '#ffffff', 9: '#00ffff',
+  10: '#C0C0C0', 11: '#00cccc', 12: '#8b4513', 13: '#222222', 14: '#3ee855', 15: '#1e90ff', 16: '#5e4533',
+  17: '#ff00ff', 18: '#0066ff', 19: '#2ecc71'
 };
 
 /**
@@ -50,8 +50,9 @@ export function drawSprite(ctx: CanvasRenderingContext2D, spr: number[], x: numb
 /**
  * Optimized Bloom Effect.
  * Draws a radial gradient glow from the cache to improve performance during busy scenes.
+ * Decouples alpha from the color string to prevent perceptual shrinking during fades.
  */
-export function drawGlow(ctx: CanvasRenderingContext2D, x: number, y: number, radius: number, colorStr: string) {
+export function drawGlow(ctx: CanvasRenderingContext2D, x: number, y: number, radius: number, colorStr: string, alpha: number = 1.0) {
     const key = `${Math.floor(radius)}_${colorStr}`;
     let cached = GLOW_CACHE.get(key);
     
@@ -72,6 +73,7 @@ export function drawGlow(ctx: CanvasRenderingContext2D, x: number, y: number, ra
 
     ctx.save();
     ctx.globalCompositeOperation = 'lighter'; // Additive blending for "glow" look
+    ctx.globalAlpha *= alpha; // Apply external alpha to the entire gradient image
     ctx.drawImage(cached, x - radius, y - radius);
     ctx.restore();
 }

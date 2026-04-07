@@ -240,9 +240,10 @@ function updateGame(dt: number) {
     for (let l of laserPool) {
         if (!l.active) continue;
         l.x += l.vx * dt;
+        l.y += (l.vy || 0) * dt;
         let hitWall = false;
         for (let t of getCollidingTiles(l)) { if (t.type === 1) hitWall = true; }
-        if (hitWall || l.x < 0 || l.x > G.mapCols * TILE_SIZE) { l.active = false; continue; }
+        if (hitWall || l.x < 0 || l.x > G.mapCols * TILE_SIZE || l.y < 0 || l.y > G.mapRows * TILE_SIZE) { l.active = false; continue; }
         if (checkRectCollision(player, l)) { playerDeath(); return; }
     }
 }

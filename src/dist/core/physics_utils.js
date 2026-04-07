@@ -45,8 +45,8 @@ export function getCollidingTiles(rect) {
  * resetting boss mechanics, and spawning the gruesome death quad-particles.
  */
 export function playerDeath() {
-    if (G.gameState === 'DYING')
-        return; // Prevent double execution
+    if (G.gameState === 'DYING' || player.isInvincible)
+        return; // Prevent double execution or God Mode death
     playSound('die');
     G.gameState = 'DYING';
     player.dyingTimer = 0;

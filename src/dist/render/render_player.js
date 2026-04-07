@@ -38,6 +38,11 @@ export function renderPlayer() {
     }
     else {
         // Standard Gameplay Drawing
+        // If God Mode is active, draw a pulsing golden shimmer
+        if (player.isInvincible) {
+            const glowAlpha = 0.3 + Math.sin(Date.now() * 0.005) * 0.2;
+            drawGlow(ctx, player.x + 16, player.y + 20, 50, `rgba(255, 215, 0, ${glowAlpha})`);
+        }
         drawGlow(ctx, player.x + 12, player.y + 16, 40, 'rgba(255, 150, 0, 0.25)');
         drawSprite(ctx, sprHero, player.x, player.y + wY, player.width, player.height, playerFlip);
     }
