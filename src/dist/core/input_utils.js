@@ -30,17 +30,20 @@ export function processDownInput(el) {
 /**
  * Central jump logic used by keyboard, touch, and bot stomp events.
  * Manages the transition between grounded, climbing, and double-jump states.
+ * Now includes support for Coyote Time and Jump Buffering.
  */
 export function handleJump() {
     if (G.gameState !== 'PLAYING')
         return;
-    // Normal Jump (Grounded or Climbing)
-    if (player.isOnGround || player.isClimbing) {
+    // Normal Jump (Grounded, Climbing, or Coyote Time grace period)
+    if (player.isOnGround || player.isClimbing || player.coyoteTimer > 0) {
         player.riding = null; // Instantly detach from any moving platform
         player.vy = player.jumpPower;
         player.isOnGround = false;
         player.isClimbing = false;
         player.doubleJump = true; // Empower the second jump
+        player.coyoteTimer = 0; // Consume Coyote Time
+        player.jumpBufferTimer = 0; // Clear any pending jump requests
         playSound('jump');
     }
     // Mid-air Double Jump
@@ -49,5 +52,18 @@ export function handleJump() {
         player.vy = player.jumpPower * 0.9; // Second jump is slightly less powerful (90%)
         player.doubleJump = false;
         playSound('jump');
+    }
+    // Jump Buffer fallback (missed timing)
+    else {
+        player.jumpBufferTimer = 0.15; // Remember intent for 150ms
+    }
+}
+/**
+ * Triggered when the jump key is released to allow for variable jump heights.
+ * If the player is still ascending, cutting the velocity yields a shorter hop.
+ */
+export function handleJumpRelease() {
+    if (player.vy < 0) {
+        player.vy *= 0.5;
     }
 }

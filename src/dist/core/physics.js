@@ -4,6 +4,7 @@ import { parseMap, resetPlayerPosition } from '../logic/spawner.js';
 import { getCollidingTiles, playerDeath, checkRectCollision } from './physics_utils.js';
 import { updateBoss } from './physics_boss.js';
 import { updateBombs } from './physics_weapons.js';
+import { handleJump } from './input_utils.js';
 /**
  * The master physics loop executed every frame.
  * Handles the player movement state machine, environment collisions, moving platforms,
@@ -12,6 +13,20 @@ import { updateBombs } from './physics_weapons.js';
  * @param dt Delta time for framerate independent momentum
  */
 export function updatePhysics(dt) {
+    // --- TICK JUMP STATE TIMERS ---
+    // If the player is on solid ground, refresh the 0.05s Coyote Time grace period.
+    // This allows them to jump briefly (roughly 3 frames) after walking off a ledge.
+    if (player.isOnGround) {
+        player.coyoteTimer = 0.05;
+    }
+    else if (player.coyoteTimer > 0) {
+        player.coyoteTimer -= dt;
+    }
+    // Always wind down the Jump Buffer. If this stays above 0, the player 
+    // recently tried to jump but was in mid-air.
+    if (player.jumpBufferTimer > 0) {
+        player.jumpBufferTimer -= dt;
+    }
     // --- MOVING PLATFORMS (LATCHING LOGIC) ---
     // If the player jumps, climbs, or walks off the edge of their currently latched platform, detach them.
     if (player.riding) {
@@ -324,4 +339,10 @@ export function updatePhysics(dt) {
     // Broadcast generic component calls
     updateBoss(dt);
     updateBombs(dt);
+    // --- JUMP BUFFER EXECUTION ---
+    // At the very end of the physics loop, if the player is grounded (or on a platform)
+    // and they have a pending jump buffered, execute it immediately.
+    if ((player.isOnGround || player.riding) && player.jumpBufferTimer > 0) {
+        handleJump();
+    }
 }

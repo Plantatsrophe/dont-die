@@ -44,7 +44,9 @@ export const player = {
     rideOffsetX: 0,
     lives: 3,
     score: 0,
-    color: '#3498db'
+    color: '#3498db',
+    coyoteTimer: 0,
+    jumpBufferTimer: 0
 };
 /**
  * Real-time hardware key state tracker.

@@ -1,7 +1,7 @@
 import { G, keys } from './globals.js';
 import { initAudio, startBackgroundMusic } from '../assets/audio.js';
 import { handleUIAccept } from './game.js';
-import { processDownInput, handleJump } from './input_utils.js';
+import { processDownInput, handleJump, handleJumpRelease } from './input_utils.js';
 import { initTouchControls } from './input_touch.js';
 /**
  * Global application Keyboard Listener - Keydown
@@ -71,12 +71,16 @@ window.addEventListener('keyup', (e) => {
         keys.ArrowLeft = false;
     if (e.code === 'ArrowRight' || e.code === 'KeyD')
         keys.ArrowRight = false;
-    if (e.code === 'ArrowUp' || e.code === 'KeyW')
+    if (e.code === 'ArrowUp' || e.code === 'KeyW') {
         keys.ArrowUp = false;
+        handleJumpRelease();
+    }
     if (e.code === 'ArrowDown' || e.code === 'KeyS')
         keys.ArrowDown = false;
-    if (e.code === 'Space')
+    if (e.code === 'Space') {
         G.spacePressed = false;
+        handleJumpRelease();
+    }
 });
 // Boot the virtual joystick system dynamically if the browser supports mobile touch APIs
 initTouchControls();

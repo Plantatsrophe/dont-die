@@ -46,6 +46,8 @@ export interface IPlayer {
     lives: number;
     score: number;
     color: string;
+    coyoteTimer: number; // Grace period for jumping after falling
+    jumpBufferTimer: number; // Grace period for pre-landing jump inputs
     lastDir?: number; // Last-moved direction (-1 or 1) for sprite flipping
     dyingTimer?: number; // Accumulator for death animation
     portalX?: number; // Target X for level-clear warp
