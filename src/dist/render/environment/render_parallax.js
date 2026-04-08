@@ -6,7 +6,7 @@
  * relative to the camera to create a 3D sense of scale in a 2D world.
  */
 import { G, canvas, ctx } from '../../core/globals.js';
-import { drawSlumsParallax, drawSewerParallax, drawMineParallax, renderVirtualBackground, drawH311Parallax, drawSlumsLayer2 } from './render_biomes.js';
+import { drawSlumsParallax, drawSewerParallax, drawMineParallax, renderVirtualBackground, drawH311Parallax, drawH311Midground, drawSlumsLayer2 } from './render_biomes.js';
 /**
  * Renders the primary background layers (Sky & Far Parallax).
  * Switches logic based on the current Biome ID.
@@ -41,9 +41,9 @@ export function renderParallax() {
         skyGradient.addColorStop(0, '#0a0a1a');
         skyGradient.addColorStop(1, '#0a0a1a');
     }
-    else if (bId === 4) { // H311: Hellish reds
-        skyGradient.addColorStop(0, '#2b0202');
-        skyGradient.addColorStop(1, '#7a0505');
+    else if (bId === 4) { // H311: Hellish Reds
+        skyGradient.addColorStop(0, '#0a0000'); // Midnight Black/Red
+        skyGradient.addColorStop(1, '#b50202'); // Deep Crimson
     }
     else { // Slums: Sunset urban oranges
         skyGradient.addColorStop(0, '#0a0a1a');
@@ -72,4 +72,6 @@ export function renderParallaxLayer2() {
     const bId = Math.floor(currentLevel / 20) % 5;
     if (bId === 0)
         drawSlumsLayer2(G.camera.x); // Distant mountains/cityscape for Slums
+    else if (bId === 4)
+        drawH311Midground(G.camera.x * 0.15); // Monolithic silhouettes for H311
 }

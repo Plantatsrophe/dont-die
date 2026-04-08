@@ -55,8 +55,8 @@ function spawnNewRift() {
         }
     }
     // 4. Vertical Positioning
-    // Prefer row 1 or 2 as Row 0 is often a solid ceiling border in H311.
-    const targetRow = 1 + Math.floor(Math.random() * 2);
+    // Lowered to "about a third from the top" as requested (approx Row 5-6)
+    const targetRow = 5 + Math.floor(Math.random() * 2);
     // 5. Unreachable Check: Must be at least 4 tiles above ground
     if (floorRow - targetRow < 4)
         return false;

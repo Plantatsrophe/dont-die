@@ -19,10 +19,10 @@ export function updatePortals(dt: number) {
             if (!portal.activeImp || !portal.activeImp.active) {
                 const imp: any = {
                     type: 'bloodImp',
-                    x: portal.x + (portal.width / 2) - 12,
+                    x: portal.x + (portal.width / 2) - 16,
                     y: portal.y + 10, // Spawn closer to the lowered portal base
-                    width: 24,
-                    height: 24,
+                    width: 32,
+                    height: 40,
                     vx: 0,
                     vy: 0,
                     dir: 1,
@@ -73,12 +73,17 @@ export function updateImps(dt: number) {
         const oldY = imp.y;
 
         if (imp.state === 'hover') {
-            // Move toward player X
-            const targetX = player.x + player.width / 2;
+            // Predictive AI: "Lead" the player if they are moving
+            // If moving fast, aim for where they will be in ~0.3 seconds
+            const isMoving = Math.abs(player.vx) > 50;
+            const leadTime = 0.3;
+            const targetX = isMoving ? (player.x + player.width / 2 + player.vx * leadTime) : (player.x + player.width / 2);
+            
             const impCenterX = imp.x + imp.width / 2;
             const diffX = targetX - impCenterX;
             
-            imp.vx = Math.sign(diffX) * 60;
+            // Catch up speed (increased to ensure they can get ahead of player)
+            imp.vx = Math.sign(diffX) * 150;
             imp.x += imp.vx * dt;
 
             // Wall Collision
@@ -91,8 +96,8 @@ export function updateImps(dt: number) {
                 }
             }
 
-            // Dive Check: Proximity + Player is below
-            if (Math.abs(diffX) < 120 && player.y > imp.y + 50) {
+            // Dive Check: Proximity to PREDICTED target (Tight 40px / 1-Column window)
+            if (Math.abs(diffX) < 40 && player.y > imp.y + 50) {
                 imp.state = 'dive';
             }
         } else if (imp.state === 'dive') {

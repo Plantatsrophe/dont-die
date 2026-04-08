@@ -36,10 +36,10 @@ export function spawnEntityAt(char: string, tile: number, row: number, col: numb
         if (resetEntities) spawnMovingPlatform(char, row, col, map);
         return true;
     } else if (tile === 8) { // Bot
-        if (resetEntities) G.enemies.push({ type:'bot', x:col*TILE_SIZE+8, y:(row+1)*TILE_SIZE-24, width:24, height:24, vx:50, vy:0, dir:1, cooldown:0 });
+        if (resetEntities && biomeId !== 4) G.enemies.push({ type:'bot', x:col*TILE_SIZE+8, y:(row+1)*TILE_SIZE-24, width:24, height:24, vx:50, vy:0, dir:1, cooldown:0 });
         return true;
     } else if (char === 'L') { // Laser Bot
-        if (resetEntities) G.enemies.push({ type:'laserBot', x:col*TILE_SIZE+8, y:(row+1)*TILE_SIZE-24, width:24, height:24, vx:0, vy:0, dir:-1, cooldown:1.0 });
+        if (resetEntities && biomeId !== 4) G.enemies.push({ type:'laserBot', x:col*TILE_SIZE+8, y:(row+1)*TILE_SIZE-24, width:24, height:24, vx:0, vy:0, dir:-1, cooldown:1.0 });
         return true;
     } else if (char === 'B') { // Boss
         if (resetEntities) spawnBoss(col, row);

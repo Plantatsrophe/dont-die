@@ -10,4 +10,4 @@ export { drawSlumsParallax, drawSlumsLayer2 } from '../biomes/render_biomes_slum
 export { drawSewerParallax } from '../biomes/render_biomes_sewer.js';
 export { drawMineParallax } from '../biomes/render_biomes_mine.js';
 export { renderVirtualBackground } from '../biomes/render_biomes_virtual.js';
-export { drawH311Parallax } from '../biomes/render_biomes_h311.js';
+export { drawH311Parallax, drawH311Midground } from '../biomes/render_biomes_h311.js';
