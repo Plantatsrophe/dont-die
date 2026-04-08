@@ -10,8 +10,8 @@
  * timestamps and v-params in this file upon every successful build.
  */
 
-// Cache-Busting Timestamp: 2026-04-08 15:08:35
-const CACHE_NAME = 'platformer-cache-v357';
+// Cache-Busting Timestamp: 2026-04-08 18:25:53
+const CACHE_NAME = 'platformer-cache-v389';
 
 /**
  * Manifest of all static assets required for a full offline experience.
@@ -20,86 +20,86 @@ const CACHE_NAME = 'platformer-cache-v357';
  */
 const ASSETS_TO_CACHE = [
 /* --- MANIFEST START --- */
-  './?v=357',
-  './index.html?v=357',
-  './manifest.json?v=357',
-  './style.css?v=357',
-  './src/assets/images/icon.svg?v=357',
-  './src/assets/images/logo.png?v=357',
-  './src/dist/assets/assets.js?v=357',
-  './src/dist/assets/audio/audio_music.js?v=357',
-  './src/dist/assets/audio/audio_sfx.js?v=357',
-  './src/dist/assets/audio.js?v=357',
-  './src/dist/assets/sprites/sprites_auhgr.js?v=357',
-  './src/dist/assets/sprites/sprites_biomes.js?v=357',
-  './src/dist/assets/sprites/sprites_bosses.js?v=357',
-  './src/dist/assets/sprites/sprites_enemies.js?v=357',
-  './src/dist/assets/sprites/sprites_glitch.js?v=357',
-  './src/dist/assets/sprites/sprites_hero.js?v=357',
-  './src/dist/core/game.js?v=357',
-  './src/dist/core/globals.js?v=357',
-  './src/dist/core/input/input.js?v=357',
-  './src/dist/core/input/input_touch.js?v=357',
-  './src/dist/core/input/input_utils.js?v=357',
-  './src/dist/core/spatial_grid.js?v=357',
-  './src/dist/data/db.js?v=357',
-  './src/dist/data/levels.js?v=357',
-  './src/dist/logic/game_logic.js?v=357',
-  './src/dist/logic/game_ui.js?v=357',
-  './src/dist/logic/spawning/entity_spawner.js?v=357',
-  './src/dist/logic/spawning/spawner.js?v=357',
-  './src/dist/logic/spawning/spawner_entities.js?v=357',
-  './src/dist/logic/spawning/spawner_glitch_arena.js?v=357',
-  './src/dist/logic/spawning/spawner_utils.js?v=357',
-  './src/dist/main.js?v=357',
-  './src/dist/physics/bosses/physics_boss.js?v=357',
-  './src/dist/physics/bosses/physics_boss_auhgr.js?v=357',
-  './src/dist/physics/bosses/physics_boss_baphometron.js?v=357',
-  './src/dist/physics/bosses/physics_boss_glitch.js?v=357',
-  './src/dist/physics/bosses/physics_boss_glitch_utils.js?v=357',
-  './src/dist/physics/bosses/physics_boss_masticator.js?v=357',
-  './src/dist/physics/bosses/physics_boss_septicus.js?v=357',
-  './src/dist/physics/bosses/physics_boss_septicus_utils.js?v=357',
-  './src/dist/physics/core/physics_core.js?v=357',
-  './src/dist/physics/core/physics_utils.js?v=357',
-  './src/dist/physics/hazards/physics_bombs.js?v=357',
-  './src/dist/physics/hazards/physics_crumbling.js?v=357',
-  './src/dist/physics/hazards/physics_geysers.js?v=357',
-  './src/dist/physics/hazards/physics_h311_rifts.js?v=357',
-  './src/dist/physics/hazards/physics_imps.js?v=357',
-  './src/dist/physics/hazards/physics_lasers.js?v=357',
-  './src/dist/physics/hazards/physics_virtual_hazards.js?v=357',
-  './src/dist/physics/states/physics_states.js?v=357',
-  './src/dist/render/actors/render_entities.js?v=357',
-  './src/dist/render/actors/render_player.js?v=357',
-  './src/dist/render/biomes/render_biomes_h311.js?v=357',
-  './src/dist/render/biomes/render_biomes_mine.js?v=357',
-  './src/dist/render/biomes/render_biomes_sewer.js?v=357',
-  './src/dist/render/biomes/render_biomes_slums.js?v=357',
-  './src/dist/render/biomes/render_biomes_virtual.js?v=357',
-  './src/dist/render/bosses/render_bosses.js?v=357',
-  './src/dist/render/bosses/render_boss_auhgr.js?v=357',
-  './src/dist/render/bosses/render_boss_glitch.js?v=357',
-  './src/dist/render/bosses/render_boss_masticator.js?v=357',
-  './src/dist/render/bosses/render_boss_septicus.js?v=357',
-  './src/dist/render/elements/render_conduits.js?v=357',
-  './src/dist/render/elements/render_geysers.js?v=357',
-  './src/dist/render/elements/render_hazards_virtual.js?v=357',
-  './src/dist/render/elements/render_imps.js?v=357',
-  './src/dist/render/elements/render_particles.js?v=357',
-  './src/dist/render/elements/render_projectiles.js?v=357',
-  './src/dist/render/elements/render_reflectors.js?v=357',
-  './src/dist/render/environment/render_biomes.js?v=357',
-  './src/dist/render/environment/render_map_cache.js?v=357',
-  './src/dist/render/environment/render_parallax.js?v=357',
-  './src/dist/render/environment/render_world.js?v=357',
-  './src/dist/render/render.js?v=357',
-  './src/dist/render/screens/render_menus.js?v=357',
-  './src/dist/render/screens/render_menu_instructions.js?v=357',
-  './src/dist/render/screens/render_menu_intro.js?v=357',
-  './src/dist/render/screens/render_ui.js?v=357',
-  './src/dist/render/utils/render_utils.js?v=357',
-  './src/dist/render/utils/render_utils_fiber.js?v=357'
+  './?v=389',
+  './index.html?v=389',
+  './manifest.json?v=389',
+  './style.css?v=389',
+  './src/assets/images/icon.svg?v=389',
+  './src/assets/images/logo.png?v=389',
+  './src/dist/assets/assets.js?v=389',
+  './src/dist/assets/audio/audio_music.js?v=389',
+  './src/dist/assets/audio/audio_sfx.js?v=389',
+  './src/dist/assets/audio.js?v=389',
+  './src/dist/assets/sprites/sprites_auhgr.js?v=389',
+  './src/dist/assets/sprites/sprites_biomes.js?v=389',
+  './src/dist/assets/sprites/sprites_bosses.js?v=389',
+  './src/dist/assets/sprites/sprites_enemies.js?v=389',
+  './src/dist/assets/sprites/sprites_glitch.js?v=389',
+  './src/dist/assets/sprites/sprites_hero.js?v=389',
+  './src/dist/core/game.js?v=389',
+  './src/dist/core/globals.js?v=389',
+  './src/dist/core/input/input.js?v=389',
+  './src/dist/core/input/input_touch.js?v=389',
+  './src/dist/core/input/input_utils.js?v=389',
+  './src/dist/core/spatial_grid.js?v=389',
+  './src/dist/data/db.js?v=389',
+  './src/dist/data/levels.js?v=389',
+  './src/dist/logic/game_logic.js?v=389',
+  './src/dist/logic/game_ui.js?v=389',
+  './src/dist/logic/spawning/entity_spawner.js?v=389',
+  './src/dist/logic/spawning/spawner.js?v=389',
+  './src/dist/logic/spawning/spawner_entities.js?v=389',
+  './src/dist/logic/spawning/spawner_glitch_arena.js?v=389',
+  './src/dist/logic/spawning/spawner_utils.js?v=389',
+  './src/dist/main.js?v=389',
+  './src/dist/physics/bosses/physics_boss.js?v=389',
+  './src/dist/physics/bosses/physics_boss_auhgr.js?v=389',
+  './src/dist/physics/bosses/physics_boss_baphometron.js?v=389',
+  './src/dist/physics/bosses/physics_boss_glitch.js?v=389',
+  './src/dist/physics/bosses/physics_boss_glitch_utils.js?v=389',
+  './src/dist/physics/bosses/physics_boss_masticator.js?v=389',
+  './src/dist/physics/bosses/physics_boss_septicus.js?v=389',
+  './src/dist/physics/bosses/physics_boss_septicus_utils.js?v=389',
+  './src/dist/physics/core/physics_core.js?v=389',
+  './src/dist/physics/core/physics_utils.js?v=389',
+  './src/dist/physics/hazards/physics_bombs.js?v=389',
+  './src/dist/physics/hazards/physics_crumbling.js?v=389',
+  './src/dist/physics/hazards/physics_geysers.js?v=389',
+  './src/dist/physics/hazards/physics_h311_rifts.js?v=389',
+  './src/dist/physics/hazards/physics_imps.js?v=389',
+  './src/dist/physics/hazards/physics_lasers.js?v=389',
+  './src/dist/physics/hazards/physics_virtual_hazards.js?v=389',
+  './src/dist/physics/states/physics_states.js?v=389',
+  './src/dist/render/actors/render_entities.js?v=389',
+  './src/dist/render/actors/render_player.js?v=389',
+  './src/dist/render/biomes/render_biomes_h311.js?v=389',
+  './src/dist/render/biomes/render_biomes_mine.js?v=389',
+  './src/dist/render/biomes/render_biomes_sewer.js?v=389',
+  './src/dist/render/biomes/render_biomes_slums.js?v=389',
+  './src/dist/render/biomes/render_biomes_virtual.js?v=389',
+  './src/dist/render/bosses/render_bosses.js?v=389',
+  './src/dist/render/bosses/render_boss_auhgr.js?v=389',
+  './src/dist/render/bosses/render_boss_glitch.js?v=389',
+  './src/dist/render/bosses/render_boss_masticator.js?v=389',
+  './src/dist/render/bosses/render_boss_septicus.js?v=389',
+  './src/dist/render/elements/render_conduits.js?v=389',
+  './src/dist/render/elements/render_geysers.js?v=389',
+  './src/dist/render/elements/render_hazards_virtual.js?v=389',
+  './src/dist/render/elements/render_imps.js?v=389',
+  './src/dist/render/elements/render_particles.js?v=389',
+  './src/dist/render/elements/render_projectiles.js?v=389',
+  './src/dist/render/elements/render_reflectors.js?v=389',
+  './src/dist/render/environment/render_biomes.js?v=389',
+  './src/dist/render/environment/render_map_cache.js?v=389',
+  './src/dist/render/environment/render_parallax.js?v=389',
+  './src/dist/render/environment/render_world.js?v=389',
+  './src/dist/render/render.js?v=389',
+  './src/dist/render/screens/render_menus.js?v=389',
+  './src/dist/render/screens/render_menu_instructions.js?v=389',
+  './src/dist/render/screens/render_menu_intro.js?v=389',
+  './src/dist/render/screens/render_ui.js?v=389',
+  './src/dist/render/utils/render_utils.js?v=389',
+  './src/dist/render/utils/render_utils_fiber.js?v=389'
 /* --- MANIFEST END --- */
 ];
 
@@ -138,14 +138,30 @@ self.addEventListener('activate', (e) => {
 /**
  * FETCH EVENT
  * Intercepts network requests.
- * It follows a "Cache-First" approach: if a file is in the cache, it's served instantly.
- * The 'ignoreSearch: true' flag is critical to match URLs that have versioned query 
- * strings like ?v=357.
  */
 self.addEventListener('fetch', (e) => {
-  e.respondWith(
-    caches.match(e.request, { ignoreSearch: true }).then((response) => {
-      return response || fetch(e.request);
-    })
-  );
+  const url = new URL(e.request.url);
+  const isIndex = url.pathname === '/' || url.pathname.endsWith('index.html');
+
+  if (isIndex) {
+    // NETWORK-FIRST strategy for index.html to ensure version sync
+    e.respondWith(
+      fetch(e.request)
+        .then((response) => {
+          const clonedResponse = response.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(e.request, clonedResponse);
+          });
+          return response;
+        })
+        .catch(() => caches.match(e.request, { ignoreSearch: true }))
+    );
+  } else {
+    // CACHE-FIRST strategy for other assets
+    e.respondWith(
+      caches.match(e.request, { ignoreSearch: true }).then((response) => {
+        return response || fetch(e.request);
+      })
+    );
+  }
 });

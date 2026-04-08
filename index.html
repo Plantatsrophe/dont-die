@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Don't Die</title>
-    <link rel="stylesheet" href="style.css?v=357">
+    <link rel="stylesheet" href="style.css?v=389">
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="src/assets/images/icon.svg" type="image/svg+xml">
@@ -38,23 +38,36 @@
         </div>
     </div>
 
-    <script type="module" src="src/dist/data/db.js?v=357"></script>
-    <script type="module" src="src/dist/main.js?v=357"></script>
+    <script type="module" src="src/dist/data/db.js?v=389"></script>
+    <script type="module" src="src/dist/main.js?v=389"></script>
     <script>
+        const CURRENT_VERSION = 'v368';
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                // Force unregister previous versions if we are loading this fresh index.html
+                // AGGRESSIVE PURGE: Kill any Service Worker that doesn't match EXACTLY
                 navigator.serviceWorker.getRegistrations().then(regs => {
+                    let reloadNeeded = false;
                     for(let reg of regs) {
-                        if (!reg.active || !reg.active.scriptURL.includes('v=357')) {
+                        const swUrl = reg.active ? reg.active.scriptURL : '';
+                        if (!swUrl.includes(CURRENT_VERSION)) {
                             reg.unregister();
-                            console.log('Unregistered stale service worker.');
+                            reloadNeeded = true;
+                            console.log('[Cache Purge] Unregistered stale worker:', swUrl);
                         }
                     }
+                    if (reloadNeeded) {
+                        console.log('[Cache Purge] Force reloading for version sync...');
+                        window.location.reload();
+                    }
                 });
-                navigator.serviceWorker.register('./sw.js?v=357')
-                    .then(reg => console.log('Service Worker registered explicitly!'))
-                    .catch(err => console.log('Service Worker registration failed structurally: ', err));
+
+                navigator.serviceWorker.register('./sw.js?v=389')
+                    .then(reg => {
+                        console.log('Service Worker registered explicitly at v368');
+                        // Ensure update is found immediately
+                        reg.update();
+                    })
+                    .catch(err => console.error('SW Error:', err));
             });
         }
     </script>

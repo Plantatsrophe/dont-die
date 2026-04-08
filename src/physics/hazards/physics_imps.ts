@@ -74,17 +74,25 @@ export function updateImps(dt: number) {
 
         if (imp.state === 'hover') {
             // Predictive AI: "Lead" the player if they are moving
-            // If moving fast, aim for where they will be in ~0.3 seconds
+            // Lowered leadTime from 0.3 to 0.15 for more balanced dodging
             const isMoving = Math.abs(player.vx) > 50;
-            const leadTime = 0.3;
+            const leadTime = 0.15;
             const targetX = isMoving ? (player.x + player.width / 2 + player.vx * leadTime) : (player.x + player.width / 2);
             
             const impCenterX = imp.x + imp.width / 2;
             const diffX = targetX - impCenterX;
             
-            // Catch up speed (increased to ensure they can get ahead of player)
-            imp.vx = Math.sign(diffX) * 150;
-            imp.x += imp.vx * dt;
+            // Catch up speed: Both must be faster than player (250) to trigger dives while moving
+            const speed = Math.abs(diffX) > 100 ? 350 : 280;
+            imp.vx = Math.sign(diffX) * speed;
+            
+            // Precision Snapping: If we're extremely close, just snap to center to ensure a direct-hit dive
+            if (Math.abs(diffX) < (speed * dt)) {
+                imp.x = targetX - imp.width / 2;
+                imp.vx = 0;
+            } else {
+                imp.x += imp.vx * dt;
+            }
 
             // Wall Collision
             const tiles = getCollidingTiles(imp);
@@ -96,8 +104,20 @@ export function updateImps(dt: number) {
                 }
             }
 
-            // Dive Check: Proximity to PREDICTED target (Tight 40px / 1-Column window)
-            if (Math.abs(diffX) < 40 && player.y > imp.y + 50) {
+            // Dive Check: If aligned, enter "charge" state for a 250ms wind-up
+            if (Math.abs(targetX - (imp.x + imp.width / 2)) < 2 && player.y > imp.y + 50) {
+                imp.state = 'charge';
+                imp.cooldown = 0.25; // 250ms wind-up delay
+                // Final zero-drift precision snap
+                imp.x = targetX - imp.width / 2;
+                imp.vx = 0;
+            }
+        } else if (imp.state === 'charge') {
+            // Wind-up: Freeze in place to give player a reaction window
+            imp.vx = 0;
+            imp.vy = 0;
+            imp.cooldown -= dt;
+            if (imp.cooldown <= 0) {
                 imp.state = 'dive';
             }
         } else if (imp.state === 'dive') {
