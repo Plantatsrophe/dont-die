@@ -4,7 +4,7 @@
 100 levels of pixel-perfect platforming pain, now fully refactored and organized for maximum performance. This isn't your average browser game; it's a lean, mean, 60-FPS machine.
 
 ## The Mission
-You're a little guy trapped in a world that hates you. There are lasers, spikes, homing bots, and bottomless pits. Your goal? **Don't Die.** It sounds simple, but by the time you're deep in the mainframe, you'll be wishing you had an extra life (find the hotdogs—you'll need them).
+1. Get Hotdog and Fudge back to the show 2. Don't Die
 
 ## How to Play
 1. Fire up `index.html` in any modern browser.
