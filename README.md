@@ -59,12 +59,5 @@ We've recently gutted the engine and rebuilt it from the ground up to be modular
 *   **Procedural Synth Engine**: All music and SFX are generated in real-time via the Web Audio API. No bulky assets—just pure math.
 *   **Firebase Integration**: Secure global high-scores with integrity checksums to keep the cheaters at bay.
 
----
-
-## Development & Modification
-Want to see how it works or make it even harder?
-1. `npm install` to grab the build tools.
-2. `npm run build` to compile the TypeScript files in `/src`.
-3. Check out `generate_levels.py` if you want to procedurally generate a whole new world.
 
 *Good luck, pilot. You're gonna need it.*
