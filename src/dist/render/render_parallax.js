@@ -71,5 +71,5 @@ export function renderParallaxLayer2() {
     const { currentLevel } = G;
     const bId = Math.floor(currentLevel / 20) % 5;
     if (bId === 0)
-        drawSlumsLayer2(); // Distant mountains/cityscape for Slums
+        drawSlumsLayer2(G.camera.x); // Distant mountains/cityscape for Slums
 }

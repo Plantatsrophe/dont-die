@@ -1,6 +1,6 @@
 import { G, keys } from './globals.js';
 import { initAudio, startBackgroundMusic } from '../assets/audio.js';
-import { handleUIAccept } from './game.js';
+import { handleUIAccept } from '../logic/game_ui.js';
 import { processDownInput, handleJump, handleJumpRelease } from './input_utils.js';
 import { initTouchControls } from './input_touch.js';
 /**

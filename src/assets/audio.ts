@@ -7,8 +7,8 @@
 
 import { G } from '../core/globals.js';
 
-export { startBackgroundMusic, stopBackgroundMusic } from './audio_music.js';
-export { playSound } from './audio_sfx.js';
+export { startBackgroundMusic, stopBackgroundMusic } from './audio/audio_music.js';
+export { playSound } from './audio/audio_sfx.js';
 
 /**
  * Initializes the global Web Audio context. 

@@ -9,9 +9,9 @@
  * top-level side effects (e.g., adding global event listeners).
  */
 
-import { parseMap, resetPlayerPosition } from './logic/spawner.js';
+import { parseMap, resetPlayerPosition } from './logic/spawning/spawner.js';
 import { gameLoop } from './core/game.js';
-import './core/input.js'; 
+import './core/input/input.js'; 
 
 /**
  * INITIAL BOOT SEQUENCE

@@ -9,13 +9,13 @@
  * 3. Screen-Space Overlays (HUD, Menus, UI)
  */
 import { G, ctx, offscreenMapCanvas } from '../core/globals.js';
-import { renderParallax, renderParallaxLayer2 } from './render_parallax.js';
-import { renderStartScreen, renderIntroScreen, renderInstructions } from './render_menus.js';
-import { renderConduits, preRenderMap, renderAnimatedTiles } from './render_world.js';
-import { renderEntities } from './render_entities.js';
-import { renderBoss } from './render_bosses.js';
-import { renderPlayer, renderPlayerCutscene } from './render_player.js';
-import { renderHUD, renderOverlays, renderCredits, renderShareButton } from './render_ui.js';
+import { renderParallax, renderParallaxLayer2 } from './environment/render_parallax.js';
+import { renderStartScreen, renderIntroScreen, renderInstructions } from './screens/render_menus.js';
+import { renderConduits, preRenderMap, renderAnimatedTiles } from './environment/render_world.js';
+import { renderEntities } from './actors/render_entities.js';
+import { renderBoss } from './bosses/render_bosses.js';
+import { renderPlayer, renderPlayerCutscene } from './actors/render_player.js';
+import { renderHUD, renderOverlays, renderCredits, renderShareButton } from './screens/render_ui.js';
 /**
  * Main render function called by the game loop.
  * Switches between menu-specific rendering and active world-rendering.

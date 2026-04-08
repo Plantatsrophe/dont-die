@@ -1,6 +1,6 @@
 import { G, player, keys } from './globals.js';
 import { initAudio, startBackgroundMusic } from '../assets/audio.js';
-import { handleUIAccept } from './game.js';
+import { handleUIAccept } from '../logic/game_ui.js';
 import { processDownInput, handleJump } from './input_utils.js';
 /**
  * Flag indicating if the user has interacted via a touch-capable device.
