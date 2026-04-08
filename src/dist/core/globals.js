@@ -10,6 +10,8 @@ export const ctx = canvas.getContext('2d');
  */
 export const offscreenMapCanvas = document.createElement('canvas');
 export const offscreenMapCtx = offscreenMapCanvas.getContext('2d');
+export const offscreenParallaxCanvas = document.createElement('canvas');
+export const offscreenParallaxCtx = offscreenParallaxCanvas.getContext('2d');
 /**
  * Unified tile size for the world grid.
  * Most sprites are 32x32 to 64x64, but the physics grid is strictly 40px blocks.
