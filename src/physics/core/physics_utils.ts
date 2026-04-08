@@ -1,6 +1,6 @@
-import { G, player, keys, TILE_SIZE, laserPool, particlePool, getNextParticle } from '../core/globals.js';
-import { playSound } from '../assets/audio.js';
-import type { IRect, IEntity, IParticle } from '../types.js';
+import { G, player, keys, TILE_SIZE, laserPool, particlePool, getNextParticle } from '../../core/globals.js';
+import { playSound } from '../../assets/audio.js';
+import type { IRect, IEntity, IParticle } from '../../types.js';
 
 /**
  * Standard AABB (Axis-Aligned Bounding Box) 2D collision check.

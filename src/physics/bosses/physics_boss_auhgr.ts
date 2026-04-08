@@ -1,5 +1,5 @@
 import { G, player, TILE_SIZE, particlePool, getNextParticle } from '../../core/globals.js';
-import { playerDeath } from '../physics_utils.js';
+import { playerDeath } from '../core/physics_utils.js';
 
 /**
  * Executes the entire physics routine for the Auh-Gr boss encounter (Level 59).

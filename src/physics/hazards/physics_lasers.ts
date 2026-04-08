@@ -1,7 +1,7 @@
-import { G, player, getNextParticle, TILE_SIZE, reflectorPool } from '../core/globals.js';
-import { checkRectCollision, getCollidingTiles, playerDeath } from './physics_utils.js';
-import { playSound } from '../assets/audio.js';
-import { bossExplode } from './bosses/physics_boss.js';
+import { G, player, getNextParticle, TILE_SIZE, reflectorPool } from '../../core/globals.js';
+import { checkRectCollision, getCollidingTiles, playerDeath } from '../core/physics_utils.js';
+import { playSound } from '../../assets/audio.js';
+import { bossExplode } from '../bosses/physics_boss.js';
 
 /**
  * Handles physics updates for projectile weapons (lasers).

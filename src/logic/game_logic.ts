@@ -1,9 +1,9 @@
 import { G, player, TILE_SIZE, canvas, particlePool, getNextParticle, getNextLaser, addScore } from '../core/globals.js';
 import { playSound } from '../assets/audio.js';
-import { updatePhysics } from '../physics/physics_core.js';
-import { updateBombs } from '../physics/physics_bombs.js';
-import { updateLasers } from '../physics/physics_lasers.js';
-import { checkRectCollision, playerDeath, getCollidingTiles } from '../physics/physics_utils.js';
+import { updatePhysics } from '../physics/core/physics_core.js';
+import { updateBombs } from '../physics/hazards/physics_bombs.js';
+import { updateLasers } from '../physics/hazards/physics_lasers.js';
+import { checkRectCollision, playerDeath, getCollidingTiles } from '../physics/core/physics_utils.js';
 import { bossExplode } from '../physics/bosses/physics_boss.js';
 import { updateSpatialGrid, queryGrid } from '../core/spatial_grid.js';
 import type { IItem, IEnemy } from '../types.js';

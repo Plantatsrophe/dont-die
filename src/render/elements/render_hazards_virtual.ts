@@ -1,5 +1,5 @@
 import { G, canvas, ctx } from '../../core/globals.js';
-import { checkRectCollision } from '../../physics/physics_utils.js';
+import { checkRectCollision } from '../../physics/core/physics_utils.js';
 
 /**
  * Renders the dynamic Virtual-biome hazards (Sectors and Nodes).

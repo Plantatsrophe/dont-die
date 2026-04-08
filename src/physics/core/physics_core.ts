@@ -1,11 +1,11 @@
-import { G, player, keys, TILE_SIZE, addScore } from '../core/globals.js';
-import { playSound } from '../assets/audio.js';
+import { G, player, keys, TILE_SIZE, addScore } from '../../core/globals.js';
+import { playSound } from '../../assets/audio.js';
 import { getCollidingTiles, playerDeath, checkRectCollision } from './physics_utils.js';
-import { updateBoss } from './bosses/physics_boss.js';
-import { updateBombs } from './physics_bombs.js';
-import { handleJump } from '../core/input/input_utils.js';
-import { updateDeathState, updateLevelClearState, updateValveCutsceneState } from './states/physics_states.js';
-import { updateVirtualHazards } from './physics_virtual_hazards.js';
+import { updateBoss } from '../bosses/physics_boss.js';
+import { updateBombs } from '../hazards/physics_bombs.js';
+import { handleJump } from '../../core/input/input_utils.js';
+import { updateDeathState, updateLevelClearState, updateValveCutsceneState } from '../states/physics_states.js';
+import { updateVirtualHazards } from '../hazards/physics_virtual_hazards.js';
 
 /**
  * The master physics loop executed every frame.

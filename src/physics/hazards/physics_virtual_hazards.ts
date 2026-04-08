@@ -1,5 +1,5 @@
-import { G, player } from '../core/globals.js';
-import { checkRectCollision, playerDeath } from './physics_utils.js';
+import { G, player } from '../../core/globals.js';
+import { checkRectCollision, playerDeath } from '../core/physics_utils.js';
 
 /**
  * Handles the logic for dynamic hazards in the Virtual biome (bId 3).

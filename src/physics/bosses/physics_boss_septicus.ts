@@ -1,6 +1,6 @@
 import { G, player, TILE_SIZE, getNextParticle } from '../../core/globals.js';
 import { playSound } from '../../assets/audio.js';
-import { playerDeath } from '../physics_utils.js';
+import { playerDeath } from '../core/physics_utils.js';
 import { handleSepticusDeath, updateSepticusProjectiles } from './physics_boss_septicus_utils.js';
 
 /**

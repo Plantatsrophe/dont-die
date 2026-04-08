@@ -1,5 +1,5 @@
 import { G, player, TILE_SIZE, getNextParticle } from '../../core/globals.js';
-import { playerDeath } from '../physics_utils.js';
+import { playerDeath } from '../core/physics_utils.js';
 /**
  * Executes the entire physics routine for the Auh-Gr boss encounter (Level 59).
  * Auh-Gr is a massive, screen-wide mechanical drill boss that relentlessly climbs

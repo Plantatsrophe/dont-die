@@ -1,7 +1,7 @@
-import { G, getNextParticle } from '../core/globals.js';
-import { checkRectCollision } from './physics_utils.js';
-import { playSound } from '../assets/audio.js';
-import { bossExplode } from './bosses/physics_boss.js';
+import { G, getNextParticle } from '../../core/globals.js';
+import { checkRectCollision } from '../core/physics_utils.js';
+import { playSound } from '../../assets/audio.js';
+import { bossExplode } from '../bosses/physics_boss.js';
 
 /**
  * Handles physics updates for environmental weapons (like Bombs).

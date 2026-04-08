@@ -1,6 +1,6 @@
 import { G, player, TILE_SIZE, getNextParticle } from '../../core/globals.js';
 import { playSound } from '../../assets/audio.js';
-import { checkRectCollision, playerDeath } from '../physics_utils.js';
+import { checkRectCollision, playerDeath } from '../core/physics_utils.js';
 import { updateAuhGr } from './physics_boss_auhgr.js';
 import { updateMasticator } from './physics_boss_masticator.js';
 import { updateSepticus } from './physics_boss_septicus.js';

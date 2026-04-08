@@ -1,6 +1,6 @@
 import { G, TILE_SIZE, getNextParticle, player } from '../../core/globals.js';
 import { playSound } from '../../assets/audio.js';
-import { playerDeath } from '../physics_utils.js';
+import { playerDeath } from '../core/physics_utils.js';
 
 /**
  * Handles the death and sinking sequence for Septicus.
