@@ -1,60 +1,67 @@
-# DON'T DIE 💀
+# DON'T DIE 💀 (v309)
 
-A brutal, zero-dependency retro platformer for your browser—now fully refactored in **TypeScript**. 100 levels of pure pixelated pain.
+**Brutal. Zero-Dependency. Pure TypeScript.**
+100 levels of pixel-perfect platforming pain, now fully refactored and organized for maximum performance. This isn't your average browser game; it's a lean, mean, 60-FPS machine.
 
-## The Pitch
-You're a little guy in a big, dangerous world. There are lasers, spikes, bots, and pits. Your goal is pretty simple: **Don't Die.** 
-
-We've packed 100 hand-crafted levels into this thing. It starts easy enough in the Slums, but by the time you're deep in the Sewers or facing the Goliath boss in the final gauntlet, you'll be wishing for a "Pause" button (there isn't one).
+## The Mission
+You're a little guy trapped in a world that hates you. There are lasers, spikes, homing bots, and bottomless pits. Your goal? **Don't Die.** It sounds simple, but by the time you're deep in the mainframe, you'll be wishing you had an extra life (find the hotdogs—you'll need them).
 
 ## How to Play
-1. Open `index.html` in any modern browser (Chrome, Firefox, Edge).
-2. Hit **Enter** to start.
-3. Reach the exit portal in each level to progress. 
+1. Fire up `index.html` in any modern browser.
+2. Smash **Enter** to skip the intro (if you've got the guts).
+3. Reach the exit portal in each level. Don't touch the red stuff.
 
-### Controls
-* **Move:** `W,A,S,D` or `Arrow Keys`
-* **Jump:** `Spacebar` (Tap it twice for a double-jump)
-* **Enter:** Confirm your initials on the high-score screen.
-
-## What's Inside?
-- **100 Levels**: Five different biomes including the Slums, Sewers, Central Shaft, and the massive Factory.
-- **Nasty Enemies**: Roaming bots and stationary Laser Bots that track your every move. Pro tip: Stomp them from above for `+200pts`.
-- **Items**: Snag Gears for points or find Hotdogs for an extra life. You're going to need every single one of them.
-- **Synthwave Soundtrack**: Procedurally generated music using the Web Audio API—no MP3s, just pure code-driven synth.
-- **Global High Scores**: Save your legacy to the local leaderboard.
-
-## Project Structure (For the Devs)
-The game is built with **TypeScript (ESM)**—modular, type-safe, and high-performance.
-- [src/main.ts](file:///e:/Dont%20Die/dont-die/src/main.ts): The entry point and boot sequence.
-- [src/core/game.ts](file:///e:/Dont%20Die/dont-die/src/core/game.ts): The main game loop and state management.
-- [src/core/physics.ts](file:///e:/Dont%20Die/dont-die/src/core/physics.ts): Character movement and AABB collision.
-- [src/core/globals.ts](file:///e:/Dont%20Die/dont-die/src/core/globals.ts): Centralized game state and shared constants.
-- [src/logic/](file:///e:/Dont%20Die/dont-die/src/logic/): Spawning and entity logic.
-- [src/render/](file:///e:/Dont%20Die/dont-die/src/render/): Modular rendering engine (Canvas-based).
-- [src/data/levels.ts](file:///e:/Dont%20Die/dont-die/src/data/levels.ts): The map data for the entire 100-level gauntlet.
-- [sw.js](file:///e:/Dont%20Die/dont-die/sw.js): Service worker for offline support (PWA).
-
-## Development
-To build the project and compile TypeScript to the `src/dist` folder:
-1. Install dependencies: `npm install`
-2. Run build: `npm run build`
-3. Watch mode for active development: `npm run watch`
-
-## Cheat Codes (Browser Console)
-You can manipulate the game state directly via the browser console (F12):
-- `skipLevel(index)`: Skip to any level (0-99). Example: `skipLevel(38)` for Level 39.
-- `player.lives = 99`: Give yourself extra lives.
-- `player.score = 5000`: Set your current score.
-- `player.speed = 400`: Increase movement speed.
-- `G.timer = 120`: Reset or increase the level timer.
-- `resetPlayerPosition()`: Respawn at the start of the current level.
-
-## Custom Maps
-If the 100 levels aren't enough, you can regenerate the entire world using the Python script:
-```bash
-python generate_levels.py
-```
+### The Controls
+*   **Move:** `W,A,S,D` or `Arrow Keys`
+*   **Jump:** `Spacebar` (Double-tap for a mid-air boost)
+*   **Enter:** Confirm your initials and claim your spot on the leaderboard.
 
 ---
-*Good luck. You'll need it.*
+
+## 5 Biomes, 100 Levels of Hell
+We've built five distinct zones, each with its own special brand of misery:
+
+1.  **Industrial Slums (LVL 00-19)**: The tutorial. Get used to the gravity and the bots. 
+2.  **Toxic Sewers (LVL 20-39)**: Watch your step in the green sludge. This biome introduced our **Valve Purification** mechanics—clean the pipes or pay the price.
+3.  **The Deep Mines (LVL 40-59)**: Verticality is the name of the game here. We pushed the engine to handle massive vertical scrolls and moving elevator platforms.
+4.  **Virtual Mainframe (LVL 60-79)**: Neon-soaked digital madness. Watch out for specialized hazards and the **Glitch effects** that'll mess with your vision.
+5.  **The Factory / Goliath (LVL 80-99)**: The final gauntlet. High heat, fast lasers, and no room for error.
+
+---
+
+## The Boss Logs (The Heavy Hitters)
+We've hand-coded three major boss encounters that'll push any player to the limit:
+
+*   **Septicus (Level 39)**: The Sewer King. You can't just jump on this guy. You'll need to use the environment, purify the valves, and avoid his toxic spray while he tries to drown the arena.
+*   **Auh-Gr (Level 59)**: A massive construction mech that forces you into a high-speed vertical ascent. One slip and you're scrap metal.
+*   **The Glitch (Level 79)**: The final digital nightmare. This fight breaks the physics engine—literally. Specialized arena-building logic and CPU-melting fiber effects make this the ultimate test.
+
+---
+
+## Under The Hood (For the Real Devs)
+We've recently gutted the engine and rebuilt it from the ground up to be modular and blazing fast.
+
+### The Architecture
+*   **Modular Design**: Every logic and rendering file is kept under 150 lines to keep things lean.
+*   **Logical Hierarchy**: 
+    - [/src/core/](file:///e:/Dont%20Die/src/core/): The engine kernel and input systems.
+    - [/src/physics/](file:///e:/Dont%20Die/src/physics/): Core movement, AABB collision, and Boss AI.
+    - [/src/render/](file:///e:/Dont%20Die/src/render/): Categorized visual pipelines (Actors, Environment, Utils).
+    - [/src/logic/](file:///e:/Dont%20Die/src/logic/): High-level game flow and spawning systems.
+
+### Turbo-Charged Features
+*   **Object Pooling**: We pre-allocate circular buffers for **500+ particles** and **50+ lasers**. No garbage collection spikes here—just smooth sprites.
+*   **Spatial Grid Partitioning**: The engine handles 100+ entities by only checking collisions for nearby objects. Modern tech for a retro soul.
+*   **Pre-rendered Map Cache**: We blit the static world geometry to an offscreen buffer. The browser only draws the tiles once per level change, keeping the draw calls near-zero during gameplay.
+*   **Procedural Synth Engine**: All music and SFX are generated in real-time via the Web Audio API. No bulky assets—just pure math.
+*   **Firebase Integration**: Secure global high-scores with integrity checksums to keep the cheaters at bay.
+
+---
+
+## Development & Modification
+Want to see how it works or make it even harder?
+1. `npm install` to grab the build tools.
+2. `npm run build` to compile the TypeScript files in `/src`.
+3. Check out `generate_levels.py` if you want to procedurally generate a whole new world.
+
+*Good luck, pilot. You're gonna need it.*
