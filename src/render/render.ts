@@ -40,7 +40,14 @@ export function render() {
     // --- PHASE 3: World-Space Rendering ---
     // Save current canvas state and translate the context based on the camera position.
     ctx.save();
-    ctx.translate(-Math.floor(camera.x), -Math.floor(camera.y));
+    
+    // Apply Global Screen Shake (if active)
+    let sx = 0, sy = 0;
+    if (G.shakeTimer > 0) {
+        sx = (Math.random() - 0.5) * G.shakeTimer * 20;
+        sy = (Math.random() - 0.5) * G.shakeTimer * 20;
+    }
+    ctx.translate(-Math.floor(camera.x) + sx, -Math.floor(camera.y) + sy);
 
     // Render world static geometry and animated tiles
     renderConduits();

@@ -116,19 +116,35 @@ export function renderCredits() {
     // Y-Offset calculation based on the shared cutscene timer
     const timer = player.cutsceneTimer || 0;
     let cY = canvas.height - (timer - 4.0) * 50;
+    // --- MAIN TITLE ---
     ctx.fillText("CREDITS", canvas.width / 2, cY);
+    // --- CREATED BY ---
     ctx.fillStyle = '#b75c32';
     ctx.font = '15px "Press Start 2P"';
     ctx.fillText("CREATED BY:", canvas.width / 2, cY + 100);
     ctx.fillStyle = 'white';
     ctx.font = '20px "Press Start 2P"';
     ctx.fillText("BARRY THE RING DADDY", canvas.width / 2, cY + 140);
+    // --- SCRIPT WRITTEN BY ---
     ctx.fillStyle = '#b75c32';
+    ctx.font = '15px "Press Start 2P"';
     ctx.fillText("SCRIPT WRITTEN BY:", canvas.width / 2, cY + 240);
     ctx.fillStyle = 'white';
-    ctx.fillText("HOTDOG THE HISTORIAN", canvas.width / 2, cY + 280);
+    ctx.font = '20px "Press Start 2P"';
+    ctx.fillText("HOTDOG", canvas.width / 2, cY + 280);
+    ctx.fillText("THE HISTORIAN", canvas.width / 2, cY + 320); // Moved below Hotdog
+    // --- SPECIAL THANKS ---
+    ctx.fillStyle = '#b75c32';
+    ctx.font = '15px "Press Start 2P"';
+    ctx.fillText("SPECIAL THANKS:", canvas.width / 2, cY + 420);
+    ctx.fillStyle = 'white';
+    ctx.font = '20px "Press Start 2P"';
+    ctx.fillText("FUDGE", canvas.width / 2, cY + 460);
+    ctx.fillText("THE ENTIRE GRFC CREW", canvas.width / 2, cY + 500);
+    // --- CLOSING ---
     ctx.fillStyle = '#f1c40f';
-    ctx.fillText("THANK YOU FOR PLAYING!", canvas.width / 2, cY + 650);
+    ctx.font = '20px "Press Start 2P"';
+    ctx.fillText("THANK YOU FOR PLAYING!", canvas.width / 2, cY + 700);
 }
 /**
  * Draws the social/save button prompt on end-game screens.

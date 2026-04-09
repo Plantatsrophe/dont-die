@@ -18,6 +18,10 @@ export function resetPlayerPosition() {
     player.droppingThrough = false;
     player.isOnGround = false;
     player.isClimbing = false;
+    // Boss Stand-down on respawn
+    if (G.baphometronController) {
+        G.baphometronController.reset();
+    }
 }
 /**
  * Full game state reset (New Game).

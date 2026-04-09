@@ -91,7 +91,11 @@ export function drawH311Midground(px: number) {
     
     // --- LEVEL CLIMAX CALCULATIONS ---
     // Calculate where the level ends in parallax-space (0.15x multiplier)
-    const parallaxEnd = (G.mapCols * TILE_SIZE) * 0.15;
+    // LEVEL 99 OFFSET: Force the parallax end to the far right of the 800px viewport 
+    // when the camera is locked at 800 (px = 120). Target screen x: ~650
+    let parallaxEnd = (G.mapCols * TILE_SIZE) * 0.15;
+    if (G.currentLevel === 99) parallaxEnd = 770; 
+
     const maxSlot = Math.floor(parallaxEnd / UNIFIED_SPACING);
 
     const start = Math.floor(px / UNIFIED_SPACING) - 2;
@@ -123,7 +127,8 @@ export function drawH311Midground(px: number) {
         const cX = isClimax ? (parallaxEnd - px) : (i * UNIFIED_SPACING - px + jitter);
 
         // 4. Content Selection (Weighted: prioritized Skulls and Spires)
-        const typePool = [0, 1, 2, 0, 2];
+        // Level 99 Exception: Remove Spires (Type 2) for a more focused climax skyline.
+        const typePool = G.currentLevel === 99 ? [0, 1, 0] : [0, 1, 2, 0, 2];
         const typeIdx = isClimax ? 0 : typePool[Math.floor(seed * typePool.length)];
 
         drawLandmark(ctx, cX, seed, typeIdx, drawColor);

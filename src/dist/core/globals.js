@@ -122,7 +122,9 @@ export const G = {
     reflectors: reflectorPool,
     crumblingBlocks: [],
     geysers: [],
-    demonPortals: []
+    demonPortals: [],
+    isBaphometronFightActive: false,
+    shakeTimer: 0
 };
 /**
  * Score Integrity Salt

@@ -40,6 +40,8 @@ export function parseMap(resetEntities = true) {
         for (let l of laserPool) l.active = false;
         G.boss = { active: false, timer: 0, hp: 0, phase: 0, hurtTimer: 0, vibrateX: 0, vx: 0, vy: 0, hasSeenPlayer: false, x: 0, y: 0, width: 0, height: 0, type: 'boss', squash: 1, squashTimer: 0 };
         G.purifiedValves = [];
+        G.isBaphometronFightActive = false;
+        G.baphometronController = undefined;
     }
     
     for (let p of particlePool) p.active = false; 

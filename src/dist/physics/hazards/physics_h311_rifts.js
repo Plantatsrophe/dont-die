@@ -4,8 +4,8 @@ import { G, TILE_SIZE, player } from '../../core/globals.js';
  * Rifts appear and disappear randomly near the player at unreachable heights.
  */
 export function updateDynamicRifts(dt) {
-    // Only active in H311 biome (ID 4)
-    if (G.biomeId !== 4)
+    // Only active in H311 biome (ID 4) and NOT in the final boss arena (Level 99)
+    if (G.biomeId !== 4 || G.currentLevel === 99)
         return;
     G.nextRiftTimer -= dt;
     if (G.nextRiftTimer <= 0 && G.gameState === 'PLAYING') {

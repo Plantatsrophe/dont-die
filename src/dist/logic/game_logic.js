@@ -1,5 +1,6 @@
 import { G, player, TILE_SIZE, canvas, particlePool, getNextParticle, getNextLaser, addScore } from '../core/globals.js';
 import { playSound } from '../assets/audio.js';
+import { BaphometronController } from './bosses/baphometron.js';
 import { updatePhysics } from '../physics/core/physics_core.js';
 import { updateBombs } from '../physics/hazards/physics_bombs.js';
 import { updateLasers } from '../physics/hazards/physics_lasers.js';
@@ -11,16 +12,93 @@ import { updateSpatialGrid, queryGrid } from '../core/spatial_grid.js';
  */
 export function updateGame(dt) {
     if (G.gameState === 'PLAYING') {
-        G.timerAcc += dt;
-        if (G.timerAcc >= 1) {
-            G.timer--;
-            G.timerAcc -= 1;
-            if (G.timer <= 0)
-                playerDeath();
+        // --- LEVEL 99 TIMER DELAY ---
+        // For the final boss, the timer doesn't start until the player enters Screen 2.
+        const isTimerPaused = (G.currentLevel === 99 && !G.isBaphometronFightActive);
+        if (!isTimerPaused) {
+            G.timerAcc += dt;
+            if (G.timerAcc >= 1) {
+                G.timer--;
+                G.timerAcc -= 1;
+                if (G.timer <= 0)
+                    playerDeath();
+            }
         }
     }
     updateSpatialGrid();
     updatePhysics(dt);
+    // --- BAPHOMETRON ARENA TRIGGER ---
+    if (G.currentLevel === 99 && player.x > 800 && !G.isBaphometronFightActive) {
+        G.isBaphometronFightActive = true;
+        G.boss.active = true;
+        G.boss.type = 'baphometron';
+        G.baphometronController = new BaphometronController(() => {
+            G.gameState = 'CREDITS_CUTSCENE';
+            player.cutsceneTimer = 0;
+        }, () => {
+            G.shakeTimer = 0.4;
+        });
+        console.log("Baphometron: Fight Activated. Player TRAPPED in Screen 2.");
+    }
+    // --- BAPHOMETRON ARENA CLAMP ---
+    if (G.isBaphometronFightActive) {
+        // (Camera smoothing is handled below in the Camera Engine)
+        // Player Boundary Clamp (800 - 1600)
+        if (player.x < 800) {
+            player.x = 800;
+            if (player.vx < 0)
+                player.vx = 0;
+        }
+        if (player.x + player.width > 1600) {
+            player.x = 1600 - player.width;
+            if (player.vx > 0)
+                player.vx = 0;
+        }
+        // Controller logic
+        if (G.baphometronController) {
+            G.baphometronController.update(dt);
+        }
+        // Screen Shake decay
+        if (G.shakeTimer > 0)
+            G.shakeTimer -= dt;
+        // --- SKY SPIKE PHYSICS HOOKS ---
+        G.baphometronController?.getSpikes().forEach(spike => {
+            if (!spike.active)
+                return;
+            const spikeRect = { x: spike.x, y: spike.y, width: spike.width, height: spike.height };
+            // 1. LETHAL FALLING CHECK
+            if (spike.state === 'falling' && spike.timer <= 0) {
+                if (checkRectCollision(player, spikeRect)) {
+                    playerDeath();
+                    console.log("Baphometron: Player crushed by falling spike!");
+                }
+            }
+            // 2. STUCK SPIKE PLATFORM CHECK
+            else if (spike.state === 'stuck') {
+                // Coyote Buffer: +2px width on each side for stability
+                const platformRect = { x: spike.x - 2, y: spike.y, width: spike.width + 4, height: spike.height };
+                // One-Way Logic: Only land if coming from above
+                const playerOldY = player.y - player.vy * dt;
+                const isAbove = (playerOldY + player.height <= spike.y + 5);
+                if (isAbove && player.vy >= 0 && checkRectCollision(player, platformRect)) {
+                    player.y = spike.y - player.height;
+                    player.vy = 0;
+                    player.isOnGround = true;
+                    player.doubleJump = true;
+                }
+            }
+        });
+        // --- BAPHOMETRON LIMB PHYSICS HOOKS ---
+        G.baphometronController?.getLimbs().forEach(limb => {
+            if (limb.active && limb.state === 'executing') {
+                const limbRect = { x: limb.x, y: limb.y, width: limb.width, height: limb.height };
+                if (checkRectCollision(player, limbRect)) {
+                    playerDeath();
+                    console.log(`Baphometron: Player hit by ${limb.type}!`);
+                }
+            }
+        });
+    }
     for (let p of particlePool) {
         if (!p.active)
             continue;
@@ -37,12 +115,19 @@ export function updateGame(dt) {
         return;
     // --- CAMERA ENGINE ---
     let camTX = player.x + player.width / 2, camTY = player.y + player.height / 2;
+    // Baphometron Arena Lock: Ease to the center of Screen 2 (X: 1200)
+    // We use a slower lerp speed (0.02) during the fight to make the initial entry transition more cinematic.
+    let lerpFactor = 0.05;
+    if (G.isBaphometronFightActive) {
+        camTX = 1200;
+        lerpFactor = 0.02; // Slower, more deliberate slide
+    }
     if (G.boss && G.boss.active && G.boss.isSinking) {
         camTX = G.boss.x + G.boss.width / 2;
         camTY = G.boss.y + G.boss.height / 2;
     }
-    G.camera.x += (camTX - canvas.width / 2 - G.camera.x) * 0.05;
-    G.camera.y += (camTY - canvas.height / 2 - G.camera.y) * 0.05;
+    G.camera.x += (camTX - canvas.width / 2 - G.camera.x) * lerpFactor;
+    G.camera.y += (camTY - canvas.height / 2 - G.camera.y) * lerpFactor;
     G.camera.x = Math.max(0, Math.min(G.mapCols * TILE_SIZE - canvas.width, G.camera.x));
     G.camera.y = Math.max(0, Math.min(G.mapRows * TILE_SIZE - canvas.height, G.camera.y));
     // --- ENTITY INTERACTIONS ---

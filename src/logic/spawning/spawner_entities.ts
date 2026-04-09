@@ -17,8 +17,9 @@ export function spawnEntityAt(char: string, tile: number, row: number, col: numb
         let targetRow = row;
 
         // --- H311 BIOME OVERRIDE ---
-        // Relocate checkpoints to map center (Col 100) to ensure balanced progression pacing
-        if (biomeId === 4) {
+        // Relocate checkpoints to map center (Col 100) for progression levels, 
+        // but keep them at their defined location for the Baphometron Boss Arena.
+        if (biomeId === 4 && G.currentLevel !== 99) {
             targetCol = Math.floor(map[0].length / 2);
             // Height Correction Tool: Search for the nearest solid ground at the midpoint
             // to ensure the checkpoint isn't floating above magma.

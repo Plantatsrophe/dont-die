@@ -13,6 +13,11 @@ export function resetPlayerPosition() {
     }
     player.vx = 0; player.vy = 0;
     player.droppingThrough = false; player.isOnGround = false; player.isClimbing = false;
+
+    // Boss Stand-down on respawn
+    if (G.baphometronController) {
+        G.baphometronController.reset();
+    }
 }
 
 /**

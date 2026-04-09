@@ -1,3 +1,5 @@
+import type { BaphometronController } from './logic/bosses/baphometron.js';
+
 /**
  * Basic 2D Rectangle interface for collision math.
  */
@@ -236,6 +238,19 @@ export interface IGeyser {
 }
 
 /**
+ * Sky Spike hazard/platform for the Baphometron boss fight.
+ */
+export interface ISpikeEntity {
+    active: boolean;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    state: 'falling' | 'stuck' | 'shattering' | 'inactive';
+    timer: number;
+}
+
+/**
  * Ash Block (Crumbling Terrain) entity.
  */
 export interface ICrumblingBlock {
@@ -307,6 +322,9 @@ export interface IGlobals {
     crumblingBlocks: ICrumblingBlock[];
     geysers: IGeyser[];
     demonPortals: IDemonPortal[];
+    isBaphometronFightActive: boolean;
+    baphometronController?: BaphometronController;
+    shakeTimer: number;
 }
 
 /**
