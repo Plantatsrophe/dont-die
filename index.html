@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Don't Die</title>
-    <link rel="stylesheet" href="style.css?v=420">
+    <link rel="stylesheet" href="style.css?v=422">
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="src/assets/images/icon.svg" type="image/svg+xml">
@@ -38,10 +38,10 @@
         </div>
     </div>
 
-    <script type="module" src="src/dist/data/db.js?v=420"></script>
-    <script type="module" src="src/dist/main.js?v=420"></script>
+    <script type="module" src="src/dist/main.js?v=422"></script>
+    <script type="module" async src="src/dist/data/db.js?v=422"></script>
     <script>
-        const CURRENT_VERSION = 'v368';
+        const CURRENT_VERSION = 'v=422';
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 // AGGRESSIVE PURGE: Kill any Service Worker that doesn't match EXACTLY
@@ -61,9 +61,9 @@
                     }
                 });
 
-                navigator.serviceWorker.register('./sw.js?v=420')
+                navigator.serviceWorker.register('./sw.js?v=422')
                     .then(reg => {
-                        console.log('Service Worker registered explicitly at v368');
+                        console.log('Service Worker registered explicitly at v=422');
                         // Ensure update is found immediately
                         reg.update();
                     })
